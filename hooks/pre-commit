@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+./gradlew lint
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Pre-commit checks failed!"
+    echo "Run './gradlew format' to auto-fix formatting issues."
+    exit 1
+fi
+
+echo "All checks passed!"
+exit 0

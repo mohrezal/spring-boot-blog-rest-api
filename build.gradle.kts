@@ -4,6 +4,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.hibernate.orm") version "7.2.0.Final"
     id("org.graalvm.buildtools.native") version "0.11.3"
+    id("com.diffplug.spotless") version "8.1.0"
+    checkstyle
 }
 
 group = "com.github.mohrezal"
@@ -57,4 +59,54 @@ hibernate {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        googleJavaFormat("1.33.0").aosp().reflowLongStrings()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+        target("src/*/java/**/*.java")
+        targetExclude("build/**")
+    }
+
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint()
+    }
+
+    format("misc") {
+        target("*.md", ".gitignore", "*.yml", "*.yaml", "*.xml")
+        targetExclude("checkstyle.xml")
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = "12.3.1"
+    configFile = file("$projectDir/checkstyle.xml")
+    isIgnoreFailures = false
+}
+
+tasks.register("format") {
+    dependsOn("spotlessApply")
+}
+
+tasks.register("lint") {
+    dependsOn("spotlessCheck", "checkstyleMain", "checkstyleTest")
+}
+
+tasks.register("prepare") {
+    val source = "hooks/pre-commit"
+    val target = ".git/hooks/pre-commit"
+    doLast {
+        file(source).copyTo(file(target), true)
+        file(target).setExecutable(true)
+    }
+}
+
+tasks.named("check") {
+    dependsOn("lint")
 }
