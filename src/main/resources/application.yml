@@ -1,0 +1,41 @@
+server:
+  port: ${APPLICATION_SERVER_PORT}
+spring:
+  config:
+    import:  optional:file:.env[.properties]
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: jdbc:postgresql://${APPLICATION_DATABASE_HOST}:${APPLICATION_DATABASE_PORT}/${APPLICATION_DATABASE_NAME}
+    username: ${APPLICATION_DATABASE_USERNAME}
+    password: ${APPLICATION_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  jpa:
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jws-algorithms: HS512
+
+app:
+  security:
+    secret: ${APPLICATION_SECURITY_SECRET}

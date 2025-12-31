@@ -1,0 +1,11 @@
+.git
+.gradle
+.idea
+build/classes
+build/tmp
+*.md
+.env
+.gitignore
+.gitattributes
+gradlew.bat
+.DS_Store

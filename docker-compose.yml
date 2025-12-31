@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
+      - APPLICATION_DATABASE_HOST=db
+    volumes:
+      - .:/app
+      - gradle-cache:/home/gradle/.gradle
+      - /app/.gradle
+      - /app/build
+    networks:
+      - blog-network
+    depends_on:
+      db:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+  db:
+    image: postgres:18-alpine
+    ports:
+      - "${APPLICATION_DATABASE_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${APPLICATION_DATABASE_NAME}
+      - POSTGRES_USER=${APPLICATION_DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${APPLICATION_DATABASE_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      - blog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${APPLICATION_DATABASE_USERNAME} -d ${APPLICATION_DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  database:
+  gradle-cache:
