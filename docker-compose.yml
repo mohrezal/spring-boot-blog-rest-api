@@ -1,28 +1,4 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    environment:
-      - SPRING_DEVTOOLS_RESTART_ENABLED=true
-      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
-      - APPLICATION_DATABASE_HOST=db
-    volumes:
-      - .:/app
-      - gradle-cache:/home/gradle/.gradle
-      - /app/.gradle
-      - /app/build
-    networks:
-      - blog-network
-    depends_on:
-      db:
-        condition: service_healthy
-    stdin_open: true
-    tty: true
   db:
     image: postgres:18-alpine
     ports:
@@ -46,4 +22,3 @@ networks:
 
 volumes:
   database:
-  gradle-cache:

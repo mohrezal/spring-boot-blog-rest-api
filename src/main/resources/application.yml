@@ -35,6 +35,10 @@ spring:
       resourceserver:
         jwt:
           jws-algorithms: HS512
+  web:
+    error:
+      whitelabel:
+        enabled: false
 
 app:
   security:

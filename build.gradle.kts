@@ -52,12 +52,6 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-hibernate {
-    enhancement {
-        enableAssociationManagement = true
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }
