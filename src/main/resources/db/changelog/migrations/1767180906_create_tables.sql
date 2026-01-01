@@ -3,14 +3,6 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE TABLE users(
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(256) UNIQUE NOT NULL,
@@ -29,7 +21,7 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE TABLE user_credentials(
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    password_hashed VARCHAR(100) NOT NULL,
+    hashed_password VARCHAR(100) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
@@ -73,22 +65,6 @@ CREATE INDEX idx_posts_status ON posts(status);
 CREATE INDEX idx_posts_published_at ON posts(published_at DESC);
 CREATE INDEX idx_posts_slug ON posts(slug);
 
-CREATE TRIGGER users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER user_credentials_updated_at BEFORE UPDATE ON user_credentials
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER categories_updated_at BEFORE UPDATE ON categories
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER posts_updated_at BEFORE UPDATE ON posts
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
---rollback DROP TRIGGER IF EXISTS posts_updated_at ON posts;
---rollback DROP TRIGGER IF EXISTS categories_updated_at ON categories;
---rollback DROP TRIGGER IF EXISTS user_credentials_updated_at ON user_credentials;
---rollback DROP TRIGGER IF EXISTS users_updated_at ON users;
 --rollback DROP INDEX IF EXISTS idx_posts_slug;
 --rollback DROP INDEX IF EXISTS idx_posts_published_at;
 --rollback DROP INDEX IF EXISTS idx_posts_status;
@@ -100,5 +76,4 @@ CREATE TRIGGER posts_updated_at BEFORE UPDATE ON posts
 --rollback DROP TABLE IF EXISTS categories CASCADE;
 --rollback DROP TABLE IF EXISTS user_credentials CASCADE;
 --rollback DROP TABLE IF EXISTS users CASCADE;
---rollback DROP FUNCTION IF EXISTS update_updated_at_column();
 --rollback DROP EXTENSION IF EXISTS "uuid-ossp";

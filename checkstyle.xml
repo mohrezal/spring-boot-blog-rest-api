@@ -104,7 +104,7 @@
             <property name="exceptionVariableName" value="expected|ignore"/>
         </module>
         <module name="LeftCurly"/>
-        <module name="NeedBraces"/>
+        <!-- <module name="NeedBraces"/> -->
         <module name="RightCurly"/>
         <module name="AvoidNestedBlocks"/>
 

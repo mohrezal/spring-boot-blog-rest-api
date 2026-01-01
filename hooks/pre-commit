@@ -1,12 +1,20 @@
 #!/bin/sh
 
+echo "Auto-formatting code..."
+./gradlew format
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Auto-formatting failed!"
+    exit 1
+fi
+
 echo "Running pre-commit checks..."
 ./gradlew lint
 
 if [ $? -ne 0 ]; then
     echo ""
     echo "Pre-commit checks failed!"
-    echo "Run './gradlew format' to auto-fix formatting issues."
     exit 1
 fi
 
