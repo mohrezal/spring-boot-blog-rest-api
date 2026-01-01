@@ -39,3 +39,6 @@ spring:
 app:
   security:
     secret: ${APPLICATION_SECURITY_SECRET}
+    accessTokenLifeTime: ${APPLICATION_SECURITY_ACCESS_TOKEN_LIFE_TIME}
+    refreshTokenLifeTime: ${APPLICATION_SECURITY_REFRESH_TOKEN_LIFE_TIME}
+    allowedOrigin: ${APPLICATION_SECURITY_ALLOWED_ORIGIN}
