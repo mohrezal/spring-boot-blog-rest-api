@@ -1,4 +1,4 @@
-package com.github.mohrezal.springbootblogrestapi.shared.services;
+package com.github.mohrezal.springbootblogrestapi.shared.services.jwt;
 
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -18,13 +18,13 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JwtService {
+public class JwtServiceImpl implements JwtService {
 
     private final ApplicationProperties applicationProperties;
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    public JwtService(ApplicationProperties applicationProperties, JwtDecoder jwtDecoder) {
+    public JwtServiceImpl(ApplicationProperties applicationProperties, JwtDecoder jwtDecoder) {
         this.applicationProperties = applicationProperties;
         this.jwtDecoder = jwtDecoder;
         byte[] keyBytes =
