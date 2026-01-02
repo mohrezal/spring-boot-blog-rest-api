@@ -5,7 +5,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractExceptionHandler {
-
     public ResponseEntity<@NonNull ErrorResponse> buildErrorResponse(BaseException ex) {
         return ResponseEntity.status(ex.getStatusCode())
                 .body(ErrorResponse.builder().message(ex.getMessage()).build());

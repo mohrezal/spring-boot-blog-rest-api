@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,12 +41,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers(
+                                                HttpMethod.POST,
+                                                Routes.build(
+                                                        Routes.Auth.BASE, Routes.Auth.REGISTER))
+                                        .permitAll()
+                                        .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",
                                                 "/swagger-ui.html")
                                         .permitAll()
                                         .anyRequest()
-                                        .permitAll())
+                                        .authenticated())
                 .oauth2ResourceServer(
                         oauth2 ->
                                 oauth2.bearerTokenResolver(cookieBearerTokenResolver)

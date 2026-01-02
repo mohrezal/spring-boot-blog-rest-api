@@ -1,9 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.shared.exceptions.types;
 
+import com.github.mohrezal.springbootblogrestapi.shared.enums.MessageKey;
 import org.springframework.http.HttpStatus;
 
 public class ResourceNotFoundException extends BaseException {
-    public ResourceNotFoundException(String message) {
-        super(HttpStatus.NOT_FOUND, message);
+    public ResourceNotFoundException() {
+        super(HttpStatus.NOT_FOUND, MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND);
+    }
+
+    public ResourceNotFoundException(MessageKey messageKey) {
+        super(HttpStatus.NOT_FOUND, messageKey);
     }
 }

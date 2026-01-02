@@ -43,10 +43,13 @@ public class User extends BaseModel implements UserDetails {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "bio", nullable = false)
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
+
+    @Column(name = "bio")
     private String bio;
 
-    @Column(name = "avatar_url", nullable = false)
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "role", nullable = false)
