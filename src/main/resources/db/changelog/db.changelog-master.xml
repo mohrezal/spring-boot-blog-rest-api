@@ -5,4 +5,5 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
     <include file="db/changelog/migrations/1767180906_create_tables.sql" />
+    <include file="db/changelog/migrations/1767444188_create_refresh_tokens_table.sql" />
 </databaseChangeLog>

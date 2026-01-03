@@ -17,7 +17,9 @@ public enum MessageKey {
     USER_NOT_FOUND("User not found."),
     USER_EMAIL_ALREADY_EXISTS("A user account with this email address already exists."),
     USER_INVALID_CREDENTIALS("Invalid email or password."),
-    USER_ERROR_EMAIL_CONFLICT("A user account with this email address already exists.");
+    USER_ERROR_EMAIL_CONFLICT("A user account with this email address already exists."),
+    USER_INVALID_REFRESH_TOKEN("Invalid or expired refresh token."),
+    USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found.");
 
     private final String message;
 

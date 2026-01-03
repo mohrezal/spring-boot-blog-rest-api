@@ -1,31 +1,45 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
 
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterResponse;
-import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.registration.RegistrationService;
 import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
+import com.github.mohrezal.springbootblogrestapi.shared.services.deviceinfo.DeviceInfoService;
 import com.github.mohrezal.springbootblogrestapi.shared.services.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
-public class RegisterUserCommand implements Command<RegisterUserRequest, RegisterResponse> {
+@Slf4j
+@Transactional(rollbackFor = Exception.class)
+public class RegisterUserCommand implements Command<RegisterUserCommandParams, RegisterResponse> {
 
     private final RegistrationService registrationService;
     private final JwtService jwtService;
     private final UserMapper userMapper;
+    private final DeviceInfoService deviceInfoService;
 
     @Override
-    public RegisterResponse execute(RegisterUserRequest params) {
-        User user = registrationService.register(params, UserRole.USER);
+    public RegisterResponse execute(RegisterUserCommandParams params) {
+        User user = registrationService.register(params.getRegisterUserRequest(), UserRole.USER);
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+        String deviceName = deviceInfoService.parseDeviceName(params.getUserAgent());
+
+        jwtService.saveRefreshToken(
+                refreshToken, user, params.getIpAddress(), params.getUserAgent(), deviceName);
 
         AuthResponse authResponse =
                 AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();

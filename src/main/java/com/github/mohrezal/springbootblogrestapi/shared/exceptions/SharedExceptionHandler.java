@@ -9,7 +9,9 @@ import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.Resourc
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.UnexpectedException;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -63,5 +65,13 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<@NonNull ErrorResponse> handleUnexpectedException(
             UnexpectedException ex, WebRequest request) {
         return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleBadCredentialsException(
+            BadCredentialsException ex, WebRequest request) {
+        ErrorResponse errorResponse =
+                ErrorResponse.builder().message("Invalid email or password.").build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 }

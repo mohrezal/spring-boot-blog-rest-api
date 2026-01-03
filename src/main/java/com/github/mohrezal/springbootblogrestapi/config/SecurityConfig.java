@@ -1,8 +1,8 @@
 package com.github.mohrezal.springbootblogrestapi.config;
 
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,7 +20,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -67,13 +66,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(
                         oauth2 ->
                                 oauth2.bearerTokenResolver(cookieBearerTokenResolver)
-                                        .jwt(Customizer.withDefaults())
-                                        .authenticationEntryPoint(
-                                                (request, response, authException) -> {
-                                                    response.sendError(
-                                                            HttpServletResponse.SC_UNAUTHORIZED,
-                                                            authException.getMessage());
-                                                }))
+                                        .jwt(Customizer.withDefaults()))
                 .build();
     }
 
@@ -116,9 +109,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username ->
-                userRepository
-                        .findByEmail(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
     }
 
     @Bean

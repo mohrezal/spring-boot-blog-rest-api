@@ -2,7 +2,11 @@ package com.github.mohrezal.springbootblogrestapi.domains.users.controllers;
 
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.LoginUserCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.RefreshTokenCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.RegisterUserCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.LoginUserCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.RefreshTokenCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.LoginRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterResponse;
@@ -15,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -29,29 +34,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final RegisterUserCommand registerUserCommand;
-    private final LoginUserCommand loginUserCommand;
+    private final ObjectProvider<@NonNull RegisterUserCommand> registerUserCommandProvider;
+    private final ObjectProvider<@NonNull LoginUserCommand> loginUserCommandProvider;
+    private final ObjectProvider<@NonNull RefreshTokenCommand> refreshTokenCommandProvider;
     private final CookieUtil cookieUtil;
     private final ApplicationProperties applicationProperties;
 
     @PostMapping(Routes.Auth.REGISTER)
     public ResponseEntity<@NonNull UserSummary> register(
-            @Valid @RequestBody RegisterUserRequest registerUser) {
-        RegisterResponse registerResponse = registerUserCommand.execute(registerUser);
+            @Valid @RequestBody RegisterUserRequest registerUser, HttpServletRequest request) {
+        RegisterUserCommandParams params =
+                RegisterUserCommandParams.builder()
+                        .registerUserRequest(registerUser)
+                        .ipAddress(request.getRemoteAddr())
+                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
+                        .build();
+
+        RegisterResponse registerResponse = registerUserCommandProvider.getObject().execute(params);
 
         ResponseCookie accessTokenCookie =
-                cookieUtil.createCookie(
-                        CookieConstants.ACCESS_TOKEN_COOKIE_NAME,
-                        registerResponse.getAuthResponse().getAccessToken(),
-                        applicationProperties.security().accessTokenLifeTime(),
-                        "/");
-
+                createAccessTokenCookie(registerResponse.getAuthResponse().getAccessToken());
         ResponseCookie refreshTokenCookie =
-                cookieUtil.createCookie(
-                        CookieConstants.REFRESH_TOKEN_COOKIE_NAME,
-                        registerResponse.getAuthResponse().getRefreshToken(),
-                        applicationProperties.security().refreshTokenLifeTime(),
-                        Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH));
+                createRefreshTokenCookie(registerResponse.getAuthResponse().getRefreshToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
@@ -60,22 +64,20 @@ public class AuthController {
     }
 
     @PostMapping(Routes.Auth.LOGIN)
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest loginRequest) {
-        AuthResponse authResponse = loginUserCommand.execute(loginRequest);
+    public ResponseEntity<Void> login(
+            @Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        LoginUserCommandParams params =
+                LoginUserCommandParams.builder()
+                        .loginRequest(loginRequest)
+                        .ipAddress(request.getRemoteAddr())
+                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
+                        .build();
 
-        ResponseCookie accessTokenCookie =
-                cookieUtil.createCookie(
-                        CookieConstants.ACCESS_TOKEN_COOKIE_NAME,
-                        authResponse.getAccessToken(),
-                        applicationProperties.security().accessTokenLifeTime(),
-                        "/");
+        AuthResponse authResponse = loginUserCommandProvider.getObject().execute(params);
 
+        ResponseCookie accessTokenCookie = createAccessTokenCookie(authResponse.getAccessToken());
         ResponseCookie refreshTokenCookie =
-                cookieUtil.createCookie(
-                        CookieConstants.REFRESH_TOKEN_COOKIE_NAME,
-                        authResponse.getRefreshToken(),
-                        applicationProperties.security().refreshTokenLifeTime(),
-                        Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH));
+                createRefreshTokenCookie(authResponse.getRefreshToken());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
@@ -85,6 +87,42 @@ public class AuthController {
 
     @PostMapping(Routes.Auth.REFRESH)
     public ResponseEntity<Void> refresh(HttpServletRequest request) {
-        return ResponseEntity.ok().build();
+        String refreshToken =
+                cookieUtil.getCookieValue(
+                        request.getCookies(), CookieConstants.REFRESH_TOKEN_COOKIE_NAME);
+
+        RefreshTokenCommandParams params =
+                RefreshTokenCommandParams.builder()
+                        .refreshToken(refreshToken)
+                        .ipAddress(request.getRemoteAddr())
+                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
+                        .build();
+
+        AuthResponse authResponse = refreshTokenCommandProvider.getObject().execute(params);
+
+        ResponseCookie accessTokenCookie = createAccessTokenCookie(authResponse.getAccessToken());
+        ResponseCookie refreshTokenCookie =
+                createRefreshTokenCookie(authResponse.getRefreshToken());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .build();
+    }
+
+    private ResponseCookie createAccessTokenCookie(String accessToken) {
+        return cookieUtil.createCookie(
+                CookieConstants.ACCESS_TOKEN_COOKIE_NAME,
+                accessToken,
+                applicationProperties.security().accessTokenLifeTime(),
+                "/");
+    }
+
+    private ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        return cookieUtil.createCookie(
+                CookieConstants.REFRESH_TOKEN_COOKIE_NAME,
+                refreshToken,
+                applicationProperties.security().refreshTokenLifeTime(),
+                Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH));
     }
 }
