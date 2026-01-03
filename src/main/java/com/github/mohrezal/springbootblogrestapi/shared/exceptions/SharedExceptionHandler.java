@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.shared.exceptions;
 
+import com.github.mohrezal.springbootblogrestapi.shared.enums.MessageKey;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ForbiddenException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.InternalException;
@@ -71,7 +72,19 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<@NonNull ErrorResponse> handleBadCredentialsException(
             BadCredentialsException ex, WebRequest request) {
         ErrorResponse errorResponse =
-                ErrorResponse.builder().message("Invalid email or password.").build();
+                ErrorResponse.builder()
+                        .message(MessageKey.SHARED_ERROR_BAD_CREDENTIALS.getMessage())
+                        .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleGenericException(
+            Exception ex, WebRequest request) {
+        ErrorResponse errorResponse =
+                ErrorResponse.builder()
+                        .message(MessageKey.SHARED_ERROR_UNEXPECTED.getMessage())
+                        .build();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

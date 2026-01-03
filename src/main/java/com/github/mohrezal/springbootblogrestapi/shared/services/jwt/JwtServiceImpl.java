@@ -4,6 +4,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.models.RefreshTok
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.RefreshTokenRepository;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.InternalException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -191,7 +192,7 @@ public class JwtServiceImpl implements JwtService {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
+            throw new InternalException();
         }
     }
 }
