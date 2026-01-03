@@ -1,8 +1,8 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.services.registration;
 
-import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterUser;
+import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
-import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.UserEmailConflictException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.UserCredentials;
@@ -20,9 +20,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final UserRepository userRepository;
 
     @Override
-    public User register(RegisterUser registerUser, UserRole role) {
+    public User register(RegisterUserRequest registerUser, UserRole role) {
         if (userRepository.existsByEmail(registerUser.getEmail())) {
-            throw new UserEmailConflictException();
+            throw new UserEmailAlreadyExistsException();
         }
         User newUser = this.userMapper.toUser(registerUser, role);
         String hashedPassword = passwordEncoder.encode(registerUser.getPassword().trim());

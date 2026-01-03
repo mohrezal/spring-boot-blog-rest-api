@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 @RestControllerAdvice
-public class GlobalControllerExceptionHandler extends AbstractExceptionHandler {
+public class SharedExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleResourceNotFoundException(

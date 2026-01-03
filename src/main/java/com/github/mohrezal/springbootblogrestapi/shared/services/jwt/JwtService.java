@@ -1,16 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.shared.services.jwt;
 
+import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public interface JwtService {
-    String generateAccessToken(UUID userId, Authentication authentication);
+    String generateAccessToken(User user);
 
-    String generateRefreshToken(UUID userId, Authentication authentication);
-
-    String generateToken(UUID userId, Authentication authentication, Long expirationTimeInSeconds);
+    String generateRefreshToken(UUID userId);
 
     Jwt decodeToken(String token);
 

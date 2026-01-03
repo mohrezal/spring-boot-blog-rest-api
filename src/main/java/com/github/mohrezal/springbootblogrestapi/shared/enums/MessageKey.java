@@ -14,6 +14,9 @@ public enum MessageKey {
     SHARED_ERROR_INTERNAL("An internal server error occurred. Please try again later."),
     SHARED_ERROR_UNEXPECTED("An unexpected error occurred."),
 
+    USER_NOT_FOUND("User not found."),
+    USER_EMAIL_ALREADY_EXISTS("A user account with this email address already exists."),
+    USER_INVALID_CREDENTIALS("Invalid email or password."),
     USER_ERROR_EMAIL_CONFLICT("A user account with this email address already exists.");
 
     private final String message;

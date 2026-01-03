@@ -1,57 +1,54 @@
 package com.github.mohrezal.springbootblogrestapi.shared.services.jwt;
 
+import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import org.springframework.security.core.Authentication;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
     private final ApplicationProperties applicationProperties;
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    public JwtServiceImpl(ApplicationProperties applicationProperties, JwtDecoder jwtDecoder) {
-        this.applicationProperties = applicationProperties;
-        this.jwtDecoder = jwtDecoder;
-        byte[] keyBytes =
-                java.util.Base64.getDecoder().decode(applicationProperties.security().secret());
-        SecretKey secretKey = new SecretKeySpec(keyBytes, "HmacSHA512");
-        this.jwtEncoder = new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
-    }
-
-    public String generateAccessToken(UUID userId, Authentication authentication) {
-        return generateToken(
-                userId, authentication, applicationProperties.security().accessTokenLifeTime());
-    }
-
-    public String generateRefreshToken(UUID userId, Authentication authentication) {
-        return generateToken(
-                userId, authentication, applicationProperties.security().refreshTokenLifeTime());
-    }
-
-    public String generateToken(
-            UUID userId, Authentication authentication, Long expirationTimeInSeconds) {
+    @Override
+    public String generateAccessToken(User user) {
         Instant now = Instant.now();
-        Instant expiration = now.plusSeconds(expirationTimeInSeconds);
+        Instant expiration =
+                now.plusSeconds(applicationProperties.security().accessTokenLifeTime());
 
         List<String> roles =
-                authentication.getAuthorities().stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .toList();
+                user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+        JwtClaimsSet claims =
+                JwtClaimsSet.builder()
+                        .issuer("self")
+                        .issuedAt(now)
+                        .expiresAt(expiration)
+                        .subject(user.getId().toString())
+                        .claim("username", user.getUsername())
+                        .claim("scope", roles)
+                        .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
+    @Override
+    public String generateRefreshToken(UUID userId) {
+        Instant now = Instant.now();
+        Instant expiration =
+                now.plusSeconds(applicationProperties.security().refreshTokenLifeTime());
 
         JwtClaimsSet claims =
                 JwtClaimsSet.builder()
@@ -59,8 +56,6 @@ public class JwtServiceImpl implements JwtService {
                         .issuedAt(now)
                         .expiresAt(expiration)
                         .subject(userId.toString())
-                        .claim("username", authentication.getName())
-                        .claim("scope", roles)
                         .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

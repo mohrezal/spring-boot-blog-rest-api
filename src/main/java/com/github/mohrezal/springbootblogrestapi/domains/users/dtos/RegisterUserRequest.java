@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class RegisterUser {
+public class RegisterUserRequest {
 
     @NotBlank
     @Size(min = 2, max = 50)

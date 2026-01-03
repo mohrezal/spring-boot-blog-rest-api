@@ -57,7 +57,7 @@ public class User extends BaseModel implements UserDetails {
     private UserRole role = UserRole.USER;
 
     @Column(name = "is_verified", nullable = false)
-    private Boolean isVerified = false;
+    private Boolean isVerified = true;
 
     @OneToOne(
             mappedBy = "user",
