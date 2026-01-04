@@ -50,6 +50,7 @@ public class JwtServiceImpl implements JwtService {
                         .subject(user.getId().toString())
                         .claim("username", user.getUsername())
                         .claim("scope", roles)
+                        .id(UUID.randomUUID().toString())
                         .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -67,6 +68,7 @@ public class JwtServiceImpl implements JwtService {
                         .issuedAt(now)
                         .expiresAt(expiration)
                         .subject(userId.toString())
+                        .id(UUID.randomUUID().toString())
                         .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

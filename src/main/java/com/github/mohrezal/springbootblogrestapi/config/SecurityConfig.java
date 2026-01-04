@@ -40,6 +40,7 @@ public class SecurityConfig {
     private final CookieBearerTokenResolver cookieBearerTokenResolver;
     private final UserRepository userRepository;
     private final UserJwtAuthenticationConverter userJwtAuthenticationConverter;
+    private final SkipJwtValidationFilter skipJwtValidationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -67,6 +68,10 @@ public class SecurityConfig {
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())
+                .addFilterBefore(
+                        skipJwtValidationFilter,
+                        org.springframework.security.oauth2.server.resource.web.authentication
+                                .BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer(
                         oauth2 ->
                                 oauth2.bearerTokenResolver(cookieBearerTokenResolver)

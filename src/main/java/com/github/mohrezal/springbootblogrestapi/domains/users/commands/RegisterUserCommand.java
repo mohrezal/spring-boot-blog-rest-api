@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 public class RegisterUserCommand implements Command<RegisterUserCommandParams, RegisterResponse> {
 
     private final RegistrationService registrationService;
@@ -29,6 +28,7 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final UserMapper userMapper;
     private final DeviceInfoService deviceInfoService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
         User user = registrationService.register(params.getRegisterUserRequest(), UserRole.USER);

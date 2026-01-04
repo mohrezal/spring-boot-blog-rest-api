@@ -19,11 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 public class LogoutUserCommand implements Command<LogoutUserCommandParams, Void> {
 
     private final JwtService jwtService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(LogoutUserCommandParams params) {
         if (params.getRefreshToken() == null

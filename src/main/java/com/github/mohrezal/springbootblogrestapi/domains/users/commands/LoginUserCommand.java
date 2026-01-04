@@ -18,13 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 public class LoginUserCommand implements Command<LoginUserCommandParams, AuthResponse> {
 
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
     private final DeviceInfoService deviceInfoService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(LoginUserCommandParams params) {
         User user = authenticationService.authenticate(params.getLoginRequest());

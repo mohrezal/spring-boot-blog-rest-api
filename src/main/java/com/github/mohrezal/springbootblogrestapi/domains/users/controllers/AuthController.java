@@ -17,6 +17,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.UserSummary;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.springbootblogrestapi.shared.constants.CookieConstants;
 import com.github.mohrezal.springbootblogrestapi.shared.utils.CookieUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(Routes.Auth.BASE)
 @RequiredArgsConstructor
+@Tag(name = "Auth")
 public class AuthController {
 
     private final ObjectProvider<@NonNull RegisterUserCommand> registerUserCommandProvider;

@@ -16,4 +16,9 @@ public final class Routes {
         public static final String REFRESH = "refresh";
         public static final String LOGOUT = "logout";
     }
+
+    public static final class User {
+        public static final String BASE = API_BASE + "users";
+        public static final String ME = "me";
+    }
 }
