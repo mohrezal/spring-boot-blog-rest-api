@@ -1,5 +1,6 @@
-package com.github.mohrezal.springbootblogrestapi.config;
+package com.github.mohrezal.springbootblogrestapi.config.security;
 
+import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;

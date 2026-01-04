@@ -1,5 +1,6 @@
-package com.github.mohrezal.springbootblogrestapi.config;
+package com.github.mohrezal.springbootblogrestapi.config.security;
 
+import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.shared.constants.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

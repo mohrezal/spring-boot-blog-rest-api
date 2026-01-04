@@ -1,4 +1,4 @@
-package com.github.mohrezal.springbootblogrestapi.config;
+package com.github.mohrezal.springbootblogrestapi.config.security;
 
 import com.github.mohrezal.springbootblogrestapi.shared.constants.CookieConstants;
 import com.github.mohrezal.springbootblogrestapi.shared.constants.SecurityConstants;
