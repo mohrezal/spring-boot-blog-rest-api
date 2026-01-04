@@ -22,13 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, AuthResponse> {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final DeviceInfoService deviceInfoService;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(RefreshTokenCommandParams params) {
         if (params.getRefreshToken() == null

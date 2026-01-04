@@ -1,12 +1,19 @@
 package com.github.mohrezal.springbootblogrestapi.shared.utils;
 
+import com.github.mohrezal.springbootblogrestapi.config.Routes;
+import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
+import com.github.mohrezal.springbootblogrestapi.shared.constants.CookieConstants;
 import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CookieUtil {
+@RequiredArgsConstructor
+public class CookieUtils {
+
+    private final ApplicationProperties applicationProperties;
 
     public String getCookieValue(Cookie[] cookies, String cookieName) {
         if (cookies == null) {
@@ -54,5 +61,29 @@ public class CookieUtil {
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
         return cookie;
+    }
+
+    public ResponseCookie createAccessTokenCookie(String accessToken) {
+        return createCookie(
+                CookieConstants.ACCESS_TOKEN_COOKIE_NAME,
+                accessToken,
+                applicationProperties.security().accessTokenLifeTime(),
+                "/");
+    }
+
+    public ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        return createCookie(
+                CookieConstants.REFRESH_TOKEN_COOKIE_NAME,
+                refreshToken,
+                applicationProperties.security().refreshTokenLifeTime(),
+                Routes.Auth.BASE);
+    }
+
+    public ResponseCookie deleteAccessTokenCookie() {
+        return deleteCookie(CookieConstants.ACCESS_TOKEN_COOKIE_NAME, "/");
+    }
+
+    public ResponseCookie deleteRefreshTokenCookie() {
+        return deleteCookie(CookieConstants.REFRESH_TOKEN_COOKIE_NAME, Routes.Auth.BASE);
     }
 }

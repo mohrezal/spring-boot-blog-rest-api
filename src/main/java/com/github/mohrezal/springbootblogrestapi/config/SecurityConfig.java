@@ -13,7 +13,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -40,6 +39,7 @@ public class SecurityConfig {
     private final ApplicationProperties applicationProperties;
     private final CookieBearerTokenResolver cookieBearerTokenResolver;
     private final UserRepository userRepository;
+    private final UserJwtAuthenticationConverter userJwtAuthenticationConverter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -57,6 +57,10 @@ public class SecurityConfig {
                                                 Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH))
                                         .permitAll()
                                         .requestMatchers(
+                                                HttpMethod.POST,
+                                                Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
+                                        .authenticated()
+                                        .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",
                                                 "/swagger-ui.html")
@@ -66,7 +70,10 @@ public class SecurityConfig {
                 .oauth2ResourceServer(
                         oauth2 ->
                                 oauth2.bearerTokenResolver(cookieBearerTokenResolver)
-                                        .jwt(Customizer.withDefaults()))
+                                        .jwt(
+                                                jwt ->
+                                                        jwt.jwtAuthenticationConverter(
+                                                                userJwtAuthenticationConverter)))
                 .build();
     }
 
