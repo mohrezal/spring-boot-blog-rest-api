@@ -6,4 +6,9 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
     <include file="db/changelog/migrations/1767180906_create_tables.sql" />
     <include file="db/changelog/migrations/1767444188_create_refresh_tokens_table.sql" />
+    <include file="db/changelog/migrations/1767631622_rename_meta_description_to_description.sql"/>
+    <include file="db/changelog/migrations/1767632110_drop_meta_title_from_posts.sql" />
+    <include file="db/changelog/migrations/1767633210_add_post_categories_table.sql"/>
+    <include file="db/changelog/migrations/1767633653_drop_category_id_from_posts.sql"/>
+    <include file="db/changelog/migrations/1767634202_set_avatar_url_not_null_in_posts.sql"/>
 </databaseChangeLog>
