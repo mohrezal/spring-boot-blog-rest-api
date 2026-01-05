@@ -59,6 +59,9 @@ public class SecurityConfig {
                                                 Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH))
                                         .permitAll()
                                         .requestMatchers(
+                                                HttpMethod.GET, Routes.build(Routes.Category.BASE))
+                                        .permitAll()
+                                        .requestMatchers(
                                                 HttpMethod.POST,
                                                 Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
                                         .authenticated()
