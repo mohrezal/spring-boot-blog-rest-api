@@ -13,6 +13,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
@@ -24,6 +26,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+@NamedEntityGraph(
+        name = "Post.withUserAndCategories",
+        attributeNodes = {@NamedAttributeNode("user"), @NamedAttributeNode("categories")})
 @Entity
 @Table(name = "posts")
 @Getter

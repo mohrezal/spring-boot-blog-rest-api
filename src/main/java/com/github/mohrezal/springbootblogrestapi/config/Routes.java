@@ -25,4 +25,8 @@ public final class Routes {
     public static final class Category {
         public static final String BASE = API_BASE + "categories";
     }
+
+    public static final class Post {
+        public static final String BASE = API_BASE + "posts";
+    }
 }

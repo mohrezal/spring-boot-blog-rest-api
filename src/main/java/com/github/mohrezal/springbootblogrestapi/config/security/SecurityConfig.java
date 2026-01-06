@@ -66,6 +66,9 @@ public class SecurityConfig {
                                                 Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
                                         .authenticated()
                                         .requestMatchers(
+                                                HttpMethod.GET, Routes.build(Routes.Post.BASE))
+                                        .permitAll()
+                                        .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",
                                                 "/swagger-ui.html")
