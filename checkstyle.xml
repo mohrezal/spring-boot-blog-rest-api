@@ -140,12 +140,6 @@
             <property name="caseIndent" value="4"/>
         </module>
 
-        <module name="AnnotationLocation">
-            <property name="allowSamelineMultipleAnnotations" value="false"/>
-            <property name="allowSamelineSingleParameterlessAnnotation" value="false"/>
-            <property name="allowSamelineParameterizedAnnotation" value="false"/>
-        </module>
-
         <module name="InvalidJavadocPosition"/>
         <module name="JavadocMethod">
             <property name="accessModifiers" value="public"/>
