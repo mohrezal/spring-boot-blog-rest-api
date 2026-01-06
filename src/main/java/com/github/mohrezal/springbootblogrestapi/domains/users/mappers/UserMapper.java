@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.mappers;
 
+import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.AuthorSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.UserSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
@@ -26,6 +27,8 @@ public interface UserMapper {
     User toUser(RegisterUserRequest registerUser, UserRole role);
 
     UserSummary toUserSummary(User user);
+
+    AuthorSummary toAuthorSummary(User user);
 
     @AfterMapping
     default void setDefaultAvatarUrl(RegisterUserRequest registerUser, @MappingTarget User user) {
