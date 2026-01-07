@@ -14,6 +14,7 @@ public enum MessageKey {
     SHARED_ERROR_INTERNAL("An internal server error occurred."),
     SHARED_ERROR_UNEXPECTED("An unexpected error occurred."),
     SHARED_ERROR_BAD_CREDENTIALS("Invalid email or password."),
+    SHARED_ERROR_SLUG_GENERATION_FAILED("Slug generation failed"),
 
     USER_NOT_FOUND("User not found."),
     USER_EMAIL_ALREADY_EXISTS("A user account with this email address already exists."),

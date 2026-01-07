@@ -7,6 +7,7 @@ import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.Interna
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.InvalidRequestException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceNotFoundException;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.SlugGenerationException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.UnexpectedException;
 import org.jspecify.annotations.NonNull;
@@ -65,6 +66,12 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(UnexpectedException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleUnexpectedException(
             UnexpectedException ex, WebRequest request) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(SlugGenerationException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleSlugGenerationException(
+            SlugGenerationException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 
