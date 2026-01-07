@@ -5,10 +5,12 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository
         extends JpaRepository<@NonNull Post, @NonNull UUID>,
                 JpaSpecificationExecutor<@NonNull Post> {
+    @EntityGraph(value = "Post.withUserAndCategories")
+    Optional<Post> findBySlug(String slug);
 
     static Specification<@NonNull Post> fetchRelationships() {
         return (root, query, criteriaBuilder) -> {

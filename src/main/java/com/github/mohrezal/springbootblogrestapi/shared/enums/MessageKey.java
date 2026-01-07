@@ -20,7 +20,9 @@ public enum MessageKey {
     USER_INVALID_CREDENTIALS("Invalid email or password."),
     USER_ERROR_EMAIL_CONFLICT("A user account with this email address already exists."),
     USER_INVALID_REFRESH_TOKEN("Invalid or expired refresh token."),
-    USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found.");
+    USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found."),
+
+    POST_NOT_FOUND("Post not found.");
     private final String message;
 
     MessageKey(String message) {
