@@ -22,6 +22,8 @@ public interface PostRepository
     @EntityGraph(value = "Post.withUserAndCategories")
     Optional<Post> findBySlug(String slug);
 
+    boolean existsBySlug(String slug);
+
     static Specification<@NonNull Post> fetchRelationships() {
         return (root, query, criteriaBuilder) -> {
             if (Long.class != query.getResultType()) {

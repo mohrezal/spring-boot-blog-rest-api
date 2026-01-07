@@ -23,7 +23,9 @@ public enum MessageKey {
     USER_INVALID_REFRESH_TOKEN("Invalid or expired refresh token."),
     USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found."),
 
-    POST_NOT_FOUND("Post not found.");
+    POST_NOT_FOUND("Post not found."),
+
+    CATEGORIES_NOT_FOUND("One or more categories not found.");
     private final String message;
 
     MessageKey(String message) {
