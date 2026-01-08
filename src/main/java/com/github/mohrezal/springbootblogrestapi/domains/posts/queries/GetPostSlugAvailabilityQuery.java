@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -29,17 +30,19 @@ public class GetPostSlugAvailabilityQuery
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public SlugAvailability execute(GetPostSlugAvailabilityQueryParams params) {
         validate(params);
-        SlugAvailability response = new SlugAvailability();
-        response.setAvailable(true);
         if (postRepository.existsBySlug(params.getSlug())) {
-            response.setAvailable(false);
-            response.setSuggestion(
-                    slugGeneratorService.getSlug(params.getSlug(), postRepository::existsBySlug));
+            return SlugAvailability.builder()
+                    .available(false)
+                    .suggestion(
+                            slugGeneratorService.getSlug(
+                                    params.getSlug(), postRepository::existsBySlug))
+                    .build();
         }
 
-        return response;
+        return SlugAvailability.builder().available(true).suggestion(null).build();
     }
 }

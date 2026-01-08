@@ -30,6 +30,6 @@ public final class Routes {
         public static final String BASE = API_BASE + "posts";
         public static final String GET_POST_BY_SLUG = "{slug}";
         public static final String UPDATE_POST_BY_SLUG = "{slug}";
-        public static final String SLUG_AVAILABILITY = "availability";
+        public static final String SLUG_AVAILABILITY = "slugs/availability";
     }
 }

@@ -44,7 +44,7 @@ public class GetPostsQuery implements Query<GetPostsQueryParams, PageResponse<Po
                         params.getPage(),
                         params.getSize(),
                         Sort.by(Sort.Direction.DESC, "publishedAt"));
-        Page<Post> posts = repository.findAll(specification, pageable);
+        Page<@NonNull Post> posts = repository.findAll(specification, pageable);
 
         return PageResponse.from(posts, postMapper::toPostSummary);
     }
