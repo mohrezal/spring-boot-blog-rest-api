@@ -26,6 +26,8 @@ public enum MessageKey {
     POST_NOT_FOUND("Post not found."),
     POST_SLUG_ALREADY_EXISTS("Slug already exists."),
     POST_SLUG_INVALID_FORMAT("Invalid slug format."),
+    POST_STATUS_TRANSITION_INVALID("Cannot transition post to this status."),
+
     CATEGORIES_NOT_FOUND("One or more categories not found.");
     private final String message;
 

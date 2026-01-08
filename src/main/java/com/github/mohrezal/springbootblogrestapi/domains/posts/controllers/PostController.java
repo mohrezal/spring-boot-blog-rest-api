@@ -1,9 +1,15 @@
 package com.github.mohrezal.springbootblogrestapi.domains.posts.controllers;
 
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.ArchivePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.CreatePostCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.PublishPostCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.UpdatePostCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.ArchivePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.CreatePostCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.PublishPostCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UnarchivePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.CreatePostRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
@@ -45,6 +51,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
     private final ObjectProvider<@NonNull CreatePostCommand> createPostCommands;
     private final ObjectProvider<@NonNull UpdatePostCommand> updatePostCommands;
+    private final ObjectProvider<@NonNull PublishPostCommand> publishPostCommands;
+    private final ObjectProvider<@NonNull ArchivePostCommand> archivePostCommands;
+    private final ObjectProvider<@NonNull UnarchivePostCommand> unarchivePostCommands;
 
     private final ObjectProvider<@NonNull GetPostsQuery> getPostsQueries;
     private final ObjectProvider<@NonNull GetPostBySlugQuery> getPostBySlugQueries;
@@ -113,5 +122,33 @@ public class PostController {
         var params = GetPostSlugAvailabilityQueryParams.builder().slug(slug).build();
 
         return ResponseEntity.ok().body(getPostSlugAvailabilityQueries.getObject().execute(params));
+    }
+
+    @PostMapping(Routes.Post.PUBLISH_POST)
+    @IsAdminOrUser
+    public ResponseEntity<@NonNull Void> publishPost(
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
+        var params = PublishPostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        publishPostCommands.getObject().execute(params);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(Routes.Post.ARCHIVE_POST)
+    @IsAdminOrUser
+    public ResponseEntity<@NonNull Void> archivePost(
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
+        var params = ArchivePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        archivePostCommands.getObject().execute(params);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(Routes.Post.UNARCHIVE_POST)
+    @IsAdminOrUser
+    public ResponseEntity<@NonNull Void> unarchivePost(
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
+        var params =
+                UnarchivePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        unarchivePostCommands.getObject().execute(params);
+        return ResponseEntity.noContent().build();
     }
 }

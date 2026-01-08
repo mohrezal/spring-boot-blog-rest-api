@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions;
 
+import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostSlugFormatException;
@@ -29,6 +30,12 @@ public class PostExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(PostSlugAlreadyExistsException.class)
     public ResponseEntity<@NonNull ErrorResponse> handlePostSlugAlreadyExistsException(
             PostSlugAlreadyExistsException ex, WebRequest request) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(PostInvalidStatusTransitionException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handlePostInvalidStatusTransitionException(
+            PostInvalidStatusTransitionException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 }

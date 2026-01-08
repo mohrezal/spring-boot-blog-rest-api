@@ -10,6 +10,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.
 import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceConflictException;
@@ -32,6 +33,7 @@ public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostD
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final CategoryRepository categoryRepository;
+    private final PostUtilsService postUtilsService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -43,7 +45,7 @@ public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostD
 
         User user = (User) params.getUserDetails();
 
-        if (!post.getUser().getId().equals(user.getId())) {
+        if (!postUtilsService.isOwner(post, user)) {
             throw new AccessDeniedException();
         }
 

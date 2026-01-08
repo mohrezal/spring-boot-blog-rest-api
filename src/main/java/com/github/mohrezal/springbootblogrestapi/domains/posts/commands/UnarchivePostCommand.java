@@ -1,16 +1,16 @@
-package com.github.mohrezal.springbootblogrestapi.domains.posts.queries;
+package com.github.mohrezal.springbootblogrestapi.domains.posts.commands;
 
-import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UnarchivePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostNotFoundException;
-import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
-import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.userutils.UserUtilsService;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,37 +22,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class GetPostBySlugQuery implements Query<GetPostBySlugQueryParams, PostDetail> {
+public class UnarchivePostCommand implements Command<UnarchivePostCommandParams, Void> {
     private final PostRepository postRepository;
-    private final PostMapper postMapper;
     private final PostUtilsService postUtilsService;
     private final UserUtilsService userUtilsService;
 
-    @Transactional(readOnly = true)
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public PostDetail execute(GetPostBySlugQueryParams params) {
+    public Void execute(UnarchivePostCommandParams params) {
         Post post =
-                this.postRepository
-                        .findBySlug(params.getSlug())
-                        .orElseThrow(PostNotFoundException::new);
-
-        if (post.getStatus().equals(PostStatus.PUBLISHED)) {
-            return this.postMapper.toPostDetail(post);
-        }
-
-        if (params.getUserDetails() == null) {
-            throw new PostNotFoundException();
-        }
-
+                postRepository.findBySlug(params.getSlug()).orElseThrow(PostNotFoundException::new);
         User user = (User) params.getUserDetails();
 
-        boolean isAdmin = userUtilsService.isAdmin(user);
-        boolean isOwner = postUtilsService.isOwner(post, user);
-
-        if (isAdmin || isOwner) {
-            return this.postMapper.toPostDetail(post);
+        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+            throw new AccessDeniedException();
         }
-
-        throw new PostNotFoundException();
+        if (!post.getStatus().equals(PostStatus.ARCHIVED)) {
+            throw new PostInvalidStatusTransitionException();
+        }
+        post.setStatus(PostStatus.PUBLISHED);
+        postRepository.save(post);
+        return null;
     }
 }
