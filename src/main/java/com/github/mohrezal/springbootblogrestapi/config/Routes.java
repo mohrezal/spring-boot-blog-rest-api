@@ -29,5 +29,6 @@ public final class Routes {
     public static final class Post {
         public static final String BASE = API_BASE + "posts";
         public static final String GET_POST_BY_SLUG = "{slug}";
+        public static final String UPDATE_POST_BY_SLUG = "{slug}";
     }
 }

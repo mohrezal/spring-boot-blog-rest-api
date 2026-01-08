@@ -11,4 +11,5 @@
     <include file="db/changelog/migrations/1767633210_add_post_categories_table.sql"/>
     <include file="db/changelog/migrations/1767633653_drop_category_id_from_posts.sql"/>
     <include file="db/changelog/migrations/1767634202_set_avatar_url_not_null_in_posts.sql"/>
+    <include file="db/changelog/migrations/1767863381_add_version_to_posts.sql"/>
 </databaseChangeLog>

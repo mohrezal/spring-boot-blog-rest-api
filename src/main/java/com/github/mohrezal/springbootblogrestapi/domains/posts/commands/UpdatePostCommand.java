@@ -3,18 +3,18 @@ package com.github.mohrezal.springbootblogrestapi.domains.posts.commands;
 import com.github.mohrezal.springbootblogrestapi.domains.categories.exceptions.types.CategoryNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.categories.models.Category;
 import com.github.mohrezal.springbootblogrestapi.domains.categories.repositories.CategoryRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.CreatePostCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
-import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostNotFoundException;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.SlugAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
-import com.github.mohrezal.springbootblogrestapi.shared.services.sluggenerator.SlugGeneratorService;
 import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -27,36 +27,44 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class CreatePostCommand implements Command<CreatePostCommandParams, PostDetail> {
+public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostDetail> {
 
     private final PostRepository postRepository;
-    private final CategoryRepository categoryRepository;
-    private final SlugGeneratorService slugGeneratorService;
-
     private final PostMapper postMapper;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public PostDetail execute(CreatePostCommandParams params) {
+    public PostDetail execute(UpdatePostCommandParams params) {
+        Post post =
+                this.postRepository
+                        .findBySlug(params.getSlug())
+                        .orElseThrow(PostNotFoundException::new);
 
-        User currentUser = (User) params.getUserDetails();
+        User user = (User) params.getUserDetails();
 
-        Set<UUID> categoryIds = params.getCreatePostRequest().getCategoryIds();
-        Set<Category> categories = this.categoryRepository.findAllByIdIn(categoryIds);
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException();
+        }
 
-        if (categories.size() != categoryIds.size()) {
+        Set<Category> categories =
+                categoryRepository.findAllByIdIn(params.getUpdatePostRequest().getCategoryIds());
+
+        if (categories.size() != params.getUpdatePostRequest().getCategoryIds().size()) {
             throw new CategoryNotFoundException();
         }
 
-        Post newPost = this.postMapper.toPost(params.getCreatePostRequest());
-        newPost.setCategories(categories);
-        newPost.setUser(currentUser);
-        newPost.setStatus(PostStatus.DRAFT);
-        String slug =
-                slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
-        newPost.setSlug(slug);
+        if (!post.getSlug().equals(params.getUpdatePostRequest().getSlug())) {
+            if (postRepository.existsBySlug(params.getUpdatePostRequest().getSlug())) {
+                throw new SlugAlreadyExistsException();
+            }
+        }
+
+        postMapper.toTargetPost(params.getUpdatePostRequest(), post);
+        post.setCategories(categories);
+
         try {
-            Post savedPost = postRepository.save(newPost);
+            Post savedPost = postRepository.save(post);
             return this.postMapper.toPostDetail(savedPost);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceConflictException();

@@ -5,4 +5,5 @@ public final class RegexUtils {
 
     public static final String NAME_PATTERN = "^[\\p{L} '-]+$";
     public static final String PASSWORD_PATTERN = "^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$";
+    public static final String SLUG_PATTERN = "^[a-z0-9]+(?:-[a-z0-9]+)*$";
 }

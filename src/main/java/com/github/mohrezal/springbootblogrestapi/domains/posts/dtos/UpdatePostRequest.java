@@ -1,9 +1,9 @@
 package com.github.mohrezal.springbootblogrestapi.domains.posts.dtos;
 
-import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
+import com.github.mohrezal.springbootblogrestapi.shared.constants.RegexUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
@@ -27,5 +27,7 @@ public class UpdatePostRequest {
     @Size(max = 300)
     private String description;
 
-    @NotNull private PostStatus status;
+    @NotBlank
+    @Pattern(regexp = RegexUtils.SLUG_PATTERN)
+    private String slug;
 }

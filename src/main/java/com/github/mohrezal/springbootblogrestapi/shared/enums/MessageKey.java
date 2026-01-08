@@ -24,6 +24,7 @@ public enum MessageKey {
     USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found."),
 
     POST_NOT_FOUND("Post not found."),
+    POST_SLUG_ALREADY_EXISTS("Slug already exists."),
 
     CATEGORIES_NOT_FOUND("One or more categories not found.");
     private final String message;
