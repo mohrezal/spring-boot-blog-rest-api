@@ -8,10 +8,13 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.U
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.CreatePostRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.SlugAvailability;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostBySlugQuery;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostSlugAvailabilityQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostBySlugQueryParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
@@ -45,6 +48,8 @@ public class PostController {
 
     private final ObjectProvider<@NonNull GetPostsQuery> getPostsQueries;
     private final ObjectProvider<@NonNull GetPostBySlugQuery> getPostBySlugQueries;
+    private final ObjectProvider<@NonNull GetPostSlugAvailabilityQuery>
+            getPostSlugAvailabilityQueries;
 
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPosts(
@@ -100,5 +105,13 @@ public class PostController {
         var params = GetPostBySlugQueryParams.builder().slug(slug).userDetails(userDetails).build();
 
         return ResponseEntity.ok().body(getPostBySlugQueries.getObject().execute(params));
+    }
+
+    @GetMapping(Routes.Post.SLUG_AVAILABILITY)
+    public ResponseEntity<@NonNull SlugAvailability> getSlugAvailability(
+            @RequestParam(name = "slug", required = true) String slug) {
+        var params = GetPostSlugAvailabilityQueryParams.builder().slug(slug).build();
+
+        return ResponseEntity.ok().body(getPostSlugAvailabilityQueries.getObject().execute(params));
     }
 }

@@ -6,7 +6,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.categories.repositories
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostNotFoundException;
-import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.SlugAlreadyExistsException;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
@@ -56,7 +56,7 @@ public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostD
 
         if (!post.getSlug().equals(params.getUpdatePostRequest().getSlug())) {
             if (postRepository.existsBySlug(params.getUpdatePostRequest().getSlug())) {
-                throw new SlugAlreadyExistsException();
+                throw new PostSlugAlreadyExistsException();
             }
         }
 

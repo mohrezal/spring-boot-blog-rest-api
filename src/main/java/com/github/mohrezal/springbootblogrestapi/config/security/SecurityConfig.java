@@ -69,6 +69,12 @@ public class SecurityConfig {
                                                 HttpMethod.GET, Routes.build(Routes.Post.BASE))
                                         .permitAll()
                                         .requestMatchers(
+                                                HttpMethod.GET,
+                                                Routes.build(
+                                                        Routes.Post.BASE,
+                                                        Routes.Post.SLUG_AVAILABILITY))
+                                        .permitAll()
+                                        .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",
                                                 "/swagger-ui.html")
