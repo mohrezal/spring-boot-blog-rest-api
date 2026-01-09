@@ -3,11 +3,13 @@ package com.github.mohrezal.springbootblogrestapi.domains.posts.controllers;
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.ArchivePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.CreatePostCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.DeletePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.PublishPostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.UpdatePostCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.ArchivePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.CreatePostCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.DeletePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.PublishPostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UnarchivePostCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.UpdatePostCommandParams;
@@ -35,6 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +57,7 @@ public class PostController {
     private final ObjectProvider<@NonNull PublishPostCommand> publishPostCommands;
     private final ObjectProvider<@NonNull ArchivePostCommand> archivePostCommands;
     private final ObjectProvider<@NonNull UnarchivePostCommand> unarchivePostCommands;
+    private final ObjectProvider<@NonNull DeletePostCommand> deletePostCommands;
 
     private final ObjectProvider<@NonNull GetPostsQuery> getPostsQueries;
     private final ObjectProvider<@NonNull GetPostBySlugQuery> getPostBySlugQueries;
@@ -149,6 +153,16 @@ public class PostController {
         var params =
                 UnarchivePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
         unarchivePostCommands.getObject().execute(params);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(Routes.Post.DELETE_BY_SLUG)
+    @IsAdminOrUser
+    public ResponseEntity<Void> deletePostBySlug(
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
+
+        var params = DeletePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        deletePostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
     }
 }

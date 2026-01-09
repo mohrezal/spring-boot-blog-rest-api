@@ -34,5 +34,6 @@ public final class Routes {
         public static final String PUBLISH_POST = "{slug}/publish";
         public static final String ARCHIVE_POST = "{slug}/archive";
         public static final String UNARCHIVE_POST = "{slug}/unarchive";
+        public static final String DELETE_BY_SLUG = "{slug}";
     }
 }
