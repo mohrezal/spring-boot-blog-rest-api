@@ -1,13 +1,14 @@
-FROM gradle:9.1-jdk25
+FROM maven:3.9-eclipse-temurin-25
 
 WORKDIR /app
 
-COPY build.gradle.kts settings.gradle.kts ./
-COPY gradle ./gradle
+COPY pom.xml ./
+COPY .mvn ./.mvn
+COPY mvnw ./
 
-RUN gradle dependencies --no-daemon || true
+RUN mvn dependency:go-offline -B || true
 
 
 EXPOSE 8080
 
-CMD ["gradle", "bootRun", "--no-daemon"]
+CMD ["mvn", "spring-boot:run"]

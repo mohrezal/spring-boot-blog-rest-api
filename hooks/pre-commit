@@ -3,7 +3,7 @@
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
 echo "Auto-formatting code..."
-./gradlew format
+./mvnw spotless:apply
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -16,7 +16,7 @@ if [ -n "$STAGED_FILES" ]; then
 fi
 
 echo "Running pre-commit checks..."
-./gradlew lint
+./mvnw spotless:check checkstyle:check
 
 if [ $? -ne 0 ]; then
     echo ""
