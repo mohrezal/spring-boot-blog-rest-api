@@ -31,7 +31,8 @@ public enum MessageKey {
     CATEGORIES_NOT_FOUND("One or more categories not found."),
 
     STORAGE_FILE_SIZE_EXCEEDED("File size exceeds the maximum allowed size."),
-    STORAGE_FILE_EXTENSION_NOT_ALLOWED("File extension is not allowed.");
+    STORAGE_FILE_MIME_TYPE_NOT_ALLOWED("File type is not allowed."),
+    STORAGE_UPLOAD_FAILED("Failed to upload file.");
 
     private final String message;
 

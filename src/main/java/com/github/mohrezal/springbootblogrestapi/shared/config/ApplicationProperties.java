@@ -23,5 +23,11 @@ public record ApplicationProperties(@Valid Security security, @Valid Storage sto
 
     @Validated
     public record Storage(
-            @NotEmpty List<@NotBlank String> allowedExtensions, @NotNull DataSize maxFileSize) {}
+            @NotEmpty List<@NotBlank String> allowedMimeTypes,
+            @NotNull DataSize maxFileSize,
+            @NotBlank String endpoint,
+            @NotBlank String accessKey,
+            @NotBlank String secretKey,
+            @NotBlank String bucket,
+            @NotBlank String region) {}
 }

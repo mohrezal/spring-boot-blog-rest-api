@@ -1,6 +1,5 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UploadRequest {
-    @NotNull @NotBlank private MultipartFile file;
+    @NotNull private MultipartFile file;
     private String title;
     private String alt;
 }

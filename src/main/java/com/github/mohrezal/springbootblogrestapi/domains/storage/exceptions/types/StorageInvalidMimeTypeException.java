@@ -3,8 +3,8 @@ package com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.typ
 import com.github.mohrezal.springbootblogrestapi.shared.enums.MessageKey;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.InvalidRequestException;
 
-public class StorageInvalidFileExtensionException extends InvalidRequestException {
-    public StorageInvalidFileExtensionException() {
-        super(MessageKey.STORAGE_FILE_EXTENSION_NOT_ALLOWED);
+public class StorageInvalidMimeTypeException extends InvalidRequestException {
+    public StorageInvalidMimeTypeException() {
+        super(MessageKey.STORAGE_FILE_MIME_TYPE_NOT_ALLOWED);
     }
 }

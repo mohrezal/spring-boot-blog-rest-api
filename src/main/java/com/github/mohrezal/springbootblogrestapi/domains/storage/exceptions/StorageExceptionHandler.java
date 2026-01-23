@@ -1,7 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions;
 
 import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageFileSizeExceededException;
-import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageInvalidFileExtensionException;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageInvalidMimeTypeException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.AbstractExceptionHandler;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.ErrorResponse;
 import org.jspecify.annotations.NonNull;
@@ -18,9 +18,9 @@ public class StorageExceptionHandler extends AbstractExceptionHandler {
         return buildErrorResponse(ex);
     }
 
-    @ExceptionHandler(StorageInvalidFileExtensionException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleStorageInvalidFileExtensionException(
-            StorageInvalidFileExtensionException ex) {
+    @ExceptionHandler(StorageInvalidMimeTypeException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleStorageInvalidMimeTypeException(
+            StorageInvalidMimeTypeException ex) {
         return buildErrorResponse(ex);
     }
 }
