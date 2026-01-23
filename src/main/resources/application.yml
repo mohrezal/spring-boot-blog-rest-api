@@ -39,6 +39,10 @@ spring:
     error:
       whitelabel:
         enabled: false
+  servlet:
+    multipart:
+      max-file-size: ${APPLICATION_STORAGE_MAX_FILE_SIZE}
+      max-request-size: ${APPLICATION_STORAGE_MAX_REQUEST_SIZE}
 
 app:
   security:
@@ -46,3 +50,6 @@ app:
     accessTokenLifeTime: ${APPLICATION_SECURITY_ACCESS_TOKEN_LIFE_TIME}
     refreshTokenLifeTime: ${APPLICATION_SECURITY_REFRESH_TOKEN_LIFE_TIME}
     allowedOrigin: ${APPLICATION_SECURITY_ALLOWED_ORIGIN}
+  storage:
+    allowedExtensions: ${APPLICATION_STORAGE_ALLOWED_EXTENSIONS}
+    maxFileSize: ${APPLICATION_STORAGE_MAX_FILE_SIZE}

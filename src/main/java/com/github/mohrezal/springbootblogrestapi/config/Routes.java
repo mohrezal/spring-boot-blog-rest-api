@@ -36,4 +36,8 @@ public final class Routes {
         public static final String UNARCHIVE_POST = "{slug}/unarchive";
         public static final String DELETE_BY_SLUG = "{slug}";
     }
+
+    public static final class Storage {
+        public static final String BASE = API_BASE + "storage";
+    }
 }
