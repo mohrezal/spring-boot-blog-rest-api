@@ -37,6 +37,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String[] PUBLIC_SWAGGER_PATHS = {
+        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+    };
+
+    private static final String[] PUBLIC_POST_ENDPOINTS = {
+        Routes.build(Routes.Auth.BASE, Routes.Auth.REGISTER),
+        Routes.build(Routes.Auth.BASE, Routes.Auth.LOGIN),
+        Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH)
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+        Routes.build(Routes.Category.BASE),
+        Routes.build(Routes.Post.BASE),
+        Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY),
+        Routes.build(Routes.Storage.BASE, Routes.Storage.DOWNLOAD)
+    };
+
     private final ApplicationProperties applicationProperties;
     private final CookieBearerTokenResolver cookieBearerTokenResolver;
     private final UserRepository userRepository;
@@ -51,34 +68,16 @@ public class SecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers(
-                                                HttpMethod.POST,
-                                                Routes.build(
-                                                        Routes.Auth.BASE, Routes.Auth.REGISTER),
-                                                Routes.build(Routes.Auth.BASE, Routes.Auth.LOGIN),
-                                                Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH))
+                                auth.requestMatchers(PUBLIC_SWAGGER_PATHS)
                                         .permitAll()
-                                        .requestMatchers(
-                                                HttpMethod.GET, Routes.build(Routes.Category.BASE))
+                                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                                         .permitAll()
                                         .requestMatchers(
                                                 HttpMethod.POST,
                                                 Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
                                         .authenticated()
-                                        .requestMatchers(
-                                                HttpMethod.GET, Routes.build(Routes.Post.BASE))
-                                        .permitAll()
-                                        .requestMatchers(
-                                                HttpMethod.GET,
-                                                Routes.build(
-                                                        Routes.Post.BASE,
-                                                        Routes.Post.SLUG_AVAILABILITY))
-                                        .permitAll()
-                                        .requestMatchers(
-                                                "/v3/api-docs/**",
-                                                "/swagger-ui/**",
-                                                "/swagger-ui.html")
-                                        .permitAll()
                                         .anyRequest()
                                         .authenticated())
                 .addFilterBefore(

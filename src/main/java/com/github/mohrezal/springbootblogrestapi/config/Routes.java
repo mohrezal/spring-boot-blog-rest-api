@@ -39,5 +39,6 @@ public final class Routes {
 
     public static final class Storage {
         public static final String BASE = API_BASE + "storage";
+        public static final String DOWNLOAD = "{filename}";
     }
 }
