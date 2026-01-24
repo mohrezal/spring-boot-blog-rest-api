@@ -1,15 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types;
 
 import com.github.mohrezal.springbootblogrestapi.shared.enums.MessageKey;
-import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.BaseException;
-import org.springframework.http.HttpStatus;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.UnauthorizedException;
 
-public class UserInvalidCredentialsException extends BaseException {
+public class UserInvalidCredentialsException extends UnauthorizedException {
     public UserInvalidCredentialsException() {
-        super(HttpStatus.UNAUTHORIZED, MessageKey.USER_INVALID_CREDENTIALS);
+        super(MessageKey.USER_INVALID_CREDENTIALS);
     }
 
     public UserInvalidCredentialsException(MessageKey messageKey) {
-        super(HttpStatus.UNAUTHORIZED, messageKey);
+        super(messageKey);
     }
 }

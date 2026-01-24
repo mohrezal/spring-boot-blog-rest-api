@@ -1,8 +1,11 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.exceptions;
 
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserAlreadyFollowingException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserCannotFollowSelfException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserInvalidRefreshTokenException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFollowingException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.AbstractExceptionHandler;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.ErrorResponse;
@@ -36,6 +39,24 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(UserInvalidRefreshTokenException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleUserInvalidRefreshTokenException(
             UserInvalidRefreshTokenException ex, WebRequest request) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserAlreadyFollowingException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleUserAlreadyFollowingException(
+            UserAlreadyFollowingException ex) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserCannotFollowSelfException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleUserCannotFollowSelfException(
+            UserCannotFollowSelfException ex) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserNotFollowingException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleUserNotFollowingException(
+            UserNotFollowingException ex) {
         return buildErrorResponse(ex);
     }
 }

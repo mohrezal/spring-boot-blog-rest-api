@@ -1,15 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types;
 
 import com.github.mohrezal.springbootblogrestapi.shared.enums.MessageKey;
-import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.BaseException;
-import org.springframework.http.HttpStatus;
+import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceNotFoundException;
 
-public class UserRefreshTokenNotFoundException extends BaseException {
+public class UserRefreshTokenNotFoundException extends ResourceNotFoundException {
     public UserRefreshTokenNotFoundException() {
-        super(HttpStatus.NOT_FOUND, MessageKey.USER_REFRESH_TOKEN_NOT_FOUND);
+        super(MessageKey.USER_REFRESH_TOKEN_NOT_FOUND);
     }
 
     public UserRefreshTokenNotFoundException(MessageKey messageKey) {
-        super(HttpStatus.NOT_FOUND, messageKey);
+        super(messageKey);
     }
 }
