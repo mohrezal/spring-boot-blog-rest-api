@@ -1,0 +1,53 @@
+package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
+
+import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.FollowUserCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserAlreadyFollowingException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserCannotFollowSelfException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.domains.users.models.UserFollow;
+import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserFollowRepository;
+import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class FollowUserCommand implements Command<FollowUserCommandParams, Void> {
+
+    private final UserFollowRepository userFollowRepository;
+    private final UserRepository userRepository;
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Void execute(FollowUserCommandParams params) {
+        User currentUser = (User) params.getUserDetails();
+        User targetUser =
+                userRepository.findById(params.getUserId()).orElseThrow(UserNotFoundException::new);
+
+        if (currentUser.getId().equals(targetUser.getId())) {
+            throw new UserCannotFollowSelfException();
+        }
+
+        boolean isUserAlreadyFollowed =
+                userFollowRepository.isAlreadyFollowing(currentUser.getId(), targetUser.getId());
+
+        if (isUserAlreadyFollowed) {
+            throw new UserAlreadyFollowingException();
+        }
+
+        UserFollow userFollow =
+                UserFollow.builder().follower(currentUser).followed(targetUser).build();
+
+        userFollowRepository.save(userFollow);
+
+        return null;
+    }
+}
