@@ -51,7 +51,7 @@ public class SecurityConfig {
         Routes.build(Routes.Category.BASE),
         Routes.build(Routes.Post.BASE),
         Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY),
-        Routes.build(Routes.Storage.BASE, Routes.Storage.DOWNLOAD)
+        Routes.build(Routes.Storage.BASE, Routes.Storage.BY_FILENAME)
     };
 
     private final ApplicationProperties applicationProperties;

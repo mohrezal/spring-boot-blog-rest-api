@@ -8,4 +8,6 @@ public interface S3StorageService {
     String upload(MultipartFile file, String key, String contentType) throws IOException;
 
     byte[] download(String key);
+
+    void delete(String key);
 }

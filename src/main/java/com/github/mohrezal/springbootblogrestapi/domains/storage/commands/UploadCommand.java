@@ -1,15 +1,15 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.commands;
 
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params.UploadCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadRequest;
-import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageFileSizeExceededException;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageInvalidMimeTypeException;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.exceptions.types.StorageUploadFailedException;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.s3.S3StorageService;
-import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtils;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import java.io.IOException;
@@ -25,9 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class UploadCommand implements Command<UploadCommandParams, UploadResponse> {
+public class UploadCommand implements Command<UploadCommandParams, StorageSummary> {
 
-    private final StorageUtils storageUtils;
+    private final StorageUtilsService storageUtils;
     private final S3StorageService s3StorageService;
     private final StorageRepository storageRepository;
 
@@ -48,7 +48,7 @@ public class UploadCommand implements Command<UploadCommandParams, UploadRespons
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public UploadResponse execute(UploadCommandParams params) {
+    public StorageSummary execute(UploadCommandParams params) {
         User user = (User) params.getUserDetails();
         UploadRequest request = params.getUploadRequest();
         MultipartFile file = request.getFile();
@@ -72,7 +72,7 @@ public class UploadCommand implements Command<UploadCommandParams, UploadRespons
 
             Storage savedStorage = storageRepository.save(storage);
 
-            return UploadResponse.builder()
+            return StorageSummary.builder()
                     .id(savedStorage.getId())
                     .filename(savedStorage.getFilename())
                     .originalFilename(savedStorage.getOriginalFilename())

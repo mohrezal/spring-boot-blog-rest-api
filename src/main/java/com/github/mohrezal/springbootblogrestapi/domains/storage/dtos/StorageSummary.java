@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UploadResponse {
+public class StorageSummary {
     private UUID id;
     private String filename;
     private String originalFilename;
@@ -20,4 +20,5 @@ public class UploadResponse {
     private String title;
     private String alt;
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

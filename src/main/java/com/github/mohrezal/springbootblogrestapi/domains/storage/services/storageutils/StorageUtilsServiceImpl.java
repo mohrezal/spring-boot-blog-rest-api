@@ -1,5 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
+import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class StorageUtilsImpl implements StorageUtils {
+public class StorageUtilsServiceImpl implements StorageUtilsService {
 
     private static final Tika TIKA = new Tika();
     private final ApplicationProperties applicationProperties;
@@ -51,5 +53,10 @@ public class StorageUtilsImpl implements StorageUtils {
             return "";
         }
         return filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+    }
+
+    @Override
+    public boolean isOwner(User user, Storage storage) {
+        return storage.getUser().getId().equals(user.getId());
     }
 }
