@@ -9,8 +9,11 @@ import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageFil
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.GetStorageByFilenameQuery;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.GetUserStorageListQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params.GetStorageByFilenameQueryParams;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params.GetUserStorageListQueryParams;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,6 +43,7 @@ public class StorageController {
     private final ObjectProvider<@NonNull DeleteCommand> deleteCommands;
 
     private final ObjectProvider<@NonNull GetStorageByFilenameQuery> getStorageByFilenameQueries;
+    private final ObjectProvider<@NonNull GetUserStorageListQuery> getUserStorageListQueries;
 
     @IsAdminOrUser
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -78,5 +83,21 @@ public class StorageController {
                 DeleteCommandParams.builder().fileName(filename).userDetails(userDetails).build();
         command.execute(params);
         return ResponseEntity.noContent().build();
+    }
+
+    @IsAdminOrUser
+    @GetMapping(Routes.Storage.LIST)
+    public ResponseEntity<@NonNull PageResponse<StorageSummary>> list(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        var query = getUserStorageListQueries.getObject();
+        var params =
+                GetUserStorageListQueryParams.builder()
+                        .userDetails(userDetails)
+                        .page(page)
+                        .size(size)
+                        .build();
+        return ResponseEntity.ok().body(query.execute(params));
     }
 }
