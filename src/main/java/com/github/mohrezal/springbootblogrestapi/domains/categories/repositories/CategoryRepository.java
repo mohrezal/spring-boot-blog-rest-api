@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends JpaRepository<@NonNull Category, @NonNull UUID> {
     Set<Category> findAllByIdIn(Set<UUID> ids);
+
+    boolean existsBySlug(String slug);
 }

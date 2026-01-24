@@ -3,6 +3,8 @@ server:
 spring:
   config:
     import:  optional:file:.env[.properties]
+  thymeleaf:
+    check-template-location: false
   threads:
     virtual:
       enabled: true

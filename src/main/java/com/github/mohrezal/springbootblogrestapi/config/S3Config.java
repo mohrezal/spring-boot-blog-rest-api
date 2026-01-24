@@ -1,4 +1,4 @@
-package com.github.mohrezal.springbootblogrestapi.domains.storage.config;
+package com.github.mohrezal.springbootblogrestapi.config;
 
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
 import java.net.URI;
