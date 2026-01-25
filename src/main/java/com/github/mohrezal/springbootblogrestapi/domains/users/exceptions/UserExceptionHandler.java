@@ -1,7 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.exceptions;
 
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserAlreadyFollowingException;
-import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserCannotFollowSelfException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserInvalidRefreshTokenException;
@@ -48,9 +48,9 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
         return buildErrorResponse(ex);
     }
 
-    @ExceptionHandler(UserCannotFollowSelfException.class)
+    @ExceptionHandler(UserCannotFollowOrUnfollowSelfException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleUserCannotFollowSelfException(
-            UserCannotFollowSelfException ex) {
+            UserCannotFollowOrUnfollowSelfException ex) {
         return buildErrorResponse(ex);
     }
 

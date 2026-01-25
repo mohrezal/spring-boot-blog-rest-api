@@ -22,7 +22,7 @@ public enum MessageKey {
     USER_ERROR_EMAIL_CONFLICT("A user account with this email address already exists."),
     USER_INVALID_REFRESH_TOKEN("Invalid or expired refresh token."),
     USER_REFRESH_TOKEN_NOT_FOUND("Refresh token not found."),
-    USER_CANNOT_FOLLOW_SELF("You cannot follow yourself."),
+    USER_CANNOT_FOLLOW_OR_UNFOLLOW_SELF("You cannot follow or unfollow yourself."),
     USER_ALREADY_FOLLOWING("You are already following this user."),
     USER_NOT_FOLLOWING("You are not following this user."),
 
