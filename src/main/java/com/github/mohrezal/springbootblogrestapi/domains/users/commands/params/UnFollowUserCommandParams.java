@@ -1,6 +1,5 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands.params;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,5 +12,5 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 public class UnFollowUserCommandParams {
     private UserDetails userDetails;
-    private UUID userId;
+    private String handle;
 }

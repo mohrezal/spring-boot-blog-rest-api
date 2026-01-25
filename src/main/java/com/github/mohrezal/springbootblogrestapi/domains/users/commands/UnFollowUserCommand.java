@@ -31,7 +31,9 @@ public class UnFollowUserCommand implements Command<UnFollowUserCommandParams, V
     public Void execute(UnFollowUserCommandParams params) {
         User currentUser = (User) params.getUserDetails();
         User targetUser =
-                userRepository.findById(params.getUserId()).orElseThrow(UserNotFoundException::new);
+                userRepository
+                        .findByHandle(params.getHandle())
+                        .orElseThrow(UserNotFoundException::new);
 
         if (currentUser.getId().equals(targetUser.getId())) {
             throw new UserCannotFollowOrUnfollowSelfException();

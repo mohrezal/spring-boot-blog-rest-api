@@ -30,7 +30,9 @@ public class FollowUserCommand implements Command<FollowUserCommandParams, Void>
     public Void execute(FollowUserCommandParams params) {
         User currentUser = (User) params.getUserDetails();
         User targetUser =
-                userRepository.findById(params.getUserId()).orElseThrow(UserNotFoundException::new);
+                userRepository
+                        .findByHandle(params.getHandle())
+                        .orElseThrow(UserNotFoundException::new);
 
         if (currentUser.getId().equals(targetUser.getId())) {
             throw new UserCannotFollowOrUnfollowSelfException();

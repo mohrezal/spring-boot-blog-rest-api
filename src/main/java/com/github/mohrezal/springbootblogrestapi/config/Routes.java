@@ -20,8 +20,8 @@ public final class Routes {
     public static final class User {
         public static final String BASE = API_BASE + "users";
         public static final String ME = "me";
-        public static final String FOLLOW_USER = "{userId}/follow";
-        public static final String UNFOLLOW_USER = "{userId}/unfollow";
+        public static final String FOLLOW_USER = "{handle}/follow";
+        public static final String UNFOLLOW_USER = "{handle}/unfollow";
     }
 
     public static final class Category {

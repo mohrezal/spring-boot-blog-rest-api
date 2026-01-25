@@ -11,7 +11,6 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.queries.CurrentUs
 import com.github.mohrezal.springbootblogrestapi.domains.users.queries.params.CurrentUserQueryParams;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
@@ -47,9 +46,9 @@ public class UserController {
     @IsAdminOrUser
     @PostMapping(Routes.User.FOLLOW_USER)
     public ResponseEntity<Void> followUser(
-            @AuthenticationPrincipal UserDetails userDetails, @PathVariable UUID userId) {
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
         var params =
-                FollowUserCommandParams.builder().userDetails(userDetails).userId(userId).build();
+                FollowUserCommandParams.builder().userDetails(userDetails).handle(handle).build();
 
         var command = followUserCommands.getObject();
         command.validate(params);
@@ -60,10 +59,10 @@ public class UserController {
     @IsAdminOrUser
     @PostMapping(Routes.User.UNFOLLOW_USER)
     public ResponseEntity<Void> unFollowUser(
-            @AuthenticationPrincipal UserDetails userDetails, @PathVariable UUID userId) {
+            @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
         var command = unFollowUserCommands.getObject();
         var params =
-                UnFollowUserCommandParams.builder().userDetails(userDetails).userId(userId).build();
+                UnFollowUserCommandParams.builder().userDetails(userDetails).handle(handle).build();
 
         command.execute(params);
         return ResponseEntity.ok().build();
