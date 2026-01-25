@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
         name = "users",
         indexes = {
             @Index(name = "idx_user_email", columnList = "email", unique = true),
+            @Index(name = "idx_user_handle", columnList = "handle", unique = true),
         })
 @Getter
 @Setter
@@ -39,6 +40,9 @@ public class User extends BaseModel implements UserDetails {
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @Column(name = "handle", unique = true, nullable = false, length = 30)
+    private String handle;
 
     @Column(name = "first_name", nullable = false)
     private String firstName;

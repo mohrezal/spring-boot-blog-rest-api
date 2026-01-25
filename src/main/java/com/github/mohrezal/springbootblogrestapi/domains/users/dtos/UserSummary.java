@@ -18,6 +18,7 @@ public class UserSummary {
 
     private UUID id;
     private String email;
+    private String handle;
     private String firstName;
     private String lastName;
     private String bio;

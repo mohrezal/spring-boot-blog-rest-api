@@ -108,11 +108,24 @@ public class Seeder implements CommandLineRunner {
         List<User> userList = new ArrayList<>();
         String password = "password";
         for (int i = 0; i < userCount; i++) {
+            String handle = faker.internet().username().replaceAll("[^a-z0-9_]", "").toLowerCase();
+            if (handle.length() < 5) {
+                handle = handle + faker.random().hex(5);
+            }
+            if (handle.length() > 30) {
+                handle = handle.substring(0, 30);
+            }
+            final String uniqueHandle = handle + "_" + faker.random().hex(4);
+
             User user =
                     User.builder()
                             .avatarUrl("MOCKED_AVATAR_URL")
                             .bio(faker.lorem().sentence(faker.random().nextInt(1, 299)))
                             .email(faker.internet().emailAddress())
+                            .handle(
+                                    uniqueHandle.length() > 30
+                                            ? uniqueHandle.substring(0, 30)
+                                            : uniqueHandle)
                             .role(UserRole.USER)
                             .isVerified(faker.options().option(Boolean.FALSE, Boolean.TRUE))
                             .lastName(faker.name().lastName())

@@ -60,3 +60,5 @@ app:
     secretKey: ${APPLICATION_STORAGE_SECRET_KEY}
     bucket: ${APPLICATION_STORAGE_BUCKET}
     region: ${APPLICATION_STORAGE_REGION}
+  handle:
+    reservedHandles: ${APPLICATION_HANDLE_RESERVED_HANDLES}

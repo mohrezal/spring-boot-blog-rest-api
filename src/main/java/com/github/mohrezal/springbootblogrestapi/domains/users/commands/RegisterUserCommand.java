@@ -4,9 +4,13 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.R
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserHandleAlreadyExistsException;
+import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserHandleReservedException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.registration.RegistrationService;
+import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
 import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import com.github.mohrezal.springbootblogrestapi.shared.services.deviceinfo.DeviceInfoService;
 import com.github.mohrezal.springbootblogrestapi.shared.services.jwt.JwtService;
@@ -27,6 +31,8 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final JwtService jwtService;
     private final UserMapper userMapper;
     private final DeviceInfoService deviceInfoService;
+    private final UserRepository userRepository;
+    private final ApplicationProperties applicationProperties;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -48,5 +54,18 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
                 .user(userMapper.toUserSummary(user))
                 .authResponse(authResponse)
                 .build();
+    }
+
+    @Override
+    public void validate(RegisterUserCommandParams params) {
+        String handle = params.getRegisterUserRequest().getHandle().toLowerCase();
+
+        if (applicationProperties.handle().reservedHandles().contains(handle)) {
+            throw new UserHandleReservedException();
+        }
+
+        if (userRepository.existsByHandle(handle)) {
+            throw new UserHandleAlreadyExistsException();
+        }
     }
 }

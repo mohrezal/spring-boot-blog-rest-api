@@ -56,7 +56,9 @@ public class AuthController {
                         .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
                         .build();
 
-        RegisterResponse registerResponse = registerUserCommandProvider.getObject().execute(params);
+        var command = registerUserCommandProvider.getObject();
+        command.validate(params);
+        RegisterResponse registerResponse = command.execute(params);
 
         ResponseCookie accessTokenCookie =
                 cookieUtils.createAccessTokenCookie(

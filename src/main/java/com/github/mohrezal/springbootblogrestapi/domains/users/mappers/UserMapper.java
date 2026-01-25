@@ -14,6 +14,7 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "handle", source = "registerUser.handle")
     @Mapping(target = "role", source = "role")
     @Mapping(target = "email", source = "registerUser.email")
     @Mapping(target = "firstName", source = "registerUser.firstName")

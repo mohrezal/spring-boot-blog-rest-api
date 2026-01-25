@@ -25,6 +25,8 @@ public enum MessageKey {
     USER_CANNOT_FOLLOW_OR_UNFOLLOW_SELF("You cannot follow or unfollow yourself."),
     USER_ALREADY_FOLLOWING("You are already following this user."),
     USER_NOT_FOLLOWING("You are not following this user."),
+    USER_HANDLE_ALREADY_EXISTS("This handle is already taken."),
+    USER_HANDLE_RESERVED("This handle is reserved and cannot be used."),
 
     POST_NOT_FOUND("Post not found."),
     POST_SLUG_ALREADY_EXISTS("Slug already exists."),

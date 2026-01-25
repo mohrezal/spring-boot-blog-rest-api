@@ -8,6 +8,7 @@ import lombok.Data;
 @Builder
 public class AuthorSummary {
     private UUID id;
+    private String handle;
     private String firstName;
     private String lastName;
     private String avatarUrl;

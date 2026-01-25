@@ -36,6 +36,13 @@ public class RegisterUserRequest {
     private String email;
 
     @NotBlank
+    @Size(min = 5, max = 30)
+    @Pattern(
+            regexp = RegexUtils.HANDLE_PATTERN,
+            message = "Only lowercase letters, numbers, and underscores")
+    private String handle;
+
+    @NotBlank
     @Size(min = 8, max = 64)
     @Pattern(
             regexp = RegexUtils.PASSWORD_PATTERN,
