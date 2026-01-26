@@ -1,6 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.config.security;
 
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
+import com.github.mohrezal.springbootblogrestapi.config.ratelimit.RateLimitFilter;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
 import com.github.mohrezal.springbootblogrestapi.shared.config.ApplicationProperties;
@@ -26,7 +27,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -59,6 +62,7 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final UserJwtAuthenticationConverter userJwtAuthenticationConverter;
     private final SkipJwtValidationFilter skipJwtValidationFilter;
+    private final RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -80,10 +84,7 @@ public class SecurityConfig {
                                         .authenticated()
                                         .anyRequest()
                                         .authenticated())
-                .addFilterBefore(
-                        skipJwtValidationFilter,
-                        org.springframework.security.oauth2.server.resource.web.authentication
-                                .BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(skipJwtValidationFilter, BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer(
                         oauth2 ->
                                 oauth2.bearerTokenResolver(cookieBearerTokenResolver)
@@ -91,6 +92,7 @@ public class SecurityConfig {
                                                 jwt ->
                                                         jwt.jwtAuthenticationConverter(
                                                                 userJwtAuthenticationConverter)))
+                .addFilterAfter(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
