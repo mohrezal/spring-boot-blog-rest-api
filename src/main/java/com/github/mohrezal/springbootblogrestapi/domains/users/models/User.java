@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,9 +62,11 @@ public class User extends BaseModel implements UserDetails {
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private UserRole role = UserRole.USER;
 
     @Column(name = "is_verified", nullable = false)
+    @Builder.Default
     private Boolean isVerified = true;
 
     @OneToOne(

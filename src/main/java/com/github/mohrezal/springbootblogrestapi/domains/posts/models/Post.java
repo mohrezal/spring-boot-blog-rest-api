@@ -15,12 +15,14 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +31,14 @@ import lombok.experimental.SuperBuilder;
 
 @NamedEntityGraph(
         name = "Post.withUserAndCategories",
-        attributeNodes = {@NamedAttributeNode("user"), @NamedAttributeNode("categories")})
+        attributeNodes = {
+            @NamedAttributeNode(value = "user", subgraph = "user-avatar"),
+            @NamedAttributeNode("categories")
+        },
+        subgraphs =
+                @NamedSubgraph(
+                        name = "user-avatar",
+                        attributeNodes = @NamedAttributeNode("avatar")))
 @Entity
 @Table(name = "posts")
 @Getter
@@ -71,6 +80,7 @@ public class Post extends BaseModel {
             name = "post_categories",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Builder.Default
     private Set<Category> categories = new HashSet<>();
 
     @Version private Long version;

@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.dtos;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class UserSummary {
     private String firstName;
     private String lastName;
     private String bio;
-    private String avatarUrl;
+    private StorageSummary avatar;
     private UserRole role;
     private Boolean isVerified;
     private OffsetDateTime createdAt;

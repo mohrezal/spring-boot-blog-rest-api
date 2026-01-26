@@ -6,6 +6,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.PostSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.StorageMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,7 +14,7 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(
         componentModel = "spring",
-        uses = {UserMapper.class, CategoryMapper.class})
+        uses = {UserMapper.class, CategoryMapper.class, StorageMapper.class})
 public interface PostMapper {
 
     @Mapping(source = "user", target = "author")

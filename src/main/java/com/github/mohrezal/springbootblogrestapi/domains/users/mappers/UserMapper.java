@@ -1,6 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.mappers;
 
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.AuthorSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.StorageMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.UserSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
@@ -8,7 +9,9 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {StorageMapper.class})
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)

@@ -16,5 +16,5 @@
     <include file="db/changelog/migrations/1769277089_create_user_follows_table.sql" />
     <include file="db/changelog/migrations/1769357437_add_handle_to_users_table.sql" />
     <include file="db/changelog/migrations/1769416201_add_type_to_storage_table.sql" />
-    <include file="db/changelog/migrations/1769418391_drop_avatr_url_add_avatar_column.sql"/>
+    <include file="/db/changelog/migrations/1769418391_drop_avatar_url_add_avatar_column.sql"/>
 </databaseChangeLog>
