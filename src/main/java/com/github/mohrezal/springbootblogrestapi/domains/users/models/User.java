@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.models;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.users.enums.UserRole;
 import com.github.mohrezal.springbootblogrestapi.shared.models.BaseModel;
 import jakarta.persistence.CascadeType;
@@ -9,6 +10,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Collection;
@@ -53,8 +55,9 @@ public class User extends BaseModel implements UserDetails {
     @Column(name = "bio")
     private String bio;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id")
+    private Storage avatar;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)

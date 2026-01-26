@@ -32,8 +32,7 @@ public class UpdateUserProfileCommand
 
         if ((request.getFirstName() != null && request.getFirstName().isBlank())
                 || (request.getLastName() != null && request.getLastName().isBlank())
-                || (request.getBio() != null && request.getBio().isBlank())
-                || (request.getAvatarUrl() != null && request.getAvatarUrl().isBlank())) {
+                || (request.getBio() != null && request.getBio().isBlank())) {
             throw new InvalidRequestException();
         }
     }
@@ -58,11 +57,6 @@ public class UpdateUserProfileCommand
         if (request.getBio() != null) {
             currentUser.setBio(request.getBio());
         }
-
-        if (request.getAvatarUrl() != null) {
-            currentUser.setAvatarUrl(request.getAvatarUrl());
-        }
-
         User updatedUser = userRepository.save(currentUser);
 
         return userMapper.toUserSummary(updatedUser);

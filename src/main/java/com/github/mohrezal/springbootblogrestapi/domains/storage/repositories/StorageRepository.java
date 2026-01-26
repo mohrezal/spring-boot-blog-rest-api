@@ -17,4 +17,6 @@ public interface StorageRepository extends JpaRepository<@NonNull Storage, @NonN
     Optional<Storage> findByFilename(String filename);
 
     Page<@NonNull Storage> findAllByUserAndType(User user, StorageType type, Pageable pageable);
+
+    Optional<Storage> findAllByUser(User user);
 }

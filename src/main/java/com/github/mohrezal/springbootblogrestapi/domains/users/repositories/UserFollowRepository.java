@@ -23,10 +23,10 @@ public interface UserFollowRepository extends JpaRepository<@NonNull UserFollow,
 
     Optional<UserFollow> findByFollowedAndFollower(User followed, User follower);
 
-    @EntityGraph(attributePaths = {"follower"})
+    @EntityGraph(attributePaths = {"follower", "follower.avatar"})
     Page<@NonNull UserFollow> findByFollowedId(UUID followedId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"followed"})
+    @EntityGraph(attributePaths = {"followed", "followed.avatar"})
     Page<@NonNull UserFollow> findByFollowerId(UUID followerId, Pageable pageable);
 
     @Query(

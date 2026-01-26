@@ -119,7 +119,7 @@ public class Seeder implements CommandLineRunner {
 
             User user =
                     User.builder()
-                            .avatarUrl("MOCKED_AVATAR_URL")
+                            .avatar(null)
                             .bio(faker.lorem().sentence(faker.random().nextInt(1, 299)))
                             .email(faker.internet().emailAddress())
                             .handle(

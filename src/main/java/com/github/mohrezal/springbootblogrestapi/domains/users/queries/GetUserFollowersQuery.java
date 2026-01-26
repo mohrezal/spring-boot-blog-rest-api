@@ -1,5 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.queries;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.StorageMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.FollowerSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
@@ -33,6 +35,7 @@ public class GetUserFollowersQuery
 
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
+    private final StorageMapper storageMapper;
 
     @Transactional(readOnly = true)
     @Override
@@ -67,12 +70,14 @@ public class GetUserFollowersQuery
                 followersPage,
                 userFollow -> {
                     User follower = userFollow.getFollower();
+                    StorageSummary storageSummary =
+                            storageMapper.toStorageSummary(follower.getAvatar());
                     return FollowerSummary.builder()
                             .id(follower.getId())
                             .handle(follower.getHandle())
                             .firstName(follower.getFirstName())
                             .lastName(follower.getLastName())
-                            .avatarUrl(follower.getAvatarUrl())
+                            .avatar(storageSummary)
                             .isFollowing(followedByCurrentUser.contains(follower.getId()))
                             .followedAt(userFollow.getCreatedAt())
                             .build();

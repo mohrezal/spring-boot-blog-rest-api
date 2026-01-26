@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.dtos;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class FollowerSummary {
     private String handle;
     private String firstName;
     private String lastName;
-    private String avatarUrl;
+    private StorageSummary avatar;
     private boolean isFollowing;
     private OffsetDateTime followedAt;
 }

@@ -53,5 +53,5 @@ public class RegisterUserRequest {
     private String bio;
 
     @Size(max = 255)
-    private String avatarUrl;
+    private String avatar;
 }
