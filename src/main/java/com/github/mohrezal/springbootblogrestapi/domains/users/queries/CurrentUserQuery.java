@@ -21,7 +21,7 @@ public class CurrentUserQuery implements Query<CurrentUserQueryParams, UserSumma
 
     private final UserMapper userMapper;
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(readOnly = true)
     @Override
     public UserSummary execute(CurrentUserQueryParams params) {
         if (!(params.getUserDetails() instanceof User currentUser)) {

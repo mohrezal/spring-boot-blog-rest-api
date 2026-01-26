@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Service
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class DeletePostCommand implements Command<DeletePostCommandParams, Void> {
     private final PostRepository postRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeletePostCommandParams params) {
         Post post =

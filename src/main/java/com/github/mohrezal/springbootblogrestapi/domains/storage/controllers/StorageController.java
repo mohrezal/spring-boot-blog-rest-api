@@ -3,11 +3,15 @@ package com.github.mohrezal.springbootblogrestapi.domains.storage.controllers;
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.DeleteCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.UploadCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.UploadProfileCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params.DeleteCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params.UploadCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params.UploadProfileCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageFileResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadProfileRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadRequest;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.GetStorageByFilenameQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.GetUserStorageListQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params.GetStorageByFilenameQueryParams;
@@ -41,6 +45,7 @@ public class StorageController {
 
     private final ObjectProvider<@NonNull UploadCommand> uploadCommands;
     private final ObjectProvider<@NonNull DeleteCommand> deleteCommands;
+    private final ObjectProvider<@NonNull UploadProfileCommand> uploadProfileCommands;
 
     private final ObjectProvider<@NonNull GetStorageByFilenameQuery> getStorageByFilenameQueries;
     private final ObjectProvider<@NonNull GetUserStorageListQuery> getUserStorageListQueries;
@@ -55,6 +60,7 @@ public class StorageController {
                 UploadCommandParams.builder()
                         .uploadRequest(uploadRequest)
                         .userDetails(userDetails)
+                        .type(StorageType.MEDIA)
                         .build();
 
         command.validate(params);
@@ -99,5 +105,22 @@ public class StorageController {
                         .size(size)
                         .build();
         return ResponseEntity.ok().body(query.execute(params));
+    }
+
+    @IsAdminOrUser
+    @PostMapping(value = Routes.Storage.PROFILE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<@NonNull StorageSummary> profile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @ModelAttribute UploadProfileRequest request) {
+        var command = uploadProfileCommands.getObject();
+        var params =
+                UploadProfileCommandParams.builder()
+                        .userDetails(userDetails)
+                        .uploadProfileRequest(request)
+                        .build();
+
+        command.validate(params);
+
+        return ResponseEntity.ok().body(command.execute(params));
     }
 }

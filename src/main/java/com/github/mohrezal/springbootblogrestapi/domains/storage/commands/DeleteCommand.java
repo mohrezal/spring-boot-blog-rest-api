@@ -3,7 +3,7 @@ package com.github.mohrezal.springbootblogrestapi.domains.storage.commands;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params.DeleteCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.repositories.StorageRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.storage.services.s3.S3StorageService;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.userutils.UserUtilsService;
@@ -26,7 +26,7 @@ public class DeleteCommand implements Command<DeleteCommandParams, Void> {
     private final StorageRepository storageRepository;
     private final UserUtilsService userUtilsService;
     private final StorageUtilsService storageUtilsService;
-    private final S3StorageService s3StorageService;
+    private final StorageService storageService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -41,8 +41,7 @@ public class DeleteCommand implements Command<DeleteCommandParams, Void> {
         if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
             throw new AccessDeniedException();
         }
-        s3StorageService.delete(fileName);
-        storageRepository.delete(storage);
+        storageService.delete(storage);
         return null;
     }
 }

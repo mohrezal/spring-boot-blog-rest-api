@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class GetUserStorageListQuery
     private final StorageRepository storageRepository;
     private final StorageMapper storageMapper;
 
+    @Transactional(readOnly = true)
     @Override
     public PageResponse<StorageSummary> execute(GetUserStorageListQueryParams params) {
         User user = (User) params.getUserDetails();

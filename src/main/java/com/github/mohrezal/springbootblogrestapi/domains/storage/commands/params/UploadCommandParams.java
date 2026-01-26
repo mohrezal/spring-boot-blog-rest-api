@@ -1,6 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params;
 
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadRequest;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UploadCommandParams {
     private UserDetails userDetails;
     private UploadRequest uploadRequest;
+    private StorageType type;
 }

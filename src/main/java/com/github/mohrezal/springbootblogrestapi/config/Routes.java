@@ -45,5 +45,6 @@ public final class Routes {
         public static final String BASE = API_BASE + "storage";
         public static final String BY_FILENAME = "{filename}";
         public static final String LIST = "list";
+        public static final String PROFILE = "profile";
     }
 }
