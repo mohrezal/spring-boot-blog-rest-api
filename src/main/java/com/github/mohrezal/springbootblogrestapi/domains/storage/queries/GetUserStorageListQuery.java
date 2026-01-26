@@ -1,6 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.queries;
 
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.StorageSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.StorageMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params.GetUserStorageListQueryParams;
@@ -37,7 +38,8 @@ public class GetUserStorageListQuery
                         params.getPage(),
                         params.getSize(),
                         Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<@NonNull Storage> storageList = storageRepository.findAllByUser(user, pageable);
+        Page<@NonNull Storage> storageList =
+                storageRepository.findAllByUserAndType(user, StorageType.MEDIA, pageable);
 
         return PageResponse.from(storageList, storageMapper::toStorageSummary);
     }

@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.repositories;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import java.util.Optional;
@@ -15,5 +16,5 @@ public interface StorageRepository extends JpaRepository<@NonNull Storage, @NonN
 
     Optional<Storage> findByFilename(String filename);
 
-    Page<@NonNull Storage> findAllByUser(User user, Pageable pageable);
+    Page<@NonNull Storage> findAllByUserAndType(User user, StorageType type, Pageable pageable);
 }

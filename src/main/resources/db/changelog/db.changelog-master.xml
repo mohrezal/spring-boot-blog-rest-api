@@ -14,4 +14,6 @@
     <include file="db/changelog/migrations/1767863381_add_version_to_posts.sql"/>
     <include file="db/changelog/migrations/1767900000_create_storage_table.sql"/>
     <include file="db/changelog/migrations/1769277089_create_user_follows_table.sql" />
+    <include file="db/changelog/migrations/1769357437_add_handle_to_users_table.sql" />
+    <include file="db/changelog/migrations/1769416201_add_type_to_storage_table.sql" />
 </databaseChangeLog>

@@ -1,9 +1,12 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.models;
 
+import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.models.BaseModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -42,6 +45,10 @@ public class Storage extends BaseModel {
 
     @Column(name = "alt")
     private String alt;
+
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StorageType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
