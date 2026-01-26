@@ -22,6 +22,8 @@ public final class Routes {
         public static final String ME = "me";
         public static final String FOLLOW_USER = "{handle}/follow";
         public static final String UNFOLLOW_USER = "{handle}/unfollow";
+        public static final String FOLLOWERS = "{handle}/followers";
+        public static final String FOLLOWING = "{handle}/following";
     }
 
     public static final class Category {
