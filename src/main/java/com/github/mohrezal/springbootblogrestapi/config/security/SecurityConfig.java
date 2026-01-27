@@ -47,14 +47,15 @@ public class SecurityConfig {
     private static final String[] PUBLIC_POST_ENDPOINTS = {
         Routes.build(Routes.Auth.BASE, Routes.Auth.REGISTER),
         Routes.build(Routes.Auth.BASE, Routes.Auth.LOGIN),
-        Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH)
+        Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH),
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
         Routes.build(Routes.Category.BASE),
         Routes.build(Routes.Post.BASE),
         Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY),
-        Routes.build(Routes.Storage.BASE, Routes.Storage.BY_FILENAME)
+        Routes.build(Routes.Storage.BASE, Routes.Storage.BY_FILENAME),
+        Routes.build(Routes.Post.BASE, Routes.Post.SEARCH)
     };
 
     private final ApplicationProperties applicationProperties;

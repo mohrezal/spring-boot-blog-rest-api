@@ -20,9 +20,11 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.SlugAvailabi
 import com.github.mohrezal.springbootblogrestapi.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostBySlugQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostSlugAvailabilityQuery;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostsBySearchQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostsBySearchQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
@@ -63,6 +65,7 @@ public class PostController {
     private final ObjectProvider<@NonNull GetPostBySlugQuery> getPostBySlugQueries;
     private final ObjectProvider<@NonNull GetPostSlugAvailabilityQuery>
             getPostSlugAvailabilityQueries;
+    private final GetPostsBySearchQuery getPostsBySearchQuery;
 
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPosts(
@@ -164,5 +167,15 @@ public class PostController {
         var params = DeletePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
         deletePostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(Routes.Post.SEARCH)
+    public ResponseEntity<@NonNull PageResponse<PostSummary>> getPostsBySearchQuery(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(name = "query") String query) {
+        var params =
+                GetPostsBySearchQueryParams.builder().query(query).page(page).size(size).build();
+        return ResponseEntity.ok().body(getPostsBySearchQuery.execute(params));
     }
 }

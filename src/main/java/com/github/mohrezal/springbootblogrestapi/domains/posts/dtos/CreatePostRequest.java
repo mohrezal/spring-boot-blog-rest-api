@@ -1,7 +1,9 @@
 package com.github.mohrezal.springbootblogrestapi.domains.posts.dtos;
 
+import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostLanguage;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
@@ -24,4 +26,6 @@ public class CreatePostRequest {
 
     @Size(max = 300)
     private String description;
+
+    @NotNull private PostLanguage language;
 }

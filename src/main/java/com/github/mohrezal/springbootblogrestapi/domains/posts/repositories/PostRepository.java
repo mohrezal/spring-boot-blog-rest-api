@@ -5,14 +5,19 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,6 +28,41 @@ public interface PostRepository
     Optional<Post> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
+
+    @Query(
+            value =
+                    """
+                    SELECT id FROM (
+                        SELECT p.id, ts_rank(p.search_vector, websearch_to_tsquery('simple', :query)) AS rank
+                        FROM posts p
+                        WHERE p.search_vector @@ websearch_to_tsquery('simple', :query)
+                          AND p.status = 'PUBLISHED'
+                        UNION ALL
+                        SELECT p.id, word_similarity(:query, p.title) * 0.5 AS rank
+                        FROM posts p
+                        WHERE word_similarity(:query, p.title) > 0.5
+                          AND p.status = 'PUBLISHED'
+                          AND NOT p.search_vector @@ websearch_to_tsquery('simple', :query)
+                    ) AS results ORDER BY rank DESC
+                    """,
+            countQuery =
+                    """
+                    SELECT COUNT(*) FROM (
+                        SELECT p.id FROM posts p
+                        WHERE p.search_vector @@ websearch_to_tsquery('simple', :query)
+                          AND p.status = 'PUBLISHED'
+                        UNION ALL
+                        SELECT p.id FROM posts p
+                        WHERE word_similarity(:query, p.title) > 0.5
+                          AND p.status = 'PUBLISHED'
+                          AND NOT p.search_vector @@ websearch_to_tsquery('simple', :query)
+                    ) AS results
+                    """,
+            nativeQuery = true)
+    Page<UUID> findAllPostBySearchQuery(@Param("query") String query, Pageable pageable);
+
+    @EntityGraph(value = "Post.withUserAndCategories")
+    List<Post> findAllByIdIn(List<UUID> ids);
 
     static Specification<@NonNull Post> fetchRelationships() {
         return (root, query, criteriaBuilder) -> {

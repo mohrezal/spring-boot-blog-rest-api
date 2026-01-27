@@ -1,6 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.posts.models;
 
 import com.github.mohrezal.springbootblogrestapi.domains.categories.models.Category;
+import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostLanguage;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.models.BaseModel;
@@ -70,6 +71,10 @@ public class Post extends BaseModel {
 
     @Column(name = "published_at")
     private OffsetDateTime publishedAt;
+
+    @Column(name = "language")
+    @Enumerated(EnumType.STRING)
+    private PostLanguage language;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
