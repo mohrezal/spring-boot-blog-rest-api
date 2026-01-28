@@ -1,9 +1,10 @@
 package com.github.mohrezal.springbootblogrestapi.shared.services.deviceinfo;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DeviceInfoServiceImpl implements DeviceInfoService {
+public class RequestInfoServiceImpl implements RequestInfoService {
 
     @Override
     public String parseDeviceName(String userAgent) {
@@ -40,5 +41,14 @@ public class DeviceInfoServiceImpl implements DeviceInfoService {
         }
 
         return "Unknown Device";
+    }
+
+    @Override
+    public String getClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isEmpty()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

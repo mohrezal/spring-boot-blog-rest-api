@@ -5,7 +5,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.AuthResponse
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.authentication.AuthenticationService;
 import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
-import com.github.mohrezal.springbootblogrestapi.shared.services.deviceinfo.DeviceInfoService;
+import com.github.mohrezal.springbootblogrestapi.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.springbootblogrestapi.shared.services.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
 
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
-    private final DeviceInfoService deviceInfoService;
+    private final RequestInfoService deviceInfoService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

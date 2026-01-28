@@ -27,7 +27,7 @@ services:
     command: "server -s3 -s3.config=/etc/seaweedfs/s3.json -dir=/data"
     volumes:
       - static-data:/data
-      - ./config/s3.json:/etc/seaweedfs/s3.json:ro
+      - ./configs/s3.json:/etc/seaweedfs/s3.json:ro
     networks:
       - blog-network
     restart: unless-stopped

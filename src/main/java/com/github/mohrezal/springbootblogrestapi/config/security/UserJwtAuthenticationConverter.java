@@ -5,6 +5,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +25,7 @@ public class UserJwtAuthenticationConverter implements Converter<Jwt, AbstractAu
     public AbstractAuthenticationToken convert(Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-
+        MDC.put("userId", user.getId().toString());
         return new UsernamePasswordAuthenticationToken(
                 user, jwt, jwtGrantedAuthoritiesConverter.convert(jwt));
     }
