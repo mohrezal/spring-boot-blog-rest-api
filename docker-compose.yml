@@ -32,6 +32,26 @@ services:
       - blog-network
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:4.2.3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - ${APPLICATION_RABBIT_MQ_PORT}:5672
+      - ${APPLICATION_RABBIT_MQ_CLIENT_PORT}:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${APPLICATION_RABBIT_MQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${APPLICATION_RABBIT_MQ_PASSWORD}
+    networks:
+      - blog-network
+  mail:
+    image: axllent/mailpit:v1.28
+    container_name: mailpit
+    ports:
+      - ${APPLICATION_MAIL_CLIENT_PORT}:8025
+      - ${APPLICATION_MAIL_PORT}:1025
+    networks:
+      - blog-network
 networks:
   blog-network:
     driver: bridge

@@ -3,6 +3,20 @@ server:
 spring:
   config:
     import:  optional:file:.env[.properties]
+  rabbitmq:
+    host: ${APPLICATION_RABBIT_MQ_HOST}
+    port: ${APPLICATION_RABBIT_MQ_PORT}
+    username: ${APPLICATION_RABBIT_MQ_USERNAME}
+    password: ${APPLICATION_RABBIT_MQ_PASSWORD}
+  mail:
+    host: ${APPLICATION_MAIL_HOST}
+    port: ${APPLICATION_MAIL_PORT}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
   thymeleaf:
     check-template-location: false
   threads:
