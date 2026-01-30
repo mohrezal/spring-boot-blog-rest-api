@@ -6,4 +6,9 @@ public final class Templates {
     public static final class Notification {
         private static final String BASE = "notification/";
     }
+
+    public static final class Email {
+        private static final String BASE = "email/";
+        public static final String WELCOME = BASE + "welcome";
+    }
 }

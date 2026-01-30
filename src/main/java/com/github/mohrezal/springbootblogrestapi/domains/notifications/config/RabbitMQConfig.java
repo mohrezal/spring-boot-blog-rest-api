@@ -17,9 +17,11 @@ public class RabbitMQConfig {
 
     public static final String INAPP_QUEUE = "notification.inapp.queue";
     public static final String EMAIL_QUEUE = "notification.email.queue";
+    public static final String TRANSACTIONAL_EMAIL_QUEUE = "transactional.email.queue";
 
     public static final String INAPP_ROUTING_KEY = "notification.inapp";
     public static final String EMAIL_ROUTING_KEY = "notification.email";
+    public static final String TRANSACTIONAL_EMAIL_ROUTING_KEY = "transactional.email";
 
     public static final String EXCHANGE = "notification.exchange";
 
@@ -31,6 +33,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue emailQueue() {
         return new Queue(EMAIL_QUEUE, true);
+    }
+
+    @Bean
+    public Queue transactionalEmailQueue() {
+        return new Queue(TRANSACTIONAL_EMAIL_QUEUE, true);
     }
 
     @Bean
@@ -46,6 +53,13 @@ public class RabbitMQConfig {
     @Bean
     public Binding emailBinding() {
         return BindingBuilder.bind(emailQueue()).to(exchange()).with(EMAIL_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding transactionalEmailBinding() {
+        return BindingBuilder.bind(transactionalEmailQueue())
+                .to(exchange())
+                .with(TRANSACTIONAL_EMAIL_ROUTING_KEY);
     }
 
     @Bean

@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
 
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.events.UserRegisteredEvent;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.RegisterUserCommandParams;
@@ -36,6 +37,7 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final UserRepository userRepository;
     private final ApplicationProperties applicationProperties;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -53,6 +55,8 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
 
         jwtService.saveRefreshToken(
                 refreshToken, user, params.getIpAddress(), params.getUserAgent(), deviceName);
+
+        eventPublisher.publishEvent(new UserRegisteredEvent(user));
 
         AuthResponse authResponse =
                 AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();

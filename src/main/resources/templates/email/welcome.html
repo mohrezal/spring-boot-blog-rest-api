@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Welcome to Our Blog</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #3f3f46;
+            line-height: 1.6;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: transparent;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #18181b;
+            margin: 0;
+        }
+
+        .content-card {
+            background-color: #ffffff;
+            border: 1px solid #e4e4e7;
+            border-radius: 0.5rem;
+            padding: 40px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 500;
+            color: #18181b;
+            margin-bottom: 20px;
+            text-transform: capitalize;
+        }
+
+        .content-text {
+            font-size: 16px;
+            color: #3f3f46;
+            margin-bottom: 32px;
+            line-height: 1.7;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 32px 0;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #27272a;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #18181b;
+        }
+
+        .secondary-text {
+            font-size: 14px;
+            color: #71717a;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-top: 32px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px 0;
+            }
+
+            .email-container {
+                margin: 0 16px;
+            }
+
+            .content-card {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .greeting {
+                font-size: 16px;
+            }
+
+            .content-text {
+                font-size: 15px;
+            }
+
+            .cta-button {
+                display: block;
+                width: 100%;
+                padding: 14px 24px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Welcome to Our Blog!</h1>
+    </div>
+
+    <div class="content-card">
+        <div class="greeting">
+            Hello <span th:text="${userName}">User</span>,
+        </div>
+
+        <div class="content-text">
+            Thank you for joining our community! We're excited to have you here.
+            Start exploring amazing articles, share your thoughts, and connect with other readers.
+        </div>
+
+        <div class="secondary-text">
+            If you have any questions or need assistance, feel free to reach out to our support team.
+            We're here to help!
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>You received this email because you signed up for an account.</p>
+    </div>
+</div>
+</body>
+</html>
