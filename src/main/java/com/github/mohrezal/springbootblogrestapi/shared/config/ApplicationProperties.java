@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record ApplicationProperties(
-        @Valid Security security, @Valid Storage storage, @Valid Handle handle) {
+        @Valid Security security, @Valid Storage storage, @Valid Handle handle, @Valid Mail mail) {
 
     @Validated
     public record Security(
@@ -34,4 +34,7 @@ public record ApplicationProperties(
 
     @Validated
     public record Handle(@NotEmpty List<@NotBlank String> reservedHandles) {}
+
+    @Validated
+    public record Mail(@NotBlank String from) {}
 }

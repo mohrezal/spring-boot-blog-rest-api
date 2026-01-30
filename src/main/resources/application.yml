@@ -1,5 +1,8 @@
 server:
   port: ${APPLICATION_SERVER_PORT}
+logging:
+  level:
+    org.springframework.boot.devtools.autoconfigure: WARN
 spring:
   config:
     import:  optional:file:.env[.properties]
@@ -76,3 +79,5 @@ app:
     region: ${APPLICATION_STORAGE_REGION}
   handle:
     reservedHandles: ${APPLICATION_HANDLE_RESERVED_HANDLES}
+  mail:
+    from: ${APPLICATION_MAIL_FROM}

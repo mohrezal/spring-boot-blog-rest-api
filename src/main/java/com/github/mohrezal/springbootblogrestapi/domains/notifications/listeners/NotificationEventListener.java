@@ -48,10 +48,6 @@ public class NotificationEventListener {
         if (preferences.getInAppEnabled()) {
             publishToQueue(RabbitMQConfig.INAPP_ROUTING_KEY, notification.getId());
         }
-
-        if (preferences.getEmailEnabled()) {
-            publishToQueue(RabbitMQConfig.EMAIL_ROUTING_KEY, notification.getId());
-        }
     }
 
     private void publishToQueue(String routingKey, UUID notificationId) {

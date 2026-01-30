@@ -48,4 +48,9 @@ public final class Routes {
         public static final String LIST = "list";
         public static final String PROFILE = "profile";
     }
+
+    public static final class Notification {
+        public static final String BASE = API_BASE + "notifications";
+        public static final String STREAM = "stream";
+    }
 }
