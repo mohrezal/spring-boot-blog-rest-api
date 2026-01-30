@@ -20,4 +20,5 @@
     <include file="db/changelog/migrations/1769507461_enable_pg_trgm_extension.sql" />
     <include file="/db/changelog/migrations/1769508270_add_bilingual_search_to_posts.sql" />
     <include file="/db/changelog/migrations/1769694938_create_notification_tables.sql" />
+    <include file="/db/changelog/migrations/1769758708_drop_type_from_notifications.sql" />
 </databaseChangeLog>

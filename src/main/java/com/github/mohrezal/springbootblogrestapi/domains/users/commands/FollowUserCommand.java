@@ -1,5 +1,6 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
 
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.events.UserFollowedEvent;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.FollowUserCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserAlreadyFollowingException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
@@ -12,6 +13,7 @@ import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class FollowUserCommand implements Command<FollowUserCommandParams, Void>
 
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -49,6 +52,13 @@ public class FollowUserCommand implements Command<FollowUserCommandParams, Void>
                 UserFollow.builder().follower(currentUser).followed(targetUser).build();
 
         userFollowRepository.save(userFollow);
+
+        eventPublisher.publishEvent(
+                new UserFollowedEvent(
+                        currentUser.getId(),
+                        currentUser.getFirstName() + " " + currentUser.getLastName(),
+                        currentUser.getHandle(),
+                        targetUser));
 
         return null;
     }

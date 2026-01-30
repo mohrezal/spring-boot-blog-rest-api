@@ -1,5 +1,7 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
 
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.NotificationPreference;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.RegisterResponse;
@@ -33,11 +35,16 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final RequestInfoService deviceInfoService;
     private final UserRepository userRepository;
     private final ApplicationProperties applicationProperties;
+    private final NotificationPreferenceRepository notificationPreferenceRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
         User user = registrationService.register(params.getRegisterUserRequest(), UserRole.USER);
+
+        NotificationPreference notificationPreference =
+                NotificationPreference.builder().user(user).build();
+        notificationPreferenceRepository.save(notificationPreference);
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user.getId());

@@ -1,19 +1,16 @@
 package com.github.mohrezal.springbootblogrestapi.domains.notifications.models;
 
-import com.github.mohrezal.springbootblogrestapi.domains.notifications.enums.NotificationType;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.data.NotificationData;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.models.BaseModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -29,7 +26,6 @@ import org.hibernate.type.SqlTypes;
         name = "notifications",
         indexes = {
             @Index(name = "idx_recipient_id", columnList = "recipient_id"),
-            @Index(name = "idx_type", columnList = "type"),
             @Index(name = "idx_is_read", columnList = "is_read"),
             @Index(name = "idx_read_at", columnList = "read_at")
         })
@@ -45,13 +41,9 @@ public class Notification extends BaseModel {
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    private NotificationType type;
-
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "data", columnDefinition = "jsonb")
-    private Map<String, Object> data;
+    private NotificationData data;
 
     @Column(name = "is_read")
     @Builder.Default
