@@ -3,14 +3,18 @@ package com.github.mohrezal.springbootblogrestapi.domains.notifications.controll
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetNotificationsQuery;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetUserUnreadNotificationCountQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.SubscribeNotificationStreamQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetNotificationsQueryParams;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetUserUnreadNotificationCountQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.SubscribeNotificationStreamQueryParams;
 import com.github.mohrezal.springbootblogrestapi.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +31,7 @@ public class NotificationController {
 
     private final SubscribeNotificationStreamQuery subscribeNotificationStreamQuery;
     private final GetNotificationsQuery getNotificationsQuery;
+    private final GetUserUnreadNotificationCountQuery getUserUnreadNotificationCountQuery;
 
     @IsAdminOrUser
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -38,7 +43,7 @@ public class NotificationController {
 
     @IsAdminOrUser
     @GetMapping
-    public PageResponse<NotificationSummary> getNotification(
+    public ResponseEntity<@NonNull PageResponse<NotificationSummary>> getNotification(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size) {
@@ -48,6 +53,17 @@ public class NotificationController {
                         .size(size)
                         .userDetails(userDetails)
                         .build();
-        return getNotificationsQuery.execute(params);
+        return ResponseEntity.ok().body(getNotificationsQuery.execute(params));
+    }
+
+    @IsAdminOrUser
+    @GetMapping(Routes.Notification.UN_READ)
+    public ResponseEntity<@NonNull Integer> getUnReadNotifications(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var params =
+                GetUserUnreadNotificationCountQueryParams.builder()
+                        .userDetails(userDetails)
+                        .build();
+        return ResponseEntity.ok().body(getUserUnreadNotificationCountQuery.execute(params));
     }
 }

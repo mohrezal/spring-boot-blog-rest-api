@@ -14,5 +14,5 @@ public interface NotificationRepository
         extends JpaRepository<@NonNull Notification, @NonNull UUID> {
     Page<Notification> findByRecipient(User recipient, Pageable pageable);
 
-    int countByRecipientAndIsRead(User recipient, Boolean isRead);
+    Integer countByRecipientAndIsRead(User recipient, Boolean isRead);
 }

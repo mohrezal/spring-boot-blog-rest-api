@@ -52,5 +52,6 @@ public final class Routes {
     public static final class Notification {
         public static final String BASE = API_BASE + "notifications";
         public static final String STREAM = "stream";
+        public static final String UN_READ = "unread";
     }
 }
