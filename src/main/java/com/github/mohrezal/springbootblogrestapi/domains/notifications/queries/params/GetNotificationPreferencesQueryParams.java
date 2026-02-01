@@ -1,15 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params;
 
-import lombok.AllArgsConstructor;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class GetNotificationPreferencesQueryParams {
-    private UserDetails userDetails;
+public record GetNotificationPreferencesQueryParams(UserDetails userDetails)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

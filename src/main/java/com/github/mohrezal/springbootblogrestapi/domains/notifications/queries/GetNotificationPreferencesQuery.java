@@ -6,23 +6,26 @@ import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.No
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetNotificationPreferencesQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.utils.NotificationUtils;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedQuery;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GetNotificationPreferencesQuery
-        implements Query<GetNotificationPreferencesQueryParams, NotificationPreferenceSummary> {
+        extends AuthenticatedQuery<
+                GetNotificationPreferencesQueryParams, NotificationPreferenceSummary> {
     private final NotificationPreferenceRepository notificationPreferenceRepository;
     private final NotificationPreferenceMapper notificationPreferenceMapper;
 
     @Transactional(readOnly = true)
     @Override
     public NotificationPreferenceSummary execute(GetNotificationPreferencesQueryParams params) {
-        User user = (User) params.getUserDetails();
+        validate(params);
         NotificationPreference preference =
                 this.notificationPreferenceRepository
                         .findByUserId(user.getId())

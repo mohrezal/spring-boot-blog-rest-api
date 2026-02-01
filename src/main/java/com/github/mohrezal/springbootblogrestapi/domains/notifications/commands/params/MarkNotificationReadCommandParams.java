@@ -1,13 +1,15 @@
 package com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params;
 
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import java.util.UUID;
 import lombok.Builder;
-import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
 @Builder
-public class MarkNotificationReadCommandParams {
-    private UUID notificationId;
-    private UserDetails userDetails;
+public record MarkNotificationReadCommandParams(UUID notificationId, UserDetails userDetails)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

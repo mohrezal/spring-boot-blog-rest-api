@@ -47,10 +47,10 @@ public class NotificationSseServiceImpl implements NotificationSseService {
             try {
                 emitter.send(
                         SseEmitter.event()
-                                .id(notification.getId().toString())
+                                .id(notification.id().toString())
                                 .name("notification")
                                 .data(notification));
-                log.debug("Pushed notification {} to user {}", notification.getId(), userId);
+                log.debug("Pushed notification {} to user {}", notification.id(), userId);
             } catch (IOException e) {
                 log.warn("Failed to send SSE to user {}: {}", userId, e.getMessage());
                 removeEmitter(userId, emitter);

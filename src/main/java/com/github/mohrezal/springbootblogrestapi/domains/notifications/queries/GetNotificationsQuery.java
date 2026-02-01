@@ -5,10 +5,11 @@ import com.github.mohrezal.springbootblogrestapi.domains.notifications.mappers.N
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.Notification;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetNotificationsQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,20 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GetNotificationsQuery
-        implements Query<GetNotificationsQueryParams, PageResponse<NotificationSummary>> {
+        extends AuthenticatedQuery<GetNotificationsQueryParams, PageResponse<NotificationSummary>> {
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
 
     @Transactional(readOnly = true)
     @Override
     public PageResponse<NotificationSummary> execute(GetNotificationsQueryParams params) {
-        User user = (User) params.getUserDetails();
+        validate(params);
         Pageable pageable =
                 PageRequest.of(
-                        params.getPage(),
-                        params.getSize(),
-                        Sort.by(Sort.Direction.DESC, "createdAt"));
+                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Notification> notificationPage =
                 this.notificationRepository.findByRecipient(user, pageable);
         return PageResponse.from(notificationPage, notificationMapper::toNotificationSummary);
