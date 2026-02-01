@@ -1,7 +1,9 @@
 package com.github.mohrezal.springbootblogrestapi.domains.notifications.controllers;
 
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.MarkAllNotificationsReadCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.MarkNotificationReadCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params.MarkAllNotificationsReadCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params.MarkNotificationReadCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationPreferenceSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationSummary;
@@ -42,6 +44,7 @@ public class NotificationController {
     private final GetUserUnreadNotificationCountQuery getUserUnreadNotificationCountQuery;
     private final GetNotificationPreferencesQuery getNotificationPreferencesQuery;
     private final MarkNotificationReadCommand markNotificationReadCommand;
+    private final MarkAllNotificationsReadCommand markAllNotificationsReadCommand;
 
     @IsAdminOrUser
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -96,6 +99,16 @@ public class NotificationController {
                         .userDetails(userDetails)
                         .build();
         markNotificationReadCommand.execute(params);
+        return ResponseEntity.noContent().build();
+    }
+
+    @IsAdminOrUser
+    @PatchMapping(Routes.Notification.MARK_ALL_READ)
+    public ResponseEntity<Void> markAllNotificationsAsRead(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var params =
+                MarkAllNotificationsReadCommandParams.builder().userDetails(userDetails).build();
+        markAllNotificationsReadCommand.execute(params);
         return ResponseEntity.noContent().build();
     }
 }

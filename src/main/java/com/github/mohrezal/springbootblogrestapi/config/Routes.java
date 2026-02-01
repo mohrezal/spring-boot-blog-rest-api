@@ -55,5 +55,6 @@ public final class Routes {
         public static final String UN_READ = "unread";
         public static final String PREFERENCES = "preferences";
         public static final String MARK_READ = "{id}/read";
+        public static final String MARK_ALL_READ = "read-all";
     }
 }
