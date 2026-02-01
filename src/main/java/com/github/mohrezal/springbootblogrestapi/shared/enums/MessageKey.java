@@ -40,7 +40,8 @@ public enum MessageKey {
     STORAGE_FILE_MIME_TYPE_NOT_ALLOWED("File type is not allowed."),
     STORAGE_UPLOAD_FAILED("Failed to upload file."),
 
-    NOTIFICATION_NOT_FOUND("Notification not found.");
+    NOTIFICATION_NOT_FOUND("Notification not found."),
+    NOTIFICATION_PREFERENCE_NOT_FOUND("Notification preference not found.");
 
     private final String message;
 

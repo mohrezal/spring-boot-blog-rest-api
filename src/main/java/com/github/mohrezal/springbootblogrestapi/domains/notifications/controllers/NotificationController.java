@@ -1,10 +1,13 @@
 package com.github.mohrezal.springbootblogrestapi.domains.notifications.controllers;
 
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationPreferenceSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetNotificationPreferencesQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetNotificationsQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetUserUnreadNotificationCountQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.SubscribeNotificationStreamQuery;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetNotificationPreferencesQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetNotificationsQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.GetUserUnreadNotificationCountQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.params.SubscribeNotificationStreamQueryParams;
@@ -32,6 +35,7 @@ public class NotificationController {
     private final SubscribeNotificationStreamQuery subscribeNotificationStreamQuery;
     private final GetNotificationsQuery getNotificationsQuery;
     private final GetUserUnreadNotificationCountQuery getUserUnreadNotificationCountQuery;
+    private final GetNotificationPreferencesQuery getNotificationPreferencesQuery;
 
     @IsAdminOrUser
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -65,5 +69,14 @@ public class NotificationController {
                         .userDetails(userDetails)
                         .build();
         return ResponseEntity.ok().body(getUserUnreadNotificationCountQuery.execute(params));
+    }
+
+    @IsAdminOrUser
+    @GetMapping(Routes.Notification.PREFERENCES)
+    public ResponseEntity<NotificationPreferenceSummary> getNotificationPreference(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var params =
+                GetNotificationPreferencesQueryParams.builder().userDetails(userDetails).build();
+        return ResponseEntity.ok().body(getNotificationPreferencesQuery.execute(params));
     }
 }

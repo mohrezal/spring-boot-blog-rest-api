@@ -9,6 +9,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.No
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.repositories.NotificationRepository;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.utils.NotificationUtils;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.shared.utils.Templates;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class NotificationEventListener {
         NotificationPreference preferences =
                 preferenceRepository
                         .findByUserId(recipient.getId())
-                        .orElseGet(this::defaultPreferences);
+                        .orElseGet(NotificationUtils::defaultPreferences);
 
         FollowNotificationData data =
                 new FollowNotificationData(event.actorId(), event.actorName(), event.actorHandle());
@@ -85,9 +86,5 @@ public class NotificationEventListener {
         } catch (Exception e) {
             log.error("Failed to publish notification to queue {}: {}", routingKey, e.getMessage());
         }
-    }
-
-    private NotificationPreference defaultPreferences() {
-        return NotificationPreference.builder().inAppEnabled(true).emailEnabled(true).build();
     }
 }
