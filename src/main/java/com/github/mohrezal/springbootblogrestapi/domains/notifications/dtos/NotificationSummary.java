@@ -4,15 +4,12 @@ import com.github.mohrezal.springbootblogrestapi.domains.notifications.data.Noti
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.Builder;
-import lombok.Data;
 
-@Data
 @Builder
-public class NotificationSummary {
-    private UUID id;
-    private NotificationData data;
-    private ActorSummary actor;
-    private Boolean isRead;
-    private OffsetDateTime readAt;
-    private OffsetDateTime createdAt;
-}
+public record NotificationSummary(
+        UUID id,
+        NotificationData data,
+        ActorSummary actor,
+        Boolean isRead,
+        OffsetDateTime readAt,
+        OffsetDateTime createdAt) {}
