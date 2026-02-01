@@ -3,10 +3,13 @@ package com.github.mohrezal.springbootblogrestapi.domains.notifications.controll
 import com.github.mohrezal.springbootblogrestapi.config.Routes;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.MarkAllNotificationsReadCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.MarkNotificationReadCommand;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.UpdateNotificationPreferencesCommand;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params.MarkAllNotificationsReadCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params.MarkNotificationReadCommandParams;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.commands.params.UpdateNotificationPreferencesCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationPreferenceSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.NotificationSummary;
+import com.github.mohrezal.springbootblogrestapi.domains.notifications.dtos.UpdateNotificationPreferenceRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetNotificationPreferencesQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetNotificationsQuery;
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.queries.GetUserUnreadNotificationCountQuery;
@@ -28,6 +31,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,6 +50,7 @@ public class NotificationController {
     private final GetNotificationPreferencesQuery getNotificationPreferencesQuery;
     private final MarkNotificationReadCommand markNotificationReadCommand;
     private final MarkAllNotificationsReadCommand markAllNotificationsReadCommand;
+    private final UpdateNotificationPreferencesCommand updateNotificationPreferencesCommand;
 
     @IsAdminOrUser
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -110,5 +116,18 @@ public class NotificationController {
                 MarkAllNotificationsReadCommandParams.builder().userDetails(userDetails).build();
         markAllNotificationsReadCommand.execute(params);
         return ResponseEntity.noContent().build();
+    }
+
+    @IsAdminOrUser
+    @PutMapping(Routes.Notification.PREFERENCES)
+    public ResponseEntity<NotificationPreferenceSummary> updateNotificationPreferences(
+            @RequestBody UpdateNotificationPreferenceRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var params =
+                UpdateNotificationPreferencesCommandParams.builder()
+                        .userDetails(userDetails)
+                        .request(request)
+                        .build();
+        return ResponseEntity.ok().body(updateNotificationPreferencesCommand.execute(params));
     }
 }
