@@ -3,6 +3,7 @@ package com.github.mohrezal.springbootblogrestapi.domains.notifications.reposito
 import com.github.mohrezal.springbootblogrestapi.domains.notifications.models.Notification;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ public interface NotificationRepository
 
     @EntityGraph(value = "Notification.withActor")
     Page<Notification> findByRecipient(User recipient, Pageable pageable);
+
+    @EntityGraph(value = "Notification.withActor")
+    Optional<Notification> findWithActorById(UUID id);
 
     Integer countByRecipientAndIsRead(User recipient, Boolean isRead);
 

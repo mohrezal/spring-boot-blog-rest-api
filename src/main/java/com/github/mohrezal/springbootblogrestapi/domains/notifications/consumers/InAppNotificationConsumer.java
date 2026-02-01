@@ -26,7 +26,7 @@ public class InAppNotificationConsumer {
         log.debug("Received in-app notification: {}", notificationId);
 
         notificationRepository
-                .findById(notificationId)
+                .findWithActorById(notificationId)
                 .ifPresentOrElse(
                         this::pushNotification,
                         () -> log.warn("Notification not found: {}", notificationId));
