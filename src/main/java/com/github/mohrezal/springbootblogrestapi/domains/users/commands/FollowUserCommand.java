@@ -53,12 +53,7 @@ public class FollowUserCommand implements Command<FollowUserCommandParams, Void>
 
         userFollowRepository.save(userFollow);
 
-        eventPublisher.publishEvent(
-                new UserFollowedEvent(
-                        currentUser.getId(),
-                        currentUser.getFirstName() + " " + currentUser.getLastName(),
-                        currentUser.getHandle(),
-                        targetUser));
+        eventPublisher.publishEvent(new UserFollowedEvent(currentUser, targetUser));
 
         return null;
     }

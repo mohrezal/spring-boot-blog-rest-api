@@ -11,6 +11,7 @@ import lombok.Data;
 public class NotificationSummary {
     private UUID id;
     private NotificationData data;
+    private ActorSummary actor;
     private Boolean isRead;
     private OffsetDateTime readAt;
     private OffsetDateTime createdAt;

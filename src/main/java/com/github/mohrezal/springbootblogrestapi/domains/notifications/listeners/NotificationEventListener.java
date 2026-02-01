@@ -32,18 +32,19 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserFollowedEvent(UserFollowedEvent event) {
+        User actor = event.actor();
         User recipient = event.recipient();
-        log.debug("UserFollowedEvent: {} followed {}", event.actorHandle(), recipient.getHandle());
+        log.debug("UserFollowedEvent: {} followed {}", actor.getHandle(), recipient.getHandle());
 
         NotificationPreference preferences =
                 preferenceRepository
                         .findByUserId(recipient.getId())
                         .orElseGet(NotificationUtils::defaultPreferences);
 
-        FollowNotificationData data =
-                new FollowNotificationData(event.actorId(), event.actorName(), event.actorHandle());
+        FollowNotificationData data = new FollowNotificationData(actor.getId());
 
-        Notification notification = Notification.builder().recipient(recipient).data(data).build();
+        Notification notification =
+                Notification.builder().recipient(recipient).actor(actor).data(data).build();
         notificationRepository.save(notification);
 
         if (preferences.getInAppEnabled()) {

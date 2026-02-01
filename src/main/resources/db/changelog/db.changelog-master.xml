@@ -21,4 +21,5 @@
     <include file="/db/changelog/migrations/1769508270_add_bilingual_search_to_posts.sql" />
     <include file="/db/changelog/migrations/1769694938_create_notification_tables.sql" />
     <include file="/db/changelog/migrations/1769758708_drop_type_from_notifications.sql" />
+    <include file="/db/changelog/migrations/1769800000_add_actor_id_to_notifications.sql" />
 </databaseChangeLog>
