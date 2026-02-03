@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.github.mohrezal</groupId>
-    <artifactId>spring-boot-blog-rest-api</artifactId>
+    <artifactId>api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-boot-blog-rest-api</name>
     <description>spring-boot-blog-rest-api</description>

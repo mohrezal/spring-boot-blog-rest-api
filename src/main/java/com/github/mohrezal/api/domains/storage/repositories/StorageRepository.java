@@ -1,0 +1,22 @@
+package com.github.mohrezal.api.domains.storage.repositories;
+
+import com.github.mohrezal.api.domains.storage.enums.StorageType;
+import com.github.mohrezal.api.domains.storage.models.Storage;
+import com.github.mohrezal.api.domains.users.models.User;
+import java.util.Optional;
+import java.util.UUID;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface StorageRepository extends JpaRepository<@NonNull Storage, @NonNull UUID> {
+
+    Optional<Storage> findByFilename(String filename);
+
+    Page<@NonNull Storage> findAllByUserAndType(User user, StorageType type, Pageable pageable);
+
+    Optional<Storage> findAllByUser(User user);
+}

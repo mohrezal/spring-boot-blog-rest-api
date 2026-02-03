@@ -21,7 +21,7 @@ Java 25, Spring Boot 4, Spring Security, PostgreSQL, RabbitMQ, AWS S3
 ## Structure
 
 ```
-src/main/java/.../springbootblogrestapi/
+src/main/java/.../api/
 ├── config/             # App configuration (security, rate limiting, logging)
 ├── domains/            # Feature modules (users, posts, categories, storage, notifications)
 └── shared/             # Shared code (models, exceptions, services, utilities)
