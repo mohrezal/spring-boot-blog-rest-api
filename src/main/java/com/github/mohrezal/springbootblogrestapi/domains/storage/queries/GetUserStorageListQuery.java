@@ -6,9 +6,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.Storage
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params.GetUserStorageListQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.repositories.StorageRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class GetUserStorageListQuery
-        implements Query<GetUserStorageListQueryParams, PageResponse<StorageSummary>> {
+        extends AuthenticatedQuery<GetUserStorageListQueryParams, PageResponse<StorageSummary>> {
 
     private final StorageRepository storageRepository;
     private final StorageMapper storageMapper;
@@ -34,12 +33,11 @@ public class GetUserStorageListQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<StorageSummary> execute(GetUserStorageListQueryParams params) {
-        User user = (User) params.getUserDetails();
+        validate(params);
+
         Pageable pageable =
                 PageRequest.of(
-                        params.getPage(),
-                        params.getSize(),
-                        Sort.by(Sort.Direction.DESC, "createdAt"));
+                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<@NonNull Storage> storageList =
                 storageRepository.findAllByUserAndType(user, StorageType.MEDIA, pageable);
 

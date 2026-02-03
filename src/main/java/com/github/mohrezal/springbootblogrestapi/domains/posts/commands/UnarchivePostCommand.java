@@ -7,10 +7,9 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.services.postutils.PostUtilsService;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.userutils.UserUtilsService;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class UnarchivePostCommand implements Command<UnarchivePostCommandParams, Void> {
+public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostCommandParams, Void> {
+
     private final PostRepository postRepository;
     private final PostUtilsService postUtilsService;
     private final UserUtilsService userUtilsService;
@@ -30,9 +30,10 @@ public class UnarchivePostCommand implements Command<UnarchivePostCommandParams,
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(UnarchivePostCommandParams params) {
+        validate(params);
+
         Post post =
-                postRepository.findBySlug(params.getSlug()).orElseThrow(PostNotFoundException::new);
-        User user = (User) params.getUserDetails();
+                postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
 
         if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
             throw new AccessDeniedException();

@@ -1,17 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.queries.params;
 
-import lombok.AllArgsConstructor;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-public class GetUserStorageListQueryParams {
-    private UserDetails userDetails;
-    private int size;
-    private int page;
+public record GetUserStorageListQueryParams(UserDetails userDetails, int page, int size)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

@@ -3,9 +3,8 @@ package com.github.mohrezal.springbootblogrestapi.domains.users.commands;
 import com.github.mohrezal.springbootblogrestapi.domains.users.commands.params.LogoutUserCommandParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.exceptions.types.UserInvalidRefreshTokenException;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.RefreshToken;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ForbiddenException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import com.github.mohrezal.springbootblogrestapi.shared.services.jwt.JwtService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,34 +18,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class LogoutUserCommand implements Command<LogoutUserCommandParams, Void> {
+public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandParams, Void> {
 
     private final JwtService jwtService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(LogoutUserCommandParams params) {
-        if (params.getRefreshToken() == null
-                || !jwtService.validateRefreshToken(params.getRefreshToken())) {
+        if (params.refreshToken() == null
+                || !jwtService.validateRefreshToken(params.refreshToken())) {
             throw new UserInvalidRefreshTokenException();
         }
 
-        if (!(params.getUserDetails() instanceof User currentUser)) {
-            throw new ForbiddenException();
-        }
+        validate(params);
 
-        UUID currentUserId = currentUser.getId();
+        UUID currentUserId = user.getId();
 
         RefreshToken refreshToken =
                 jwtService
-                        .getRefreshTokenEntity(params.getRefreshToken())
+                        .getRefreshTokenEntity(params.refreshToken())
                         .orElseThrow(UserInvalidRefreshTokenException::new);
 
         if (!currentUserId.equals(refreshToken.getUser().getId())) {
             throw new ForbiddenException();
         }
 
-        jwtService.revokeRefreshToken(params.getRefreshToken());
+        jwtService.revokeRefreshToken(params.refreshToken());
 
         return null;
     }

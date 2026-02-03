@@ -2,18 +2,16 @@ package com.github.mohrezal.springbootblogrestapi.domains.storage.commands.param
 
 import com.github.mohrezal.springbootblogrestapi.domains.storage.dtos.UploadRequest;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.enums.StorageType;
-import lombok.AllArgsConstructor;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@Data
-public class UploadCommandParams {
-    private UserDetails userDetails;
-    private UploadRequest uploadRequest;
-    private StorageType type;
+public record UploadCommandParams(
+        UserDetails userDetails, UploadRequest uploadRequest, StorageType type)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

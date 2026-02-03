@@ -9,9 +9,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.Storage
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtilsService;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class UploadProfileCommand implements Command<UploadProfileCommandParams, StorageSummary> {
+public class UploadProfileCommand
+        extends AuthenticatedCommand<UploadProfileCommandParams, StorageSummary> {
 
     private final StorageService storageService;
     private final StorageUtilsService storageUtilsService;
@@ -34,7 +34,9 @@ public class UploadProfileCommand implements Command<UploadProfileCommandParams,
 
     @Override
     public void validate(UploadProfileCommandParams params) {
-        MultipartFile file = params.getUploadProfileRequest().getFile();
+        super.validate(params);
+
+        MultipartFile file = params.uploadProfileRequest().getFile();
         try {
             if (!storageUtilsService.isValidMimeType(file)) {
                 throw new StorageInvalidMimeTypeException();
@@ -51,7 +53,7 @@ public class UploadProfileCommand implements Command<UploadProfileCommandParams,
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadProfileCommandParams params) {
-        User user = (User) params.getUserDetails();
+        validate(params);
 
         if (user.getAvatar() != null) {
             storageService.delete(user.getAvatar());
@@ -63,7 +65,7 @@ public class UploadProfileCommand implements Command<UploadProfileCommandParams,
 
         Storage storage =
                 storageService.upload(
-                        params.getUploadProfileRequest().getFile(),
+                        params.uploadProfileRequest().getFile(),
                         profileInfo,
                         profileInfo,
                         StorageType.PROFILE,

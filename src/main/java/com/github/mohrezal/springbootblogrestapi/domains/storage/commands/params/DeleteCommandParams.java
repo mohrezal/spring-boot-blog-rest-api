@@ -1,16 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.storage.commands.params;
 
-import lombok.AllArgsConstructor;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class DeleteCommandParams {
-    private UserDetails userDetails;
-    private String fileName;
+public record DeleteCommandParams(UserDetails userDetails, String fileName)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

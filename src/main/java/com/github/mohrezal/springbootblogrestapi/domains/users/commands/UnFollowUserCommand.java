@@ -8,7 +8,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.UserFollow;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class UnFollowUserCommand implements Command<UnFollowUserCommandParams, Void> {
+public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserCommandParams, Void> {
 
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
@@ -29,18 +29,19 @@ public class UnFollowUserCommand implements Command<UnFollowUserCommandParams, V
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(UnFollowUserCommandParams params) {
-        User currentUser = (User) params.getUserDetails();
+        validate(params);
+
         User targetUser =
                 userRepository
-                        .findByHandle(params.getHandle())
+                        .findByHandle(params.handle())
                         .orElseThrow(UserNotFoundException::new);
 
-        if (currentUser.getId().equals(targetUser.getId())) {
+        if (user.getId().equals(targetUser.getId())) {
             throw new UserCannotFollowOrUnfollowSelfException();
         }
 
         Optional<UserFollow> userFollow =
-                userFollowRepository.findByFollowedAndFollower(targetUser, currentUser);
+                userFollowRepository.findByFollowedAndFollower(targetUser, user);
         if (userFollow.isEmpty()) {
             throw new UserNotFollowingException();
         }

@@ -5,11 +5,10 @@ import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtilsService;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.services.userutils.UserUtilsService;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceNotFoundException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -21,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class DeleteCommand implements Command<DeleteCommandParams, Void> {
+public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Void> {
 
     private final StorageRepository storageRepository;
     private final UserUtilsService userUtilsService;
@@ -31,8 +30,9 @@ public class DeleteCommand implements Command<DeleteCommandParams, Void> {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeleteCommandParams params) {
-        User user = (User) params.getUserDetails();
-        String fileName = params.getFileName();
+        validate(params);
+
+        String fileName = params.fileName();
         Storage storage =
                 storageRepository
                         .findByFilename(fileName)

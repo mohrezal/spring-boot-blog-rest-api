@@ -9,9 +9,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.enums.PostStatus;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceConflictException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import com.github.mohrezal.springbootblogrestapi.shared.services.sluggenerator.SlugGeneratorService;
 import java.util.Set;
 import java.util.UUID;
@@ -27,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class CreatePostCommand implements Command<CreatePostCommandParams, PostDetail> {
+public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandParams, PostDetail> {
 
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
@@ -38,19 +37,18 @@ public class CreatePostCommand implements Command<CreatePostCommandParams, PostD
     @Transactional(rollbackFor = Exception.class)
     @Override
     public PostDetail execute(CreatePostCommandParams params) {
+        validate(params);
 
-        User currentUser = (User) params.getUserDetails();
-
-        Set<UUID> categoryIds = params.getCreatePostRequest().getCategoryIds();
+        Set<UUID> categoryIds = params.createPostRequest().getCategoryIds();
         Set<Category> categories = this.categoryRepository.findAllByIdIn(categoryIds);
 
         if (categories.size() != categoryIds.size()) {
             throw new CategoryNotFoundException();
         }
 
-        Post newPost = this.postMapper.toPost(params.getCreatePostRequest());
+        Post newPost = this.postMapper.toPost(params.createPostRequest());
         newPost.setCategories(categories);
-        newPost.setUser(currentUser);
+        newPost.setUser(user);
         newPost.setStatus(PostStatus.DRAFT);
         String slug =
                 slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);

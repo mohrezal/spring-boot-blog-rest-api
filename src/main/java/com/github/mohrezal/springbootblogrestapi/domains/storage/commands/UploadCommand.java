@@ -10,8 +10,7 @@ import com.github.mohrezal.springbootblogrestapi.domains.storage.mappers.Storage
 import com.github.mohrezal.springbootblogrestapi.domains.storage.models.Storage;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.springbootblogrestapi.domains.storage.services.storageutils.StorageUtilsService;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class UploadCommand implements Command<UploadCommandParams, StorageSummary> {
+public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, StorageSummary> {
 
     private final StorageUtilsService storageUtils;
     private final StorageService storageService;
@@ -32,15 +31,17 @@ public class UploadCommand implements Command<UploadCommandParams, StorageSummar
 
     @Override
     public void validate(UploadCommandParams params) {
+        super.validate(params);
+
         try {
-            if (!storageUtils.isValidMimeType(params.getUploadRequest().getFile())) {
+            if (!storageUtils.isValidMimeType(params.uploadRequest().getFile())) {
                 throw new StorageInvalidMimeTypeException();
             }
         } catch (IOException e) {
             throw new StorageInvalidMimeTypeException();
         }
 
-        if (storageUtils.isMaxFileSizeExceeded(params.getUploadRequest().getFile().getSize())) {
+        if (storageUtils.isMaxFileSizeExceeded(params.uploadRequest().getFile().getSize())) {
             throw new StorageFileSizeExceededException();
         }
     }
@@ -48,9 +49,10 @@ public class UploadCommand implements Command<UploadCommandParams, StorageSummar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadCommandParams params) {
-        User user = (User) params.getUserDetails();
-        UploadRequest request = params.getUploadRequest();
-        StorageType type = params.getType() != null ? params.getType() : StorageType.MEDIA;
+        validate(params);
+
+        UploadRequest request = params.uploadRequest();
+        StorageType type = params.type() != null ? params.type() : StorageType.MEDIA;
 
         Storage savedStorage =
                 storageService.upload(

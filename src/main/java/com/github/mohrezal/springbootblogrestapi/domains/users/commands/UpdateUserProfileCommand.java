@@ -6,9 +6,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.UserSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
 import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
-import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ForbiddenException;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.InvalidRequestException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -21,14 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class UpdateUserProfileCommand
-        implements Command<UpdateUserProfileCommandParams, UserSummary> {
+        extends AuthenticatedCommand<UpdateUserProfileCommandParams, UserSummary> {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     @Override
     public void validate(UpdateUserProfileCommandParams params) {
-        UpdateUserProfileRequest request = params.getRequest();
+        super.validate(params);
+
+        UpdateUserProfileRequest request = params.request();
 
         if ((request.getFirstName() != null && request.getFirstName().isBlank())
                 || (request.getLastName() != null && request.getLastName().isBlank())
@@ -40,24 +41,22 @@ public class UpdateUserProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSummary execute(UpdateUserProfileCommandParams params) {
-        if (!(params.getUserDetails() instanceof User currentUser)) {
-            throw new ForbiddenException();
-        }
+        validate(params);
 
-        UpdateUserProfileRequest request = params.getRequest();
+        UpdateUserProfileRequest request = params.request();
 
         if (request.getFirstName() != null) {
-            currentUser.setFirstName(request.getFirstName());
+            user.setFirstName(request.getFirstName());
         }
 
         if (request.getLastName() != null) {
-            currentUser.setLastName(request.getLastName());
+            user.setLastName(request.getLastName());
         }
 
         if (request.getBio() != null) {
-            currentUser.setBio(request.getBio());
+            user.setBio(request.getBio());
         }
-        User updatedUser = userRepository.save(currentUser);
+        User updatedUser = userRepository.save(user);
 
         return userMapper.toUserSummary(updatedUser);
     }

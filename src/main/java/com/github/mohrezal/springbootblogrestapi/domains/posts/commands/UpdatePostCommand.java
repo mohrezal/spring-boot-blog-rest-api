@@ -11,10 +11,9 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.mappers.PostMappe
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.services.postutils.PostUtilsService;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ResourceConflictException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostDetail> {
+public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandParams, PostDetail> {
 
     private final PostRepository postRepository;
     private final PostMapper postMapper;
@@ -38,31 +37,31 @@ public class UpdatePostCommand implements Command<UpdatePostCommandParams, PostD
     @Transactional(rollbackFor = Exception.class)
     @Override
     public PostDetail execute(UpdatePostCommandParams params) {
+        validate(params);
+
         Post post =
                 this.postRepository
-                        .findBySlug(params.getSlug())
+                        .findBySlug(params.slug())
                         .orElseThrow(PostNotFoundException::new);
-
-        User user = (User) params.getUserDetails();
 
         if (!postUtilsService.isOwner(post, user)) {
             throw new AccessDeniedException();
         }
 
         Set<Category> categories =
-                categoryRepository.findAllByIdIn(params.getUpdatePostRequest().getCategoryIds());
+                categoryRepository.findAllByIdIn(params.updatePostRequest().getCategoryIds());
 
-        if (categories.size() != params.getUpdatePostRequest().getCategoryIds().size()) {
+        if (categories.size() != params.updatePostRequest().getCategoryIds().size()) {
             throw new CategoryNotFoundException();
         }
 
-        if (!post.getSlug().equals(params.getUpdatePostRequest().getSlug())) {
-            if (postRepository.existsBySlug(params.getUpdatePostRequest().getSlug())) {
+        if (!post.getSlug().equals(params.updatePostRequest().getSlug())) {
+            if (postRepository.existsBySlug(params.updatePostRequest().getSlug())) {
                 throw new PostSlugAlreadyExistsException();
             }
         }
 
-        postMapper.toTargetPost(params.getUpdatePostRequest(), post);
+        postMapper.toTargetPost(params.updatePostRequest(), post);
         post.setCategories(categories);
 
         try {

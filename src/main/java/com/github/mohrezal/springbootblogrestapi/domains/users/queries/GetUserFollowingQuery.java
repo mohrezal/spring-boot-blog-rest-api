@@ -9,8 +9,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.users.models.UserFollow
 import com.github.mohrezal.springbootblogrestapi.domains.users.queries.params.GetUserFollowingQueryParams;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.springbootblogrestapi.domains.users.repositories.UserRepository;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.springbootblogrestapi.shared.dtos.PageResponse;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class GetUserFollowingQuery
-        implements Query<GetUserFollowingQueryParams, PageResponse<FollowerSummary>> {
+        extends AuthenticatedQuery<GetUserFollowingQueryParams, PageResponse<FollowerSummary>> {
 
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
@@ -40,18 +40,16 @@ public class GetUserFollowingQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<FollowerSummary> execute(GetUserFollowingQueryParams params) {
+        validate(params);
+
         User targetUser =
                 userRepository
-                        .findByHandle(params.getHandle())
+                        .findByHandle(params.handle())
                         .orElseThrow(UserNotFoundException::new);
-
-        User currentUser = (User) params.getUserDetails();
 
         Pageable pageable =
                 PageRequest.of(
-                        params.getPage(),
-                        params.getSize(),
-                        Sort.by(Sort.Direction.DESC, "createdAt"));
+                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<@NonNull UserFollow> followersPage =
                 userFollowRepository.findByFollowerId(targetUser.getId(), pageable);
@@ -64,7 +62,7 @@ public class GetUserFollowingQuery
         Set<UUID> followedByCurrentUser =
                 followedIds.isEmpty()
                         ? Set.of()
-                        : userFollowRepository.findFollowedIdsIn(currentUser.getId(), followedIds);
+                        : userFollowRepository.findFollowedIdsIn(user.getId(), followedIds);
 
         return PageResponse.from(
                 followersPage,

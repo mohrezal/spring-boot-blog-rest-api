@@ -4,9 +4,8 @@ import com.github.mohrezal.springbootblogrestapi.domains.posts.commands.params.D
 import com.github.mohrezal.springbootblogrestapi.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.models.Post;
 import com.github.mohrezal.springbootblogrestapi.domains.posts.repositories.PostRepository;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.AccessDeniedException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -18,15 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DeletePostCommand implements Command<DeletePostCommandParams, Void> {
+public class DeletePostCommand extends AuthenticatedCommand<DeletePostCommandParams, Void> {
+
     private final PostRepository postRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeletePostCommandParams params) {
+        validate(params);
+
         Post post =
-                postRepository.findBySlug(params.getSlug()).orElseThrow(PostNotFoundException::new);
-        User user = (User) params.getUserDetails();
+                postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
 
         if (!user.getId().equals(post.getUser().getId())) {
             throw new AccessDeniedException();

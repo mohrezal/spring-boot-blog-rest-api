@@ -1,16 +1,14 @@
 package com.github.mohrezal.springbootblogrestapi.domains.users.commands.params;
 
-import lombok.AllArgsConstructor;
+import com.github.mohrezal.springbootblogrestapi.shared.interfaces.AuthenticatedParams;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class FollowUserCommandParams {
-    private UserDetails userDetails;
-    private String handle;
+public record FollowUserCommandParams(UserDetails userDetails, String handle)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

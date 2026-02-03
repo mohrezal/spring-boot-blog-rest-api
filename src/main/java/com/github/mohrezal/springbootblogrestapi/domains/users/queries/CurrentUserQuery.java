@@ -2,10 +2,8 @@ package com.github.mohrezal.springbootblogrestapi.domains.users.queries;
 
 import com.github.mohrezal.springbootblogrestapi.domains.users.dtos.UserSummary;
 import com.github.mohrezal.springbootblogrestapi.domains.users.mappers.UserMapper;
-import com.github.mohrezal.springbootblogrestapi.domains.users.models.User;
 import com.github.mohrezal.springbootblogrestapi.domains.users.queries.params.CurrentUserQueryParams;
-import com.github.mohrezal.springbootblogrestapi.shared.exceptions.types.ForbiddenException;
-import com.github.mohrezal.springbootblogrestapi.shared.interfaces.Query;
+import com.github.mohrezal.springbootblogrestapi.shared.abstracts.AuthenticatedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -17,17 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
-public class CurrentUserQuery implements Query<CurrentUserQueryParams, UserSummary> {
+public class CurrentUserQuery extends AuthenticatedQuery<CurrentUserQueryParams, UserSummary> {
 
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
     @Override
     public UserSummary execute(CurrentUserQueryParams params) {
-        if (!(params.getUserDetails() instanceof User currentUser)) {
-            throw new ForbiddenException();
-        }
+        validate(params);
 
-        return userMapper.toUserSummary(currentUser);
+        return userMapper.toUserSummary(user);
     }
 }
