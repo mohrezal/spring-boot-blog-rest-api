@@ -44,6 +44,8 @@ public class SecurityConfig {
         "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
     };
 
+    private static final String[] PUBLIC_ACTUATOR_PATHS = {"/actuator/health", "/actuator/info"};
+
     private static final String[] PUBLIC_POST_ENDPOINTS = {
         Routes.build(Routes.Auth.BASE, Routes.Auth.REGISTER),
         Routes.build(Routes.Auth.BASE, Routes.Auth.LOGIN),
@@ -74,6 +76,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers(PUBLIC_SWAGGER_PATHS)
+                                        .permitAll()
+                                        .requestMatchers(PUBLIC_ACTUATOR_PATHS)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
                                         .permitAll()

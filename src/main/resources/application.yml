@@ -1,8 +1,21 @@
 server:
   port: ${APPLICATION_SERVER_PORT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
 logging:
   level:
+    root: INFO
     org.springframework.boot.devtools.autoconfigure: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
 spring:
   config:
     import:  optional:file:.env[.properties]
