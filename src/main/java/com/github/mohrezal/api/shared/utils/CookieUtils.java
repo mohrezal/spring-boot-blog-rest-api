@@ -16,7 +16,7 @@ public class CookieUtils {
     private final ApplicationProperties applicationProperties;
 
     public String getCookieValue(Cookie[] cookies, String cookieName) {
-        if (cookies == null) {
+        if (cookies == null || cookies.length == 0) {
             return null;
         }
         return Arrays.stream(cookies)
@@ -52,15 +52,6 @@ public class CookieUtils {
                 .maxAge(0)
                 .sameSite("Strict")
                 .build();
-    }
-
-    public Cookie createServletCookie(String name, String value, int maxAgeSeconds) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAgeSeconds);
-        return cookie;
     }
 
     public ResponseCookie createAccessTokenCookie(String accessToken) {
