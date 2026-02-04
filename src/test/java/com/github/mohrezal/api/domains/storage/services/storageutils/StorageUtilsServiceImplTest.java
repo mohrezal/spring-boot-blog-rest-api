@@ -11,6 +11,10 @@ import static org.mockito.Mockito.when;
 import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class StorageUtilsServiceImplTest {
@@ -29,6 +34,8 @@ class StorageUtilsServiceImplTest {
     @Mock private ApplicationProperties.Storage storage;
 
     @Mock private DataSize dataSize;
+
+    @Mock private MultipartFile multipartFile;
 
     @Test
     void getExtension_whenInvalidFilename_shouldReturnEmpty() {
@@ -92,5 +99,38 @@ class StorageUtilsServiceImplTest {
         Storage storage = aStorage().withUser(owner).build();
 
         assertFalse(storageUtilsService.isOwner(otherUser, storage));
+    }
+
+    @Test
+    void getMimeType_whenValidFile_shouldReturnDetectedMimeType() throws IOException {
+        byte[] content = "plain text content".getBytes(StandardCharsets.UTF_8);
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(content));
+        when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
+
+        String mimeType = storageUtilsService.getMimeType(multipartFile);
+
+        assertEquals("text/plain", mimeType);
+    }
+
+    @Test
+    void isValidMimeType_whenMimeTypeIsAllowed_shouldReturnTrue() throws IOException {
+        byte[] content = "plain text content".getBytes(StandardCharsets.UTF_8);
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(content));
+        when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
+        when(applicationProperties.storage()).thenReturn(storage);
+        when(storage.allowedMimeTypes()).thenReturn(List.of("text/plain", "image/jpeg"));
+
+        assertTrue(storageUtilsService.isValidMimeType(multipartFile));
+    }
+
+    @Test
+    void isValidMimeType_whenMimeTypeIsNotAllowed_shouldReturnFalse() throws IOException {
+        byte[] content = "plain text content".getBytes(StandardCharsets.UTF_8);
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(content));
+        when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
+        when(applicationProperties.storage()).thenReturn(storage);
+        when(storage.allowedMimeTypes()).thenReturn(List.of("image/jpeg", "image/png"));
+
+        assertFalse(storageUtilsService.isValidMimeType(multipartFile));
     }
 }
