@@ -1,7 +1,6 @@
 package com.github.mohrezal.api.domains.storage.queries;
 
 import com.github.mohrezal.api.domains.storage.dtos.StorageFileResponse;
-import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.queries.params.GetStorageByFilenameQueryParams;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.s3.S3StorageService;
@@ -27,12 +26,12 @@ public class GetStorageByFilenameQuery
     @Transactional(readOnly = true)
     @Override
     public StorageFileResponse execute(GetStorageByFilenameQueryParams params) {
-        Storage storage =
+        var storage =
                 storageRepository
-                        .findByFilename(params.getFilename())
+                        .findByFilename(params.filename())
                         .orElseThrow(ResourceNotFoundException::new);
 
-        byte[] data = s3StorageService.download(storage.getFilename());
+        var data = s3StorageService.download(storage.getFilename());
 
         return StorageFileResponse.builder()
                 .data(data)

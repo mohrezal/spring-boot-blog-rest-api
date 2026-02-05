@@ -7,7 +7,6 @@ import com.github.mohrezal.api.domains.storage.commands.UploadProfileCommand;
 import com.github.mohrezal.api.domains.storage.commands.params.DeleteCommandParams;
 import com.github.mohrezal.api.domains.storage.commands.params.UploadCommandParams;
 import com.github.mohrezal.api.domains.storage.commands.params.UploadProfileCommandParams;
-import com.github.mohrezal.api.domains.storage.dtos.StorageFileResponse;
 import com.github.mohrezal.api.domains.storage.dtos.StorageSummary;
 import com.github.mohrezal.api.domains.storage.dtos.UploadProfileRequest;
 import com.github.mohrezal.api.domains.storage.dtos.UploadRequest;
@@ -71,9 +70,9 @@ public class StorageController {
     @GetMapping(Routes.Storage.BY_FILENAME)
     public ResponseEntity<byte[]> download(@PathVariable String filename) {
         var query = getStorageByFilenameQueries.getObject();
-        var params = GetStorageByFilenameQueryParams.builder().filename(filename).build();
+        var params = new GetStorageByFilenameQueryParams(filename);
 
-        StorageFileResponse response = query.execute(params);
+        var response = query.execute(params);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(response.getMimeType()))
