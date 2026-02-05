@@ -97,12 +97,7 @@ public class StorageController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         var query = getUserStorageListQueries.getObject();
-        var params =
-                GetUserStorageListQueryParams.builder()
-                        .userDetails(userDetails)
-                        .page(page)
-                        .size(size)
-                        .build();
+        var params = new GetUserStorageListQueryParams(userDetails, page, size);
         return ResponseEntity.ok().body(query.execute(params));
     }
 

@@ -2,23 +2,14 @@ package com.github.mohrezal.api.domains.storage.dtos;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class StorageSummary {
-    private UUID id;
-    private String filename;
-    private String originalFilename;
-    private String mimeType;
-    private Long size;
-    private String title;
-    private String alt;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-}
+public record StorageSummary(
+        UUID id,
+        String filename,
+        String originalFilename,
+        String mimeType,
+        Long size,
+        String title,
+        String alt,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt) {}
