@@ -47,7 +47,7 @@ class GetStorageByFilenameQueryTest {
         verify(s3StorageService, times(1)).download(eq(params.filename()));
 
         assertNotNull(response);
-        assertEquals(params.filename(), response.getFilename());
+        assertEquals(params.filename(), response.filename());
     }
 
     @Test

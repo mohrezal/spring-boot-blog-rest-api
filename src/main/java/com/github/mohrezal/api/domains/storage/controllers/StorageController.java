@@ -70,8 +70,8 @@ public class StorageController {
         var response = query.execute(params);
 
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(response.getMimeType()))
-                .body(response.getData());
+                .contentType(MediaType.parseMediaType(response.mimeType()))
+                .body(response.data());
     }
 
     @IsAdminOrUser
@@ -79,8 +79,7 @@ public class StorageController {
     public ResponseEntity<Void> deleteByFilename(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String filename) {
         var command = deleteCommands.getObject();
-        var params =
-                DeleteCommandParams.builder().fileName(filename).userDetails(userDetails).build();
+        var params = new DeleteCommandParams(userDetails, filename);
         command.execute(params);
         return ResponseEntity.noContent().build();
     }

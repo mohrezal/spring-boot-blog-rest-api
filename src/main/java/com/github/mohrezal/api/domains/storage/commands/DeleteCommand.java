@@ -1,7 +1,6 @@
 package com.github.mohrezal.api.domains.storage.commands;
 
 import com.github.mohrezal.api.domains.storage.commands.params.DeleteCommandParams;
-import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
@@ -32,8 +31,8 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     public Void execute(DeleteCommandParams params) {
         validate(params);
 
-        String fileName = params.fileName();
-        Storage storage =
+        var fileName = params.fileName();
+        var storage =
                 storageRepository
                         .findByFilename(fileName)
                         .orElseThrow(ResourceNotFoundException::new);
