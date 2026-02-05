@@ -28,7 +28,9 @@ app:
     refreshTokenLifeTime: 86400000
     allowedOrigin: http://localhost:3000
   storage:
-    allowedMimeTypes: image/jpeg,image/png
+    allowedMimeTypes:
+      - image/jpeg
+      - image/png
     maxFileSize: 5MB
     endpoint: http://localhost:9000
     accessKey: test-access-key

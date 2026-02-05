@@ -13,7 +13,11 @@ import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -24,12 +28,6 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleResourceNotFoundException(
             ResourceNotFoundException ex, WebRequest request) {
-        return buildErrorResponse(ex);
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleAccessDeniedException(
-            AccessDeniedException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 
@@ -83,6 +81,27 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                         .message(MessageKey.SHARED_ERROR_BAD_CREDENTIALS.getMessage())
                         .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<@NonNull ErrorResponse> handleSpringSecurityAccessDeniedException(
+            Exception ex, WebRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null
+                || !auth.isAuthenticated()
+                || auth instanceof AnonymousAuthenticationToken) {
+            ErrorResponse errorResponse =
+                    ErrorResponse.builder()
+                            .message(MessageKey.SHARED_ERROR_UNAUTHORIZED.getMessage())
+                            .build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
+
+        ErrorResponse errorResponse =
+                ErrorResponse.builder()
+                        .message(MessageKey.SHARED_ERROR_FORBIDDEN.getMessage())
+                        .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
