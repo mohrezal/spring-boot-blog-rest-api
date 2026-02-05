@@ -6,7 +6,6 @@ import com.github.mohrezal.api.domains.storage.enums.StorageType;
 import com.github.mohrezal.api.domains.storage.exceptions.types.StorageFileSizeExceededException;
 import com.github.mohrezal.api.domains.storage.exceptions.types.StorageInvalidMimeTypeException;
 import com.github.mohrezal.api.domains.storage.mappers.StorageMapper;
-import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
@@ -36,7 +35,7 @@ public class UploadProfileCommand
     public void validate(UploadProfileCommandParams params) {
         super.validate(params);
 
-        MultipartFile file = params.uploadProfileRequest().getFile();
+        MultipartFile file = params.uploadProfileRequest().file();
         try {
             if (!storageUtilsService.isValidMimeType(file)) {
                 throw new StorageInvalidMimeTypeException();
@@ -59,13 +58,13 @@ public class UploadProfileCommand
             storageService.delete(user.getAvatar());
         }
 
-        String firstName = user.getFirstName() != null ? user.getFirstName() : "";
-        String lastName = user.getLastName() != null ? user.getLastName() : "";
-        String profileInfo = String.format("%s %s profile image", firstName, lastName).trim();
+        var firstName = user.getFirstName() != null ? user.getFirstName() : "";
+        var lastName = user.getLastName() != null ? user.getLastName() : "";
+        var profileInfo = String.format("%s %s profile image", firstName, lastName).trim();
 
-        Storage storage =
+        var storage =
                 storageService.upload(
-                        params.uploadProfileRequest().getFile(),
+                        params.uploadProfileRequest().file(),
                         profileInfo,
                         profileInfo,
                         StorageType.PROFILE,

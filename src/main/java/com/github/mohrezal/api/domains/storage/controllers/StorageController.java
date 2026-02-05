@@ -107,11 +107,7 @@ public class StorageController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @ModelAttribute UploadProfileRequest request) {
         var command = uploadProfileCommands.getObject();
-        var params =
-                UploadProfileCommandParams.builder()
-                        .userDetails(userDetails)
-                        .uploadProfileRequest(request)
-                        .build();
+        var params = new UploadProfileCommandParams(userDetails, request);
 
         command.validate(params);
 
