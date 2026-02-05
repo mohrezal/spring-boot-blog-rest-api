@@ -2,12 +2,10 @@ package com.github.mohrezal.api.domains.storage.commands;
 
 import com.github.mohrezal.api.domains.storage.commands.params.UploadCommandParams;
 import com.github.mohrezal.api.domains.storage.dtos.StorageSummary;
-import com.github.mohrezal.api.domains.storage.dtos.UploadRequest;
 import com.github.mohrezal.api.domains.storage.enums.StorageType;
 import com.github.mohrezal.api.domains.storage.exceptions.types.StorageFileSizeExceededException;
 import com.github.mohrezal.api.domains.storage.exceptions.types.StorageInvalidMimeTypeException;
 import com.github.mohrezal.api.domains.storage.mappers.StorageMapper;
-import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
@@ -34,14 +32,14 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
         super.validate(params);
 
         try {
-            if (!storageUtils.isValidMimeType(params.uploadRequest().getFile())) {
+            if (!storageUtils.isValidMimeType(params.uploadRequest().file())) {
                 throw new StorageInvalidMimeTypeException();
             }
         } catch (IOException e) {
             throw new StorageInvalidMimeTypeException();
         }
 
-        if (storageUtils.isMaxFileSizeExceeded(params.uploadRequest().getFile().getSize())) {
+        if (storageUtils.isMaxFileSizeExceeded(params.uploadRequest().file().getSize())) {
             throw new StorageFileSizeExceededException();
         }
     }
@@ -51,12 +49,11 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
     public StorageSummary execute(UploadCommandParams params) {
         validate(params);
 
-        UploadRequest request = params.uploadRequest();
-        StorageType type = params.type() != null ? params.type() : StorageType.MEDIA;
+        var request = params.uploadRequest();
+        var type = params.type() != null ? params.type() : StorageType.MEDIA;
 
-        Storage savedStorage =
-                storageService.upload(
-                        request.getFile(), request.getTitle(), request.getAlt(), type, user);
+        var savedStorage =
+                storageService.upload(request.file(), request.title(), request.alt(), type, user);
 
         return storageMapper.toStorageSummary(savedStorage);
     }

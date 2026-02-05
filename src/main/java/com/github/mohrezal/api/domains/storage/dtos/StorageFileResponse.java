@@ -1,12 +1,3 @@
 package com.github.mohrezal.api.domains.storage.dtos;
 
-import lombok.Builder;
-import lombok.Data;
-
-@Data
-@Builder
-public class StorageFileResponse {
-    private byte[] data;
-    private String mimeType;
-    private String filename;
-}
+public record StorageFileResponse(byte[] data, String mimeType, String filename) {}

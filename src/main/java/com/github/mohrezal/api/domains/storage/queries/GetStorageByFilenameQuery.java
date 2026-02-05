@@ -33,10 +33,6 @@ public class GetStorageByFilenameQuery
 
         var data = s3StorageService.download(storage.getFilename());
 
-        return StorageFileResponse.builder()
-                .data(data)
-                .mimeType(storage.getMimeType())
-                .filename(storage.getFilename())
-                .build();
+        return new StorageFileResponse(data, storage.getMimeType(), storage.getFilename());
     }
 }

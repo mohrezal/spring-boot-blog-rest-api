@@ -55,12 +55,7 @@ public class StorageController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @ModelAttribute UploadRequest uploadRequest) {
         var command = uploadCommands.getObject();
-        var params =
-                UploadCommandParams.builder()
-                        .uploadRequest(uploadRequest)
-                        .userDetails(userDetails)
-                        .type(StorageType.MEDIA)
-                        .build();
+        var params = new UploadCommandParams(userDetails, uploadRequest, StorageType.MEDIA);
 
         command.validate(params);
 
