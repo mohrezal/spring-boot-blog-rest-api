@@ -1,9 +1,7 @@
 package com.github.mohrezal.api.domains.posts.repositories;
 
-import com.github.mohrezal.api.domains.categories.models.Category;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.models.Post;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +95,7 @@ public interface PostRepository
             if (categorySlugs == null || categorySlugs.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
-            Join<Post, Category> categoryJoin = root.join("categories");
+            var categoryJoin = root.join("categories");
             return categoryJoin.get("slug").in(categorySlugs);
         };
     }
@@ -107,7 +105,7 @@ public interface PostRepository
             if (categorySlug == null) {
                 return criteriaBuilder.conjunction();
             }
-            Join<Post, Category> categoryJoin = root.join("categories");
+            var categoryJoin = root.join("categories");
             return criteriaBuilder.equal(categoryJoin.get("slug"), categorySlug);
         };
     }
