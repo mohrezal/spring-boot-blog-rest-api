@@ -25,7 +25,7 @@ public class GetPostSlugAvailabilityQuery
 
     @Override
     public void validate(GetPostSlugAvailabilityQueryParams params) {
-        if (!params.getSlug().matches(RegexUtils.SLUG_PATTERN)) {
+        if (!params.slug().matches(RegexUtils.SLUG_PATTERN)) {
             throw new PostSlugFormatException();
         }
     }
@@ -34,12 +34,12 @@ public class GetPostSlugAvailabilityQuery
     @Override
     public SlugAvailability execute(GetPostSlugAvailabilityQueryParams params) {
         validate(params);
-        if (postRepository.existsBySlug(params.getSlug())) {
+        if (postRepository.existsBySlug(params.slug())) {
             return SlugAvailability.builder()
                     .available(false)
                     .suggestion(
                             slugGeneratorService.getSlug(
-                                    params.getSlug(), postRepository::existsBySlug))
+                                    params.slug(), postRepository::existsBySlug))
                     .build();
         }
 

@@ -125,8 +125,8 @@ public class PostController {
 
     @GetMapping(Routes.Post.SLUG_AVAILABILITY)
     public ResponseEntity<@NonNull SlugAvailability> getSlugAvailability(
-            @RequestParam(name = "slug", required = true) String slug) {
-        var params = GetPostSlugAvailabilityQueryParams.builder().slug(slug).build();
+            @RequestParam(name = "slug") String slug) {
+        var params = new GetPostSlugAvailabilityQueryParams(slug);
 
         return ResponseEntity.ok().body(getPostSlugAvailabilityQueries.getObject().execute(params));
     }
