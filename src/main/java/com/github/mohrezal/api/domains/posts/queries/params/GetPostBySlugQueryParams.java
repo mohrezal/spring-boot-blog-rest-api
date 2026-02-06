@@ -1,12 +1,12 @@
 package com.github.mohrezal.api.domains.posts.queries.params;
 
-import lombok.Builder;
-import lombok.Data;
+import com.github.mohrezal.api.shared.interfaces.AuthenticatedParams;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
-@Builder
-public class GetPostBySlugQueryParams {
-    private String slug;
-    private UserDetails userDetails;
+public record GetPostBySlugQueryParams(UserDetails userDetails, String slug)
+        implements AuthenticatedParams {
+    @Override
+    public UserDetails getUserDetails() {
+        return userDetails;
+    }
 }

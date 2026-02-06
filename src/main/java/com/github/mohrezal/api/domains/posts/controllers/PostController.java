@@ -118,7 +118,7 @@ public class PostController {
     @GetMapping(Routes.Post.GET_POST_BY_SLUG)
     public ResponseEntity<@NonNull PostDetail> getPostBySlug(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
-        var params = GetPostBySlugQueryParams.builder().slug(slug).userDetails(userDetails).build();
+        var params = new GetPostBySlugQueryParams(userDetails, slug);
 
         return ResponseEntity.ok().body(getPostBySlugQueries.getObject().execute(params));
     }
