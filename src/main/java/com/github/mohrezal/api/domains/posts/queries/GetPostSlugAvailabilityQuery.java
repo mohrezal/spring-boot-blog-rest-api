@@ -35,14 +35,11 @@ public class GetPostSlugAvailabilityQuery
     public SlugAvailability execute(GetPostSlugAvailabilityQueryParams params) {
         validate(params);
         if (postRepository.existsBySlug(params.slug())) {
-            return SlugAvailability.builder()
-                    .available(false)
-                    .suggestion(
-                            slugGeneratorService.getSlug(
-                                    params.slug(), postRepository::existsBySlug))
-                    .build();
+            return new SlugAvailability(
+                    false,
+                    slugGeneratorService.getSlug(params.slug(), postRepository::existsBySlug));
         }
 
-        return SlugAvailability.builder().available(true).suggestion(null).build();
+        return new SlugAvailability(true, null);
     }
 }

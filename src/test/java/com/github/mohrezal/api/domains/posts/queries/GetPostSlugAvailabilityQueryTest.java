@@ -50,8 +50,8 @@ class GetPostSlugAvailabilityQueryTest {
         when(postRepository.existsBySlug(eq(params.slug()))).thenReturn(false);
 
         var result = query.execute(params);
-        assertTrue(result.isAvailable());
-        assertNull(result.getSuggestion());
+        assertTrue(result.available());
+        assertNull(result.suggestion());
     }
 
     @Test
@@ -63,8 +63,8 @@ class GetPostSlugAvailabilityQueryTest {
 
         var result = query.execute(params);
 
-        assertFalse(result.isAvailable());
-        assertNotNull(result.getSuggestion());
-        assertEquals("new-post-1", result.getSuggestion());
+        assertFalse(result.available());
+        assertNotNull(result.suggestion());
+        assertEquals("new-post-1", result.suggestion());
     }
 }
