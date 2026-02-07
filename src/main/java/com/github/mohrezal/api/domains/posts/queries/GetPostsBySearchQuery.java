@@ -7,13 +7,9 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQuer
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.interfaces.Query;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,17 +25,15 @@ public class GetPostsBySearchQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<PostSummary> execute(GetPostsBySearchQueryParams params) {
-        PageRequest pageable = PageRequest.of(params.getPage(), params.getSize());
-        Page<UUID> searchResult =
-                postRepository.findAllPostBySearchQuery(params.getQuery(), pageable);
+        var pageable = PageRequest.of(params.page(), params.size());
+        var searchResult = postRepository.findAllPostBySearchQuery(params.query(), pageable);
 
-        List<UUID> rankedIds = searchResult.getContent();
-        List<Post> posts = postRepository.findAllByIdIn(rankedIds);
+        var rankedIds = searchResult.getContent();
+        var posts = postRepository.findAllByIdIn(rankedIds);
 
-        Map<UUID, Post> postById =
-                posts.stream().collect(Collectors.toMap(Post::getId, post -> post));
+        var postById = posts.stream().collect(Collectors.toMap(Post::getId, post -> post));
 
-        List<PostSummary> orderedSummaries =
+        var orderedSummaries =
                 rankedIds.stream()
                         .map(postById::get)
                         .filter(Objects::nonNull)

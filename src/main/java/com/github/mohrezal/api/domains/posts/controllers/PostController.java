@@ -169,8 +169,7 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(name = "query") String query) {
-        var params =
-                GetPostsBySearchQueryParams.builder().query(query).page(page).size(size).build();
+        var params = new GetPostsBySearchQueryParams(query, size, page);
         return ResponseEntity.ok().body(getPostsBySearchQuery.execute(params));
     }
 }
