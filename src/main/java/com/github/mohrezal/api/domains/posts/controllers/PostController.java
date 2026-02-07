@@ -73,13 +73,8 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Set<String> categorySlugs,
             @RequestParam(required = false) Set<UUID> authorIds) {
-        var params =
-                GetPostsQueryParams.builder()
-                        .page(page)
-                        .size(size)
-                        .categorySlugs(categorySlugs)
-                        .authorIds(authorIds)
-                        .build();
+
+        var params = new GetPostsQueryParams(page, size, categorySlugs, authorIds);
 
         var query = getPostsQueries.getObject();
         return ResponseEntity.ok(query.execute(params));
