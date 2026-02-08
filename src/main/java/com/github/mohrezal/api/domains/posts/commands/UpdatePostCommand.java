@@ -49,14 +49,14 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
         }
 
         Set<Category> categories =
-                categoryRepository.findAllByIdIn(params.updatePostRequest().getCategoryIds());
+                categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
 
-        if (categories.size() != params.updatePostRequest().getCategoryIds().size()) {
+        if (categories.size() != params.updatePostRequest().categoryIds().size()) {
             throw new CategoryNotFoundException();
         }
 
-        if (!post.getSlug().equals(params.updatePostRequest().getSlug())) {
-            if (postRepository.existsBySlug(params.updatePostRequest().getSlug())) {
+        if (!post.getSlug().equals(params.updatePostRequest().slug())) {
+            if (postRepository.existsBySlug(params.updatePostRequest().slug())) {
                 throw new PostSlugAlreadyExistsException();
             }
         }

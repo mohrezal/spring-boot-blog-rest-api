@@ -1,19 +1,15 @@
 package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryNotFoundException;
-import com.github.mohrezal.api.domains.categories.models.Category;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
-import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
-import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,22 +35,21 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     public PostDetail execute(CreatePostCommandParams params) {
         validate(params);
 
-        Set<UUID> categoryIds = params.createPostRequest().getCategoryIds();
-        Set<Category> categories = this.categoryRepository.findAllByIdIn(categoryIds);
+        var categoryIds = params.createPostRequest().categoryIds();
+        var categories = this.categoryRepository.findAllByIdIn(categoryIds);
 
         if (categories.size() != categoryIds.size()) {
             throw new CategoryNotFoundException();
         }
 
-        Post newPost = this.postMapper.toPost(params.createPostRequest());
+        var newPost = this.postMapper.toPost(params.createPostRequest());
         newPost.setCategories(categories);
         newPost.setUser(user);
         newPost.setStatus(PostStatus.DRAFT);
-        String slug =
-                slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
+        var slug = slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
         newPost.setSlug(slug);
         try {
-            Post savedPost = postRepository.save(newPost);
+            var savedPost = postRepository.save(newPost);
             return this.postMapper.toPostDetail(savedPost);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceConflictException();

@@ -7,27 +7,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.UUID;
-import lombok.Builder;
-import lombok.Data;
 
-@Data
-@Builder
-public class UpdatePostRequest {
-
-    @NotBlank
-    @Size(max = 255)
-    private String title;
-
-    @NotBlank private String content;
-
-    @NotBlank private String avatarUrl;
-
-    @NotEmpty private Set<UUID> categoryIds;
-
-    @Size(max = 300)
-    private String description;
-
-    @NotBlank
-    @Pattern(regexp = RegexUtils.SLUG_PATTERN)
-    private String slug;
-}
+public record UpdatePostRequest(
+        @NotBlank @Size(max = 255) String title,
+        @NotBlank String content,
+        @NotBlank String avatarUrl,
+        @NotEmpty Set<UUID> categoryIds,
+        @Size(max = 300) String description,
+        @NotBlank @Pattern(regexp = RegexUtils.SLUG_PATTERN) String slug) {}
