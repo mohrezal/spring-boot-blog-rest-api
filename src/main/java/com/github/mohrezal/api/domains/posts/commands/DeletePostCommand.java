@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.DeletePostCommandParams;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
-import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
@@ -26,8 +25,7 @@ public class DeletePostCommand extends AuthenticatedCommand<DeletePostCommandPar
     public Void execute(DeletePostCommandParams params) {
         validate(params);
 
-        Post post =
-                postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
 
         if (!user.getId().equals(post.getUser().getId())) {
             throw new AccessDeniedException();
