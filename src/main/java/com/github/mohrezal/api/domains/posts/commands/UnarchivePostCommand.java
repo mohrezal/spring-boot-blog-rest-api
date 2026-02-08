@@ -4,7 +4,6 @@ import com.github.mohrezal.api.domains.posts.commands.params.UnarchivePostComman
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
-import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
@@ -32,8 +31,7 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
     public Void execute(UnarchivePostCommandParams params) {
         validate(params);
 
-        Post post =
-                postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
 
         if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
             throw new AccessDeniedException();
