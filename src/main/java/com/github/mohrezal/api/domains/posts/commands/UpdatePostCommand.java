@@ -1,20 +1,17 @@
 package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryNotFoundException;
-import com.github.mohrezal.api.domains.categories.models.Category;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
-import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,7 +36,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     public PostDetail execute(UpdatePostCommandParams params) {
         validate(params);
 
-        Post post =
+        var post =
                 this.postRepository
                         .findBySlug(params.slug())
                         .orElseThrow(PostNotFoundException::new);
@@ -48,8 +45,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
             throw new AccessDeniedException();
         }
 
-        Set<Category> categories =
-                categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
+        var categories = categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
 
         if (categories.size() != params.updatePostRequest().categoryIds().size()) {
             throw new CategoryNotFoundException();
@@ -65,7 +61,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
         post.setCategories(categories);
 
         try {
-            Post savedPost = postRepository.save(post);
+            var savedPost = postRepository.save(post);
             return this.postMapper.toPostDetail(savedPost);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceConflictException();
