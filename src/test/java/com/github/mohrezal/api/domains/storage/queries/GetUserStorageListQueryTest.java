@@ -75,7 +75,7 @@ class GetUserStorageListQueryTest {
         verify(storageMapper, times(1)).toStorageSummary(mockedStorage);
 
         assertNotNull(response);
-        assertEquals(response.getItems().size(), mockedPage.getContent().size());
+        assertEquals(response.items().size(), mockedPage.getContent().size());
     }
 
     @Test
@@ -91,8 +91,8 @@ class GetUserStorageListQueryTest {
         verify(storageRepository, times(1))
                 .findAllByUserAndType(eq(mockedUser), eq(StorageType.MEDIA), any(Pageable.class));
 
-        assertTrue(response.getItems().isEmpty());
-        assertEquals(0, response.getTotalElements());
-        assertEquals(1, response.getTotalPages());
+        assertTrue(response.items().isEmpty());
+        assertEquals(0, response.totalElements());
+        assertEquals(1, response.totalPages());
     }
 }

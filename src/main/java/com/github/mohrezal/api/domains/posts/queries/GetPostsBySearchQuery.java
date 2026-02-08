@@ -40,17 +40,16 @@ public class GetPostsBySearchQuery
                         .map(postMapper::toPostSummary)
                         .toList();
 
-        return PageResponse.<PostSummary>builder()
-                .items(orderedSummaries)
-                .pageNumber(searchResult.getNumber())
-                .pageSize(searchResult.getSize())
-                .totalElements(searchResult.getTotalElements())
-                .totalPages(searchResult.getTotalPages())
-                .isFirst(searchResult.isFirst())
-                .isLast(searchResult.isLast())
-                .isEmpty(searchResult.isEmpty())
-                .hasNext(searchResult.hasNext())
-                .hasPrevious(searchResult.hasPrevious())
-                .build();
+        return new PageResponse<>(
+                orderedSummaries,
+                searchResult.getNumber(),
+                searchResult.getSize(),
+                searchResult.getTotalElements(),
+                searchResult.getTotalPages(),
+                searchResult.isFirst(),
+                searchResult.isLast(),
+                searchResult.isEmpty(),
+                searchResult.hasNext(),
+                searchResult.hasPrevious()); //
     }
 }

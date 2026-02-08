@@ -47,8 +47,8 @@ class GetPostsQueryTest {
                 .thenReturn(emptyPage);
 
         var result = query.execute(params);
-        assertTrue(result.getItems().isEmpty());
-        assertEquals(0, result.getTotalElements());
+        assertTrue(result.items().isEmpty());
+        assertEquals(0, result.totalElements());
 
         verify(repository, times(1))
                 .findAll(argThat((Specification<@NonNull Post> spec) -> true), any(Pageable.class));
@@ -79,8 +79,8 @@ class GetPostsQueryTest {
         verify(repository, times(1))
                 .findAll(argThat((Specification<@NonNull Post> spec) -> true), any(Pageable.class));
 
-        assertEquals(2, result.getItems().size());
-        assertEquals(summary1, result.getItems().get(0));
-        assertEquals(summary2, result.getItems().get(1));
+        assertEquals(2, result.items().size());
+        assertEquals(summary1, result.items().get(0));
+        assertEquals(summary2, result.items().get(1));
     }
 }

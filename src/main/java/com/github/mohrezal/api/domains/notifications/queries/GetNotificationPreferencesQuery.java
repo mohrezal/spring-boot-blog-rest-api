@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.notifications.queries;
 
 import com.github.mohrezal.api.domains.notifications.dtos.NotificationPreferenceSummary;
 import com.github.mohrezal.api.domains.notifications.mappers.NotificationPreferenceMapper;
-import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.queries.params.GetNotificationPreferencesQueryParams;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
@@ -26,7 +25,7 @@ public class GetNotificationPreferencesQuery
     @Override
     public NotificationPreferenceSummary execute(GetNotificationPreferencesQueryParams params) {
         validate(params);
-        NotificationPreference preference =
+        var preference =
                 this.notificationPreferenceRepository
                         .findByUserId(user.getId())
                         .orElseGet(NotificationUtils::defaultPreferences);

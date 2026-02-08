@@ -44,9 +44,9 @@ class GetPostsBySearchQueryTest {
 
         var result = query.execute(params);
 
-        assertTrue(result.getItems().isEmpty());
-        assertEquals(0, result.getTotalElements());
-        assertEquals(0, result.getTotalPages());
+        assertTrue(result.items().isEmpty());
+        assertEquals(0, result.totalElements());
+        assertEquals(0, result.totalPages());
     }
 
     @Test
@@ -73,8 +73,8 @@ class GetPostsBySearchQueryTest {
 
         var result = query.execute(params);
 
-        assertEquals(2, result.getItems().size());
-        assertEquals(summary2, result.getItems().get(0));
-        assertEquals(summary1, result.getItems().get(1));
+        assertEquals(2, result.items().size());
+        assertEquals(summary2, result.items().get(0));
+        assertEquals(summary1, result.items().get(1));
     }
 }
