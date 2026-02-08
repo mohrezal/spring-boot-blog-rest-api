@@ -4,7 +4,6 @@ import com.github.mohrezal.api.domains.posts.commands.params.ArchivePostCommandP
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
-import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
@@ -32,8 +31,7 @@ public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandP
     public Void execute(ArchivePostCommandParams params) {
         validate(params);
 
-        Post post =
-                postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
 
         if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
             throw new AccessDeniedException();
