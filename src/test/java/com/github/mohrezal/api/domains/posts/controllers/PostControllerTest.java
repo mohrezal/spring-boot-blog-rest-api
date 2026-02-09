@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.controllers;
 
 import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,15 +29,18 @@ import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandPa
 import com.github.mohrezal.api.domains.posts.dtos.CreatePostRequest;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
+import com.github.mohrezal.api.domains.posts.dtos.SlugAvailability;
 import com.github.mohrezal.api.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
+import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugFormatException;
 import com.github.mohrezal.api.domains.posts.queries.GetPostBySlugQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostSlugAvailabilityQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsBySearchQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
+import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
@@ -98,6 +102,9 @@ class PostControllerTest {
 
     @MockitoBean private GetPostSlugAvailabilityQuery getPostSlugAvailabilityQuery;
 
+    @MockitoBean
+    private ObjectProvider<GetPostSlugAvailabilityQuery> getPostSlugAvailabilityQueries;
+
     @MockitoBean private GetPostsBySearchQuery getPostsBySearchQuery;
 
     @Autowired private UserRepository userRepository;
@@ -156,6 +163,46 @@ class PostControllerTest {
                         get(Routes.build(Routes.Post.BASE, "missing-slug"))
                                 .with(AuthenticationUtils.authenticate(user)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getSlugAvailability_whenSlugAvailable_shouldReturn200() throws Exception {
+        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
+        when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
+                .thenReturn(new SlugAvailability(true, null));
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "unique-slug"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.suggestion").value(nullValue()));
+    }
+
+    @Test
+    void getSlugAvailability_whenSlugTaken_shouldReturn200WithSuggestion() throws Exception {
+        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
+        when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
+                .thenReturn(new SlugAvailability(false, "unique-slug-1"));
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "taken-slug"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false))
+                .andExpect(jsonPath("$.suggestion").value("unique-slug-1"));
+    }
+
+    @Test
+    void getSlugAvailability_whenInvalidSlug_shouldReturn400() throws Exception {
+        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
+        when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
+                .thenThrow(new PostSlugFormatException());
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "Invalid Slug"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
