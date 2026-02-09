@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,10 +24,13 @@ import com.github.mohrezal.api.domains.posts.commands.PublishPostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UpdatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
+import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.CreatePostRequest;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
+import com.github.mohrezal.api.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
+import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.api.domains.posts.queries.GetPostBySlugQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostSlugAvailabilityQuery;
@@ -37,6 +41,7 @@ import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
+import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.support.builders.UserBuilder;
 import com.github.mohrezal.api.support.security.AuthenticationUtils;
 import java.util.List;
@@ -73,6 +78,8 @@ class PostControllerTest {
     @MockitoBean private ObjectProvider<CreatePostCommand> createPostCommands;
 
     @MockitoBean private UpdatePostCommand updatePostCommand;
+
+    @MockitoBean private ObjectProvider<UpdatePostCommand> updatePostCommands;
 
     @MockitoBean private PublishPostCommand publishPostCommand;
 
@@ -231,5 +238,181 @@ class PostControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void updatePostBySlug_whenAuthenticatedAndValidRequest_shouldReturn200() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var postDetail = mock(PostDetail.class);
+
+        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
+        when(updatePostCommand.execute(any(UpdatePostCommandParams.class))).thenReturn(postDetail);
+
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void updatePostBySlug_whenNotAuthenticated_shouldReturn401() throws Exception {
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void updatePostBySlug_whenInvalidRequest_shouldReturn400() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        var body = new UpdatePostRequest(null, null, null, null, null, null);
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updatePostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
+        when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
+                .thenThrow(new PostNotFoundException());
+
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "missing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updatePostBySlug_whenCategoryNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
+        when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
+                .thenThrow(new CategoryNotFoundException());
+
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updatePostBySlug_whenSlugConflict_shouldReturn409() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
+        when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
+                .thenThrow(new PostSlugAlreadyExistsException());
+
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void updatePostBySlug_whenNotOwner_shouldReturn403() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
+        when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
+                .thenThrow(new AccessDeniedException());
+
+        var body =
+                new UpdatePostRequest(
+                        "Updated title",
+                        "Updated content",
+                        "UPDATED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Updated description",
+                        "updated-title");
+
+        mockMvc.perform(
+                        put(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isForbidden());
     }
 }
