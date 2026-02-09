@@ -3,23 +3,12 @@ package com.github.mohrezal.api.domains.users.dtos;
 import com.github.mohrezal.api.domains.storage.dtos.StorageSummary;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class FollowerSummary {
-    private UUID id;
-    private String handle;
-    private String firstName;
-    private String lastName;
-    private StorageSummary avatar;
-    private boolean isFollowing;
-    private OffsetDateTime followedAt;
-}
+public record FollowerSummary(
+        UUID id,
+        String handle,
+        String firstName,
+        String lastName,
+        StorageSummary avatar,
+        boolean isFollowing,
+        OffsetDateTime followedAt) {}

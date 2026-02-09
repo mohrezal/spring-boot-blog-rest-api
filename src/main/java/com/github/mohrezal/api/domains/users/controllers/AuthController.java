@@ -60,10 +60,10 @@ public class AuthController {
 
         var accessTokenCookie =
                 cookieUtils.createAccessTokenCookie(
-                        registerResponse.getAuthResponse().getAccessToken());
+                        registerResponse.getAuthResponse().accessToken());
         var refreshTokenCookie =
                 cookieUtils.createRefreshTokenCookie(
-                        registerResponse.getAuthResponse().getRefreshToken());
+                        registerResponse.getAuthResponse().refreshToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
@@ -83,9 +83,8 @@ public class AuthController {
 
         var authResponse = loginUserCommandProvider.getObject().execute(params);
 
-        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
-        var refreshTokenCookie =
-                cookieUtils.createRefreshTokenCookie(authResponse.getRefreshToken());
+        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.accessToken());
+        var refreshTokenCookie = cookieUtils.createRefreshTokenCookie(authResponse.refreshToken());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
@@ -107,9 +106,8 @@ public class AuthController {
 
         var authResponse = refreshTokenCommandProvider.getObject().execute(params);
 
-        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
-        var refreshTokenCookie =
-                cookieUtils.createRefreshTokenCookie(authResponse.getRefreshToken());
+        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.accessToken());
+        var refreshTokenCookie = cookieUtils.createRefreshTokenCookie(authResponse.refreshToken());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())

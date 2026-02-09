@@ -4,12 +4,9 @@ import com.github.mohrezal.api.domains.users.commands.params.UnFollowUserCommand
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
-import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.domains.users.models.UserFollow;
 import com.github.mohrezal.api.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -31,7 +28,7 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     public Void execute(UnFollowUserCommandParams params) {
         validate(params);
 
-        User targetUser =
+        var targetUser =
                 userRepository
                         .findByHandle(params.handle())
                         .orElseThrow(UserNotFoundException::new);
@@ -40,8 +37,7 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
             throw new UserCannotFollowOrUnfollowSelfException();
         }
 
-        Optional<UserFollow> userFollow =
-                userFollowRepository.findByFollowedAndFollower(targetUser, user);
+        var userFollow = userFollowRepository.findByFollowedAndFollower(targetUser, user);
         if (userFollow.isEmpty()) {
             throw new UserNotFollowingException();
         }

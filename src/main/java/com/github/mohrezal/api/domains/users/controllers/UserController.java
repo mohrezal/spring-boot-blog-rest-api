@@ -48,7 +48,7 @@ public class UserController {
     @GetMapping(Routes.User.ME)
     public ResponseEntity<@NonNull UserSummary> getCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails) {
-        var params = CurrentUserQueryParams.builder().userDetails(userDetails).build();
+        var params = new CurrentUserQueryParams(userDetails);
         var response = currentUserQueries.getObject().execute(params);
         return ResponseEntity.ok(response);
     }
@@ -69,9 +69,7 @@ public class UserController {
     public ResponseEntity<Void> unFollowUser(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
         var command = unFollowUserCommands.getObject();
-        var params =
-                UnFollowUserCommandParams.builder().userDetails(userDetails).handle(handle).build();
-
+        var params = new UnFollowUserCommandParams(userDetails, handle);
         command.execute(params);
         return ResponseEntity.ok().build();
     }
@@ -83,13 +81,8 @@ public class UserController {
             @PathVariable String handle,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        var params =
-                GetUserFollowersQueryParams.builder()
-                        .userDetails(userDetails)
-                        .handle(handle)
-                        .page(page)
-                        .size(size)
-                        .build();
+
+        var params = new GetUserFollowersQueryParams(userDetails, handle, page, size);
 
         var response = getUserFollowersQueries.getObject().execute(params);
         return ResponseEntity.ok(response);
@@ -102,14 +95,8 @@ public class UserController {
             @PathVariable String handle,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        var params =
-                GetUserFollowingQueryParams.builder()
-                        .userDetails(userDetails)
-                        .handle(handle)
-                        .page(page)
-                        .size(size)
-                        .build();
 
+        var params = new GetUserFollowingQueryParams(userDetails, handle, page, size);
         var response = getUserFollowingQueries.getObject().execute(params);
         return ResponseEntity.ok(response);
     }

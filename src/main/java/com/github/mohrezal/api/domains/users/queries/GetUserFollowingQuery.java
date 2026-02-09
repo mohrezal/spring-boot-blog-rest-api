@@ -70,15 +70,15 @@ public class GetUserFollowingQuery
                     User followed = userFollow.getFollowed();
                     StorageSummary storageSummary =
                             storageMapper.toStorageSummary(followed.getAvatar());
-                    return FollowerSummary.builder()
-                            .id(followed.getId())
-                            .handle(followed.getHandle())
-                            .firstName(followed.getFirstName())
-                            .lastName(followed.getLastName())
-                            .avatar(storageSummary)
-                            .isFollowing(followedByCurrentUser.contains(followed.getId()))
-                            .followedAt(userFollow.getCreatedAt())
-                            .build();
+
+                    return new FollowerSummary(
+                            followed.getId(),
+                            followed.getHandle(),
+                            followed.getFirstName(),
+                            followed.getLastName(),
+                            storageSummary,
+                            followedByCurrentUser.contains(followed.getId()),
+                            userFollow.getCreatedAt());
                 });
     }
 }

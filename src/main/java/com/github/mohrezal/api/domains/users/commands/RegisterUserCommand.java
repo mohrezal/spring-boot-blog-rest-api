@@ -10,7 +10,6 @@ import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleReservedException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
-import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.domains.users.services.registration.RegistrationService;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
@@ -41,7 +40,7 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
 
     @Override
     public void validate(RegisterUserCommandParams params) {
-        String handle = params.registerUserRequest().getHandle().toLowerCase();
+        String handle = params.registerUserRequest().handle().toLowerCase();
 
         if (applicationProperties.handle().reservedHandles().contains(handle)) {
             throw new UserHandleReservedException();
@@ -56,28 +55,23 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
         validate(params);
-        User user = registrationService.register(params.registerUserRequest(), UserRole.USER);
+        var user = registrationService.register(params.registerUserRequest(), UserRole.USER);
 
-        NotificationPreference notificationPreference =
-                NotificationPreference.builder().user(user).build();
+        var notificationPreference = NotificationPreference.builder().user(user).build();
         notificationPreferenceRepository.save(notificationPreference);
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user.getId());
+        var accessToken = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user.getId());
 
-        String deviceName = deviceInfoService.parseDeviceName(params.userAgent());
+        var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
         jwtService.saveRefreshToken(
                 refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
         eventPublisher.publishEvent(new UserRegisteredEvent(user));
 
-        AuthResponse authResponse =
-                AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+        var authResponse = new AuthResponse(accessToken, refreshToken);
 
-        return RegisterResponse.builder()
-                .user(userMapper.toUserSummary(user))
-                .authResponse(authResponse)
-                .build();
+        return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
     }
 }

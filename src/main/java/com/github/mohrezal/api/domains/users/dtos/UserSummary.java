@@ -4,28 +4,16 @@ import com.github.mohrezal.api.domains.storage.dtos.StorageSummary;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class UserSummary {
-
-    private UUID id;
-    private String email;
-    private String handle;
-    private String firstName;
-    private String lastName;
-    private String bio;
-    private StorageSummary avatar;
-    private UserRole role;
-    private Boolean isVerified;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-}
+public record UserSummary(
+        UUID id,
+        String email,
+        String handle,
+        String firstName,
+        String lastName,
+        String bio,
+        StorageSummary avatar,
+        UserRole role,
+        Boolean isVerified,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt) {}

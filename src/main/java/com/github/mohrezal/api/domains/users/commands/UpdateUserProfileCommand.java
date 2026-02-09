@@ -29,11 +29,11 @@ public class UpdateUserProfileCommand
     public void validate(UpdateUserProfileCommandParams params) {
         super.validate(params);
 
-        UpdateUserProfileRequest request = params.request();
+        var request = params.request();
 
-        if ((request.getFirstName() != null && request.getFirstName().isBlank())
-                || (request.getLastName() != null && request.getLastName().isBlank())
-                || (request.getBio() != null && request.getBio().isBlank())) {
+        if ((request.firstName() != null && request.firstName().isBlank())
+                || (request.lastName() != null && request.lastName().isBlank())
+                || (request.bio() != null && request.bio().isBlank())) {
             throw new InvalidRequestException();
         }
     }
@@ -45,16 +45,16 @@ public class UpdateUserProfileCommand
 
         UpdateUserProfileRequest request = params.request();
 
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+        if (request.firstName() != null) {
+            user.setFirstName(request.firstName());
         }
 
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+        if (request.lastName() != null) {
+            user.setLastName(request.lastName());
         }
 
-        if (request.getBio() != null) {
-            user.setBio(request.getBio());
+        if (request.bio() != null) {
+            user.setBio(request.bio());
         }
         User updatedUser = userRepository.save(user);
 

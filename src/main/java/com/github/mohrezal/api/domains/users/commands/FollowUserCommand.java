@@ -5,7 +5,6 @@ import com.github.mohrezal.api.domains.users.commands.params.FollowUserCommandPa
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
-import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.models.UserFollow;
 import com.github.mohrezal.api.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
@@ -38,7 +37,7 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
         try {
             validate(params);
 
-            User targetUser =
+            var targetUser =
                     userRepository
                             .findByHandle(params.handle())
                             .orElseThrow(UserNotFoundException::new);
@@ -47,15 +46,14 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
                 throw new UserCannotFollowOrUnfollowSelfException();
             }
 
-            boolean isUserAlreadyFollowed =
+            var isUserAlreadyFollowed =
                     userFollowRepository.isAlreadyFollowing(user.getId(), targetUser.getId());
 
             if (isUserAlreadyFollowed) {
                 throw new UserAlreadyFollowingException();
             }
 
-            UserFollow userFollow =
-                    UserFollow.builder().follower(user).followed(targetUser).build();
+            var userFollow = UserFollow.builder().follower(user).followed(targetUser).build();
 
             userFollowRepository.save(userFollow);
 
