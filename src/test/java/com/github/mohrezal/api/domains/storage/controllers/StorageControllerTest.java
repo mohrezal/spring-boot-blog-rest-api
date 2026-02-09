@@ -186,7 +186,7 @@ class StorageControllerTest {
                                 .param("title", "Test Image")
                                 .with(csrf())
                                 .with(AuthenticationUtils.authenticate(testUser)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
 
         assertThat(storageRepository.findAll()).isEmpty();
     }

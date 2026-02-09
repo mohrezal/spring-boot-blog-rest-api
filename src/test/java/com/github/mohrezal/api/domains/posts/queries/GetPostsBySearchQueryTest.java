@@ -46,7 +46,7 @@ class GetPostsBySearchQueryTest {
 
         assertTrue(result.items().isEmpty());
         assertEquals(0, result.totalElements());
-        assertEquals(0, result.totalPages());
+        assertEquals(1, result.totalPages());
     }
 
     @Test
@@ -64,7 +64,7 @@ class GetPostsBySearchQueryTest {
         var summary1 = mock(PostSummary.class);
         var summary2 = mock(PostSummary.class);
 
-        when(postRepository.findAllPostBySearchQuery(params.query(), any(Pageable.class)))
+        when(postRepository.findAllPostBySearchQuery(eq(params.query()), any(Pageable.class)))
                 .thenReturn(searchPage);
         when(postRepository.findAllByIdIn(List.of(id2, id1))).thenReturn(List.of(post1, post2));
 
