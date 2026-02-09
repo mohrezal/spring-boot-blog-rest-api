@@ -79,7 +79,8 @@ public class NotificationEventListener {
                     message);
             log.debug("Published transactional email to queue for: {}", message.to());
         } catch (Exception e) {
-            log.error("Failed to publish transactional email to queue: {}", e.getMessage());
+            log.error("Failed to publish transactional email to queue", e);
+            throw e;
         }
     }
 
@@ -88,7 +89,8 @@ public class NotificationEventListener {
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, routingKey, notificationId);
             log.debug("Published notification {} to queue: {}", notificationId, routingKey);
         } catch (Exception e) {
-            log.error("Failed to publish notification to queue {}: {}", routingKey, e.getMessage());
+            log.error("Failed to publish notification to queue {}", routingKey, e);
+            throw e;
         }
     }
 }

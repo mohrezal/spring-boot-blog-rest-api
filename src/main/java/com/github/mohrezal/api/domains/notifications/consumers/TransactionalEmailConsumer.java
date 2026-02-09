@@ -24,7 +24,8 @@ public class TransactionalEmailConsumer {
                     message.to(), message.subject(), message.template(), message.variables());
             log.debug("Transactional email sent to {}", message.to());
         } catch (Exception e) {
-            log.error("Failed to send transactional email to {}: {}", message.to(), e.getMessage());
+            log.error("Failed to send transactional email to {}", message.to(), e);
+            throw e;
         }
     }
 }
