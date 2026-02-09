@@ -39,10 +39,24 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final NotificationPreferenceRepository notificationPreferenceRepository;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
+    @Override
+    public void validate(RegisterUserCommandParams params) {
+        String handle = params.registerUserRequest().getHandle().toLowerCase();
+
+        if (applicationProperties.handle().reservedHandles().contains(handle)) {
+            throw new UserHandleReservedException();
+        }
+
+        if (userRepository.existsByHandle(handle)) {
+            throw new UserHandleAlreadyExistsException();
+        }
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
-        User user = registrationService.register(params.getRegisterUserRequest(), UserRole.USER);
+        validate(params);
+        User user = registrationService.register(params.registerUserRequest(), UserRole.USER);
 
         NotificationPreference notificationPreference =
                 NotificationPreference.builder().user(user).build();
@@ -51,10 +65,10 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user.getId());
 
-        String deviceName = deviceInfoService.parseDeviceName(params.getUserAgent());
+        String deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
         jwtService.saveRefreshToken(
-                refreshToken, user, params.getIpAddress(), params.getUserAgent(), deviceName);
+                refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
         eventPublisher.publishEvent(new UserRegisteredEvent(user));
 
@@ -65,18 +79,5 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
                 .user(userMapper.toUserSummary(user))
                 .authResponse(authResponse)
                 .build();
-    }
-
-    @Override
-    public void validate(RegisterUserCommandParams params) {
-        String handle = params.getRegisterUserRequest().getHandle().toLowerCase();
-
-        if (applicationProperties.handle().reservedHandles().contains(handle)) {
-            throw new UserHandleReservedException();
-        }
-
-        if (userRepository.existsByHandle(handle)) {
-            throw new UserHandleAlreadyExistsException();
-        }
     }
 }

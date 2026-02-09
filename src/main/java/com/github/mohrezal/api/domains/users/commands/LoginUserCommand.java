@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
-import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.authentication.AuthenticationService;
 import com.github.mohrezal.api.shared.interfaces.Command;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
@@ -27,15 +26,14 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(LoginUserCommandParams params) {
-        User user = authenticationService.authenticate(params.getLoginRequest());
+        var user = authenticationService.authenticate(params.loginRequest());
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user.getId());
-
-        String deviceName = deviceInfoService.parseDeviceName(params.getUserAgent());
+        var accessToken = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user.getId());
+        var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
         jwtService.saveRefreshToken(
-                refreshToken, user, params.getIpAddress(), params.getUserAgent(), deviceName);
+                refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
         return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
     }

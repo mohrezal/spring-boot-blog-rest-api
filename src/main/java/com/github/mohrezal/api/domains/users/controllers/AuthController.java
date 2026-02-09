@@ -9,9 +9,7 @@ import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandPar
 import com.github.mohrezal.api.domains.users.commands.params.LogoutUserCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
-import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
-import com.github.mohrezal.api.domains.users.dtos.RegisterResponse;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
@@ -26,7 +24,6 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,21 +48,20 @@ public class AuthController {
     @PostMapping(Routes.Auth.REGISTER)
     public ResponseEntity<@NonNull UserSummary> register(
             @Valid @RequestBody RegisterUserRequest registerUser, HttpServletRequest request) {
-        RegisterUserCommandParams params =
-                RegisterUserCommandParams.builder()
-                        .registerUserRequest(registerUser)
-                        .ipAddress(requestInfoService.getClientIp(request))
-                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
-                        .build();
+
+        var params =
+                new RegisterUserCommandParams(
+                        registerUser,
+                        requestInfoService.getClientIp(request),
+                        request.getHeader(HttpHeaders.USER_AGENT));
 
         var command = registerUserCommandProvider.getObject();
-        command.validate(params);
-        RegisterResponse registerResponse = command.execute(params);
+        var registerResponse = command.execute(params);
 
-        ResponseCookie accessTokenCookie =
+        var accessTokenCookie =
                 cookieUtils.createAccessTokenCookie(
                         registerResponse.getAuthResponse().getAccessToken());
-        ResponseCookie refreshTokenCookie =
+        var refreshTokenCookie =
                 cookieUtils.createRefreshTokenCookie(
                         registerResponse.getAuthResponse().getRefreshToken());
 
@@ -78,18 +74,17 @@ public class AuthController {
     @PostMapping(Routes.Auth.LOGIN)
     public ResponseEntity<Void> login(
             @Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        LoginUserCommandParams params =
-                LoginUserCommandParams.builder()
-                        .loginRequest(loginRequest)
-                        .ipAddress(requestInfoService.getClientIp(request))
-                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
-                        .build();
 
-        AuthResponse authResponse = loginUserCommandProvider.getObject().execute(params);
+        var params =
+                new LoginUserCommandParams(
+                        loginRequest,
+                        requestInfoService.getClientIp(request),
+                        request.getHeader(HttpHeaders.USER_AGENT));
 
-        ResponseCookie accessTokenCookie =
-                cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
-        ResponseCookie refreshTokenCookie =
+        var authResponse = loginUserCommandProvider.getObject().execute(params);
+
+        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
+        var refreshTokenCookie =
                 cookieUtils.createRefreshTokenCookie(authResponse.getRefreshToken());
 
         return ResponseEntity.ok()
@@ -100,22 +95,20 @@ public class AuthController {
 
     @PostMapping(Routes.Auth.REFRESH)
     public ResponseEntity<Void> refresh(HttpServletRequest request) {
-        String refreshToken =
+        var refreshToken =
                 cookieUtils.getCookieValue(
                         request.getCookies(), CookieConstants.REFRESH_TOKEN_COOKIE_NAME);
 
-        RefreshTokenCommandParams params =
-                RefreshTokenCommandParams.builder()
-                        .refreshToken(refreshToken)
-                        .ipAddress(requestInfoService.getClientIp(request))
-                        .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
-                        .build();
+        var params =
+                new RefreshTokenCommandParams(
+                        refreshToken,
+                        requestInfoService.getClientIp(request),
+                        request.getHeader(HttpHeaders.USER_AGENT));
 
-        AuthResponse authResponse = refreshTokenCommandProvider.getObject().execute(params);
+        var authResponse = refreshTokenCommandProvider.getObject().execute(params);
 
-        ResponseCookie accessTokenCookie =
-                cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
-        ResponseCookie refreshTokenCookie =
+        var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.getAccessToken());
+        var refreshTokenCookie =
                 cookieUtils.createRefreshTokenCookie(authResponse.getRefreshToken());
 
         return ResponseEntity.ok()
@@ -128,21 +121,16 @@ public class AuthController {
     @PostMapping(Routes.Auth.LOGOUT)
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {
-        String refreshToken =
+        var refreshToken =
                 cookieUtils.getCookieValue(
                         request.getCookies(), CookieConstants.REFRESH_TOKEN_COOKIE_NAME);
 
-        LogoutUserCommandParams params =
-                LogoutUserCommandParams.builder()
-                        .userDetails(userDetails)
-                        .refreshToken(refreshToken)
-                        .build();
+        var params = new LogoutUserCommandParams(userDetails, refreshToken);
 
         logoutUserCommandProvider.getObject().execute(params);
 
-        ResponseCookie accessTokenCookie = cookieUtils.deleteAccessTokenCookie();
-        ResponseCookie refreshTokenCookie = cookieUtils.deleteRefreshTokenCookie();
-
+        var accessTokenCookie = cookieUtils.deleteAccessTokenCookie();
+        var refreshTokenCookie = cookieUtils.deleteRefreshTokenCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())

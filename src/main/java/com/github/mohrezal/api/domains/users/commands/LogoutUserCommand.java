@@ -2,11 +2,9 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.LogoutUserCommandParams;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
-import com.github.mohrezal.api.domains.users.models.RefreshToken;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.ForbiddenException;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,19 +20,23 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
 
     private final JwtService jwtService;
 
-    @Transactional(rollbackFor = Exception.class)
     @Override
-    public Void execute(LogoutUserCommandParams params) {
+    public void validate(LogoutUserCommandParams params) {
+        super.validate(params);
         if (params.refreshToken() == null
                 || !jwtService.validateRefreshToken(params.refreshToken())) {
             throw new UserInvalidRefreshTokenException();
         }
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Void execute(LogoutUserCommandParams params) {
         validate(params);
 
-        UUID currentUserId = user.getId();
+        var currentUserId = user.getId();
 
-        RefreshToken refreshToken =
+        var refreshToken =
                 jwtService
                         .getRefreshTokenEntity(params.refreshToken())
                         .orElseThrow(UserInvalidRefreshTokenException::new);
