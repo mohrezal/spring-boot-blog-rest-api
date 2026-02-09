@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -102,6 +103,7 @@ class PostControllerTest {
     @MockitoBean private ObjectProvider<UnarchivePostCommand> unarchivePostCommands;
 
     @MockitoBean private DeletePostCommand deletePostCommand;
+    @MockitoBean private ObjectProvider<DeletePostCommand> deletePostCommands;
 
     @MockitoBean private GetPostsQuery getPostsQuery;
 
@@ -793,6 +795,75 @@ class PostControllerTest {
 
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deletePostBySlug_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
+        doNothing()
+                .when(deletePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .DeletePostCommandParams.class));
+
+        mockMvc.perform(
+                        delete(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deletePostBySlug_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(delete(Routes.build(Routes.Post.BASE, "existing-slug")).with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void deletePostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
+        doThrow(new PostNotFoundException())
+                .when(deletePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .DeletePostCommandParams.class));
+
+        mockMvc.perform(
+                        delete(Routes.build(Routes.Post.BASE, "missing-slug"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deletePostBySlug_whenNotOwner_shouldReturn403() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
+        doThrow(new AccessDeniedException())
+                .when(deletePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .DeletePostCommandParams.class));
+
+        mockMvc.perform(
+                        delete(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
                                 .with(AuthenticationUtils.authenticate(user)))
                 .andExpect(status().isForbidden());
