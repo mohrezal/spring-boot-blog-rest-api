@@ -868,4 +868,43 @@ class PostControllerTest {
                                 .with(AuthenticationUtils.authenticate(user)))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void getPostsBySearchQuery_whenNoResults_shouldReturnEmptyPage() throws Exception {
+        Page<PostSummary> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+
+        when(getPostsBySearchQuery.execute(any()))
+                .thenReturn(PageResponse.from(emptyPage, post -> post));
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SEARCH))
+                                .param("query", "nothing")
+                                .param("page", "0")
+                                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.isEmpty").value(true));
+    }
+
+    @Test
+    void getPostsBySearchQuery_whenResultsExist_shouldReturnPage() throws Exception {
+        var summary = mock(PostSummary.class);
+        Page<PostSummary> page = new PageImpl<>(List.of(summary), PageRequest.of(0, 10), 1);
+
+        when(getPostsBySearchQuery.execute(any()))
+                .thenReturn(PageResponse.from(page, post -> post));
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SEARCH))
+                                .param("query", "spring boot")
+                                .param("page", "0")
+                                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.isEmpty").value(false));
+    }
 }
