@@ -36,6 +36,7 @@ import com.github.mohrezal.api.domains.posts.queries.GetPostBySlugQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostSlugAvailabilityQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsBySearchQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsQuery;
+import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
@@ -93,6 +94,8 @@ class PostControllerTest {
 
     @MockitoBean private GetPostBySlugQuery getPostBySlugQuery;
 
+    @MockitoBean private ObjectProvider<GetPostBySlugQuery> getPostBySlugQueries;
+
     @MockitoBean private GetPostSlugAvailabilityQuery getPostSlugAvailabilityQuery;
 
     @MockitoBean private GetPostsBySearchQuery getPostsBySearchQuery;
@@ -114,6 +117,45 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.items.length()").value(0))
                 .andExpect(jsonPath("$.totalElements").value(0))
                 .andExpect(jsonPath("$.isEmpty").value(true));
+    }
+
+    @Test
+    void getPostBySlug_whenAuthenticatedAndPostExists_shouldReturn200() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var postDetail = mock(PostDetail.class);
+
+        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
+        when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
+                .thenReturn(postDetail);
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, "existing-slug"))
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void getPostBySlug_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(get(Routes.build(Routes.Post.BASE, "existing-slug")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getPostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
+        when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
+                .thenThrow(new PostNotFoundException());
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, "missing-slug"))
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
