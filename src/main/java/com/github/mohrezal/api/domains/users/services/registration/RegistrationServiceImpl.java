@@ -21,11 +21,11 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public User register(RegisterUserRequest registerUser, UserRole role) {
-        if (userRepository.existsByEmail(registerUser.getEmail())) {
+        if (userRepository.existsByEmail(registerUser.email())) {
             throw new UserEmailAlreadyExistsException();
         }
         User newUser = this.userMapper.toUser(registerUser, role);
-        String hashedPassword = passwordEncoder.encode(registerUser.getPassword().trim());
+        String hashedPassword = passwordEncoder.encode(registerUser.password().trim());
         UserCredentials credentials =
                 UserCredentials.builder().hashedPassword(hashedPassword).build();
 

@@ -21,9 +21,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public User authenticate(LoginRequest body) {
         Authentication authentication =
                 authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                body.getEmail(), body.getPassword()));
+                        new UsernamePasswordAuthenticationToken(body.email(), body.password()));
 
-        return userRepository.findByEmail(body.getEmail()).orElseThrow(UserNotFoundException::new);
+        return userRepository.findByEmail(body.email()).orElseThrow(UserNotFoundException::new);
     }
 }

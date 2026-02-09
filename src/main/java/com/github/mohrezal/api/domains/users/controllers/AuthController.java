@@ -59,16 +59,15 @@ public class AuthController {
         var registerResponse = command.execute(params);
 
         var accessTokenCookie =
-                cookieUtils.createAccessTokenCookie(
-                        registerResponse.getAuthResponse().accessToken());
+                cookieUtils.createAccessTokenCookie(registerResponse.authResponse().accessToken());
         var refreshTokenCookie =
                 cookieUtils.createRefreshTokenCookie(
-                        registerResponse.getAuthResponse().refreshToken());
+                        registerResponse.authResponse().refreshToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(registerResponse.getUser());
+                .body(registerResponse.user());
     }
 
     @PostMapping(Routes.Auth.LOGIN)
