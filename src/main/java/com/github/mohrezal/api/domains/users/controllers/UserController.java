@@ -57,11 +57,9 @@ public class UserController {
     @PostMapping(Routes.User.FOLLOW_USER)
     public ResponseEntity<Void> followUser(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
-        var params =
-                FollowUserCommandParams.builder().userDetails(userDetails).handle(handle).build();
+        var params = new FollowUserCommandParams(userDetails, handle);
 
         var command = followUserCommands.getObject();
-        command.validate(params);
         command.execute(params);
         return ResponseEntity.ok().build();
     }

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-
     <springProfile name="dev | default">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5level){highlight} %clr([%thread]){faint} %clr(%logger){cyan} %clr(:){faint} %msg %clr([method=%X{method} path=%X{path} duration=%X{duration} status=%X{status}]){magenta}%n</pattern>
+                <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5level){highlight} %clr([%thread]){faint} %clr(%logger{0}){cyan} %clr(:){faint} %msg %clr([method=%X{method} path=%X{path} duration=%X{duration} status=%X{status}]){magenta}%n</pattern>
             </encoder>
         </appender>
 
@@ -36,7 +35,6 @@
                 <timeZone>UTC</timeZone>
 
                 <fieldNames>
-                    <logger>[ignore]</logger>
                     <version>[ignore]</version>
                     <levelValue>[ignore]</levelValue>
                 </fieldNames>
@@ -64,7 +62,6 @@
                <timeZone>UTC</timeZone>
 
                <fieldNames>
-                   <logger>[ignore]</logger>
                    <version>[ignore]</version>
                    <levelValue>[ignore]</levelValue>
                </fieldNames>

@@ -16,6 +16,7 @@ import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.api.shared.constants.CookieConstants;
+import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +46,7 @@ public class AuthController {
     private final ObjectProvider<@NonNull RefreshTokenCommand> refreshTokenCommandProvider;
     private final ObjectProvider<@NonNull LogoutUserCommand> logoutUserCommandProvider;
     private final CookieUtils cookieUtils;
+    private final RequestInfoService requestInfoService;
 
     @PostMapping(Routes.Auth.REGISTER)
     public ResponseEntity<@NonNull UserSummary> register(
@@ -52,7 +54,7 @@ public class AuthController {
         RegisterUserCommandParams params =
                 RegisterUserCommandParams.builder()
                         .registerUserRequest(registerUser)
-                        .ipAddress(request.getRemoteAddr())
+                        .ipAddress(requestInfoService.getClientIp(request))
                         .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
                         .build();
 
@@ -79,7 +81,7 @@ public class AuthController {
         LoginUserCommandParams params =
                 LoginUserCommandParams.builder()
                         .loginRequest(loginRequest)
-                        .ipAddress(request.getRemoteAddr())
+                        .ipAddress(requestInfoService.getClientIp(request))
                         .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
                         .build();
 
@@ -105,7 +107,7 @@ public class AuthController {
         RefreshTokenCommandParams params =
                 RefreshTokenCommandParams.builder()
                         .refreshToken(refreshToken)
-                        .ipAddress(request.getRemoteAddr())
+                        .ipAddress(requestInfoService.getClientIp(request))
                         .userAgent(request.getHeader(HttpHeaders.USER_AGENT))
                         .build();
 

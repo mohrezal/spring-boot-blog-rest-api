@@ -31,30 +31,60 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(FollowUserCommandParams params) {
-        validate(params);
+        log.debug(
+                "Executing FollowUserCommand - follower: {}, target: {}",
+                user.getHandle(),
+                params.handle());
+        try {
+            validate(params);
 
-        User targetUser =
-                userRepository
-                        .findByHandle(params.handle())
-                        .orElseThrow(UserNotFoundException::new);
+            User targetUser =
+                    userRepository
+                            .findByHandle(params.handle())
+                            .orElseThrow(UserNotFoundException::new);
 
-        if (user.getId().equals(targetUser.getId())) {
-            throw new UserCannotFollowOrUnfollowSelfException();
+            if (user.getId().equals(targetUser.getId())) {
+                throw new UserCannotFollowOrUnfollowSelfException();
+            }
+
+            boolean isUserAlreadyFollowed =
+                    userFollowRepository.isAlreadyFollowing(user.getId(), targetUser.getId());
+
+            if (isUserAlreadyFollowed) {
+                throw new UserAlreadyFollowingException();
+            }
+
+            UserFollow userFollow =
+                    UserFollow.builder().follower(user).followed(targetUser).build();
+
+            userFollowRepository.save(userFollow);
+
+            log.info(
+                    "User followed successfully - follower: {}, followed:{}",
+                    user.getId(),
+                    targetUser.getId());
+
+            eventPublisher.publishEvent(new UserFollowedEvent(user, targetUser));
+
+            return null;
+
+        } catch (UserNotFoundException ex) {
+            log.warn("Follow failed - target user not found: {}", params.handle());
+            throw ex;
+        } catch (UserAlreadyFollowingException ex) {
+            log.warn(
+                    "Follow failed - user attempted to follow already following: {}", user.getId());
+            throw ex;
+        } catch (UserCannotFollowOrUnfollowSelfException ex) {
+            log.info("Follow failed - user attempted to follow to self: {}", user.getId());
+            throw ex;
+        } catch (Exception ex) {
+            log.error(
+                    "Unexpected error in FollowUserCommand - follower: {}, target: {}",
+                    user.getId(),
+                    params.handle(),
+                    ex);
+            throw ex;
         }
-
-        boolean isUserAlreadyFollowed =
-                userFollowRepository.isAlreadyFollowing(user.getId(), targetUser.getId());
-
-        if (isUserAlreadyFollowed) {
-            throw new UserAlreadyFollowingException();
-        }
-
-        UserFollow userFollow = UserFollow.builder().follower(user).followed(targetUser).build();
-
-        userFollowRepository.save(userFollow);
-
-        eventPublisher.publishEvent(new UserFollowedEvent(user, targetUser));
-
-        return null;
     }
 }
