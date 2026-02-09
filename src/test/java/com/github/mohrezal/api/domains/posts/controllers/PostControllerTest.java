@@ -4,6 +4,9 @@ import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -32,6 +35,7 @@ import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
 import com.github.mohrezal.api.domains.posts.dtos.SlugAvailability;
 import com.github.mohrezal.api.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
+import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugFormatException;
@@ -47,11 +51,13 @@ import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
+import com.github.mohrezal.api.shared.services.ratelimit.RateLimitService;
 import com.github.mohrezal.api.support.builders.UserBuilder;
 import com.github.mohrezal.api.support.security.AuthenticationUtils;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,10 +93,13 @@ class PostControllerTest {
     @MockitoBean private ObjectProvider<UpdatePostCommand> updatePostCommands;
 
     @MockitoBean private PublishPostCommand publishPostCommand;
+    @MockitoBean private ObjectProvider<PublishPostCommand> publishPostCommands;
 
     @MockitoBean private ArchivePostCommand archivePostCommand;
+    @MockitoBean private ObjectProvider<ArchivePostCommand> archivePostCommands;
 
     @MockitoBean private UnarchivePostCommand unarchivePostCommand;
+    @MockitoBean private ObjectProvider<UnarchivePostCommand> unarchivePostCommands;
 
     @MockitoBean private DeletePostCommand deletePostCommand;
 
@@ -110,6 +119,14 @@ class PostControllerTest {
     @Autowired private UserRepository userRepository;
 
     @Autowired private CategoryRepository categoryRepository;
+
+    @MockitoBean private RateLimitService rateLimitService;
+
+    @BeforeEach
+    void setUp() {
+        when(rateLimitService.tryConsume(anyString(), any()))
+                .thenReturn(new RateLimitService.ConsumptionResult(true, 100L, 0L));
+    }
 
     @Test
     void getPosts_whenNoPostsExist_shouldReturnEmptyPage() throws Exception {
@@ -502,6 +519,282 @@ class PostControllerTest {
                                 .with(AuthenticationUtils.authenticate(user))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void publishPost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
+        doNothing()
+                .when(publishPostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .PublishPostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void publishPost_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
+                                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void publishPost_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
+        doThrow(new PostNotFoundException())
+                .when(publishPostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .PublishPostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "missing-slug", "publish"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void publishPost_whenInvalidStatus_shouldReturn400() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
+        doThrow(new PostInvalidStatusTransitionException())
+                .when(publishPostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .PublishPostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void publishPost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
+        doThrow(new AccessDeniedException())
+                .when(publishPostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .PublishPostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void archivePost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
+        doNothing()
+                .when(archivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .ArchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void archivePost_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
+                                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void archivePost_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
+        doThrow(new PostNotFoundException())
+                .when(archivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .ArchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "missing-slug", "archive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void archivePost_whenInvalidStatus_shouldReturn400() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
+        doThrow(new PostInvalidStatusTransitionException())
+                .when(archivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .ArchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void archivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
+        doThrow(new AccessDeniedException())
+                .when(archivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .ArchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unarchivePost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
+        doNothing()
+                .when(unarchivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .UnarchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void unarchivePost_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
+                                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void unarchivePost_whenPostNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
+        doThrow(new PostNotFoundException())
+                .when(unarchivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .UnarchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "missing-slug", "unarchive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void unarchivePost_whenInvalidStatus_shouldReturn400() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
+        doThrow(new PostInvalidStatusTransitionException())
+                .when(unarchivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .UnarchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void unarchivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
+        doThrow(new AccessDeniedException())
+                .when(unarchivePostCommand)
+                .execute(
+                        any(
+                                com.github.mohrezal.api.domains.posts.commands.params
+                                        .UnarchivePostCommandParams.class));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user)))
                 .andExpect(status().isForbidden());
     }
 }
