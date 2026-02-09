@@ -8,7 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,6 +27,7 @@ import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.services.ratelimit.RateLimitService;
 import com.github.mohrezal.api.support.builders.UserBuilder;
+import com.github.mohrezal.api.support.security.AuthenticationUtils;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,13 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -132,7 +129,7 @@ class StorageControllerTest {
                                 .param("title", "Test Image")
                                 .param("alt", "Alt text")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.filename").exists())
                 .andExpect(jsonPath("$.originalFilename").value("image.jpg"))
@@ -162,7 +159,7 @@ class StorageControllerTest {
                                 .file(invalidMimeTypeFile)
                                 .param("title", "Test PDF")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isBadRequest());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -176,7 +173,7 @@ class StorageControllerTest {
                                 .file(oversizedFile)
                                 .param("title", "Large Image")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isBadRequest());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -188,7 +185,7 @@ class StorageControllerTest {
                         multipart(Routes.build(Routes.Storage.BASE))
                                 .param("title", "Test Image")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isInternalServerError());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -213,7 +210,7 @@ class StorageControllerTest {
                                 .file(validImageFile)
                                 .param("title", "User Upload")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isCreated());
 
         List<Storage> storages = storageRepository.findAll();
@@ -246,7 +243,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         delete(buildStorageRoute(storage.getFilename()))
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isNoContent());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -260,7 +257,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         delete(buildStorageRoute(storage.getFilename()))
                                 .with(csrf())
-                                .with(auth(otherUser)))
+                                .with(AuthenticationUtils.authenticate(otherUser)))
                 .andExpect(status().isForbidden());
 
         assertThat(storageRepository.findAll()).hasSize(1);
@@ -273,7 +270,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         delete(buildStorageRoute(storage.getFilename()))
                                 .with(csrf())
-                                .with(auth(adminUser)))
+                                .with(AuthenticationUtils.authenticate(adminUser)))
                 .andExpect(status().isNoContent());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -294,7 +291,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         delete(buildStorageRoute("non-existent.jpg"))
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isNotFound());
     }
 
@@ -306,7 +303,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         get(Routes.build(Routes.Storage.BASE, Routes.Storage.LIST))
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isArray())
                 .andExpect(jsonPath("$.items.length()").value(3))
@@ -322,7 +319,7 @@ class StorageControllerTest {
                                 .param("page", "0")
                                 .param("size", "10")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(10))
                 .andExpect(jsonPath("$.totalElements").value(15))
@@ -334,7 +331,7 @@ class StorageControllerTest {
                                 .param("page", "1")
                                 .param("size", "10")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(5))
                 .andExpect(jsonPath("$.totalElements").value(15))
@@ -354,7 +351,7 @@ class StorageControllerTest {
                                 multipart(Routes.build(Routes.Storage.BASE, Routes.Storage.PROFILE))
                                         .file(validImageFile)
                                         .with(csrf())
-                                        .with(auth(testUser)))
+                                        .with(AuthenticationUtils.authenticate(testUser)))
                         .andExpect(status().isOk())
                         .andReturn();
 
@@ -366,8 +363,8 @@ class StorageControllerTest {
 
         List<Storage> storages = storageRepository.findAll();
         assertThat(storages).hasSize(1);
-        assertThat(storages.get(0).getType()).isEqualTo(StorageType.PROFILE);
-        assertThat(storages.get(0).getFilename()).isEqualTo(firstFilename);
+        assertThat(storages.getFirst().getType()).isEqualTo(StorageType.PROFILE);
+        assertThat(storages.getFirst().getFilename()).isEqualTo(firstFilename);
 
         MockMultipartFile newProfileFile =
                 new MockMultipartFile("file", "new-profile.jpg", "image/jpeg", JPEG_BYTES);
@@ -376,15 +373,15 @@ class StorageControllerTest {
                         multipart(Routes.build(Routes.Storage.BASE, Routes.Storage.PROFILE))
                                 .file(newProfileFile)
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isOk());
 
         verify(s3StorageService, times(1)).delete(firstFilename);
 
         storages = storageRepository.findAll();
         assertThat(storages).hasSize(1);
-        assertThat(storages.get(0).getType()).isEqualTo(StorageType.PROFILE);
-        assertThat(storages.get(0).getFilename()).isNotEqualTo(firstFilename);
+        assertThat(storages.getFirst().getType()).isEqualTo(StorageType.PROFILE);
+        assertThat(storages.getFirst().getFilename()).isNotEqualTo(firstFilename);
     }
 
     @Test
@@ -393,7 +390,7 @@ class StorageControllerTest {
                         multipart(Routes.build(Routes.Storage.BASE, Routes.Storage.PROFILE))
                                 .file(invalidMimeTypeFile)
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isBadRequest());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -409,7 +406,7 @@ class StorageControllerTest {
                                 .file(validImageFile)
                                 .param("title", "Test Image")
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isInternalServerError());
 
         assertThat(storageRepository.findAll()).isEmpty();
@@ -426,7 +423,7 @@ class StorageControllerTest {
         mockMvc.perform(
                         delete(buildStorageRoute(storage.getFilename()))
                                 .with(csrf())
-                                .with(auth(testUser)))
+                                .with(AuthenticationUtils.authenticate(testUser)))
                 .andExpect(status().isInternalServerError());
 
         assertThat(storageRepository.findAll()).hasSize(1);
@@ -463,13 +460,5 @@ class StorageControllerTest {
     private String buildStorageRoute(String filename) {
         return Routes.build(
                 Routes.Storage.BASE, Routes.Storage.BY_FILENAME.replace("{filename}", filename));
-    }
-
-    private RequestPostProcessor auth(User user) {
-        return authentication(
-                new UsernamePasswordAuthenticationToken(
-                        user,
-                        "mock-token",
-                        List.of(new SimpleGrantedAuthority("SCOPE_" + user.getRole().name()))));
     }
 }

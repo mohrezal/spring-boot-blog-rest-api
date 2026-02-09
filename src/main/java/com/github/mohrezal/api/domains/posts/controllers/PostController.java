@@ -85,11 +85,7 @@ public class PostController {
     public ResponseEntity<@NonNull PostDetail> createPost(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreatePostRequest createPostRequest) {
-        var params =
-                CreatePostCommandParams.builder()
-                        .createPostRequest(createPostRequest)
-                        .userDetails(userDetails)
-                        .build();
+        var params = new CreatePostCommandParams(userDetails, createPostRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(createPostCommands.getObject().execute(params));
     }

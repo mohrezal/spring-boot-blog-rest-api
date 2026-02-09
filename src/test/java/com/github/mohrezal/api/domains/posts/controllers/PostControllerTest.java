@@ -1,29 +1,49 @@
 package com.github.mohrezal.api.domains.posts.controllers;
 
+import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory;
+import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mohrezal.api.config.Routes;
+import com.github.mohrezal.api.domains.categories.exceptions.CategoryExceptionHandler;
+import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryNotFoundException;
+import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.ArchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.CreatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.DeletePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.PublishPostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UpdatePostCommand;
+import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
+import com.github.mohrezal.api.domains.posts.dtos.CreatePostRequest;
+import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
+import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
+import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.api.domains.posts.queries.GetPostBySlugQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostSlugAvailabilityQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsBySearchQuery;
 import com.github.mohrezal.api.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
+import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
+import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
+import com.github.mohrezal.api.support.builders.UserBuilder;
+import com.github.mohrezal.api.support.security.AuthenticationUtils;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -31,6 +51,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,7 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(ObjectMapper.class)
+@Import({ObjectMapper.class, CategoryExceptionHandler.class, SharedExceptionHandler.class})
 class PostControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -48,6 +69,8 @@ class PostControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean private CreatePostCommand createPostCommand;
+
+    @MockitoBean private ObjectProvider<CreatePostCommand> createPostCommands;
 
     @MockitoBean private UpdatePostCommand updatePostCommand;
 
@@ -69,6 +92,8 @@ class PostControllerTest {
 
     @Autowired private UserRepository userRepository;
 
+    @Autowired private CategoryRepository categoryRepository;
+
     @Test
     void getPosts_whenNoPostsExist_shouldReturnEmptyPage() throws Exception {
         Page<PostSummary> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
@@ -82,5 +107,129 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.items.length()").value(0))
                 .andExpect(jsonPath("$.totalElements").value(0))
                 .andExpect(jsonPath("$.isEmpty").value(true));
+    }
+
+    @Test
+    void createPost_whenAuthenticatedAndValidRequest_shouldReturn201() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var category = categoryRepository.save(aCategory().build());
+
+        var postDetail = mock(PostDetail.class);
+
+        when(createPostCommands.getObject()).thenReturn(createPostCommand);
+        when(createPostCommand.execute(any(CreatePostCommandParams.class))).thenReturn(postDetail);
+
+        var body =
+                new CreatePostRequest(
+                        "Test post title",
+                        "Test post content",
+                        "MOCKED_AVATAR",
+                        Set.of(category.getId()),
+                        "Test description",
+                        PostLanguage.ENGLISH);
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createPost_whenNotAuthenticated_shouldReturn401() throws Exception {
+        var body =
+                new CreatePostRequest(
+                        "Test post title",
+                        "Test post content",
+                        "MOCKED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Test description",
+                        PostLanguage.ENGLISH);
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE))
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createPost_whenInvalidRequest_shouldReturn400() throws Exception {
+        var user =
+                userRepository.save(
+                        UserBuilder.aUser()
+                                .withEmail("user2@test.com")
+                                .withRole(UserRole.USER)
+                                .build());
+
+        var body = new CreatePostRequest(null, null, null, null, null, null);
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createPost_whenCategoryNotFound_shouldReturn404() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(createPostCommands.getObject()).thenReturn(createPostCommand);
+        when(createPostCommand.execute(any(CreatePostCommandParams.class)))
+                .thenThrow(CategoryNotFoundException.class);
+
+        var body =
+                new CreatePostRequest(
+                        "Test post title",
+                        "Test post content",
+                        "MOCKED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Test description",
+                        PostLanguage.ENGLISH);
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createPost_whenSlugConflict_shouldReturn409() throws Exception {
+        var user =
+                userRepository.save(
+                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+
+        when(createPostCommands.getObject()).thenReturn(createPostCommand);
+        when(createPostCommand.execute(any(CreatePostCommandParams.class)))
+                .thenThrow(new PostSlugAlreadyExistsException());
+
+        var body =
+                new CreatePostRequest(
+                        "Test post title",
+                        "Test post content",
+                        "MOCKED_AVATAR",
+                        Set.of(UUID.randomUUID()),
+                        "Test description",
+                        PostLanguage.ENGLISH);
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE))
+                                .with(csrf())
+                                .with(AuthenticationUtils.authenticate(user))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isConflict());
     }
 }

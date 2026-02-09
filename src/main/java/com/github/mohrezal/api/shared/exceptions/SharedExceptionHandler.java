@@ -10,6 +10,8 @@ import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException
 import com.github.mohrezal.api.shared.exceptions.types.SlugGenerationException;
 import com.github.mohrezal.api.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
+import java.util.HashMap;
+import java.util.Map;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -104,9 +107,20 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+        ErrorResponse errorResponse =
+                ErrorResponse.builder().message("Validation failed").errors(errors).build();
+        return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleGenericException(
-            Exception ex, WebRequest request) {
+    public ResponseEntity<@NonNull ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse errorResponse =
                 ErrorResponse.builder()
                         .message(MessageKey.SHARED_ERROR_UNEXPECTED.getMessage())
