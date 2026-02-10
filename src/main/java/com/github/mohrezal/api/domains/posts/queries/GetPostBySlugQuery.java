@@ -29,7 +29,9 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     @Transactional(readOnly = true)
     @Override
     public PostDetail execute(GetPostBySlugQueryParams params) {
-        validate(params);
+        if (params.getUserDetails() != null) {
+            validate(params);
+        }
         var post =
                 this.postRepository
                         .findBySlug(params.slug())
@@ -39,8 +41,8 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
             return this.postMapper.toPostDetail(post);
         }
 
-        var isAdmin = userUtilsService.isAdmin(user);
-        var isOwner = postUtilsService.isOwner(post, user);
+        var isAdmin = user != null && userUtilsService.isAdmin(user);
+        var isOwner = user != null && postUtilsService.isOwner(post, user);
 
         if (isAdmin || isOwner) {
             return this.postMapper.toPostDetail(post);

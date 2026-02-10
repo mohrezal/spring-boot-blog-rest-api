@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.services.authentication.AuthenticationService;
 import com.github.mohrezal.api.shared.interfaces.Command;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,9 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
             log.info("The user with id={} successfully logged in.", user.getId());
 
             return new AuthResponse(accessToken, refreshToken);
+        } catch (BadCredentialsException | UserNotFoundException e) {
+            log.warn("Login failed: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
             log.error("Unexpected error in LoginUserCommand - params : {}", params);
             throw e;

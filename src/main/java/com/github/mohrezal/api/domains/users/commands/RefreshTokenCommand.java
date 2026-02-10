@@ -31,6 +31,9 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
         if (params.refreshToken() == null || params.refreshToken().isBlank()) {
             throw new UserInvalidRefreshTokenException();
         }
+        if (!jwtService.validateRefreshToken(params.refreshToken())) {
+            throw new UserInvalidRefreshTokenException();
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)

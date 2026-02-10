@@ -49,6 +49,7 @@ class RefreshTokenCommandTest {
     void execute_whenValidRefreshToken_shouldReturnAuthResponse() {
         var refreshTokenEntity = mock(RefreshToken.class);
         when(refreshTokenEntity.getUser()).thenReturn(user);
+        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token"))
                 .thenReturn(Optional.of(refreshTokenEntity));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -92,6 +93,7 @@ class RefreshTokenCommandTest {
 
     @Test
     void execute_whenRefreshTokenNotFound_shouldThrowUserRefreshTokenNotFoundException() {
+        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token")).thenReturn(Optional.empty());
 
         assertThrows(UserRefreshTokenNotFoundException.class, () -> command.execute(params));
@@ -104,6 +106,7 @@ class RefreshTokenCommandTest {
     void execute_whenUserNotFound_shouldThrowUserNotFoundException() {
         var refreshTokenEntity = mock(RefreshToken.class);
 
+        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
         when(refreshTokenEntity.getUser()).thenReturn(user);
         when(jwtService.getRefreshTokenEntity("refresh-token"))
                 .thenReturn(Optional.of(refreshTokenEntity));
@@ -116,8 +119,19 @@ class RefreshTokenCommandTest {
 
     @Test
     void execute_whenUnexpectedExceptionOccurs_shouldRethrow() {
+        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token")).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> command.execute(params));
+    }
+
+    @Test
+    void execute_whenRefreshTokenInvalid_shouldThrowUserInvalidRefreshTokenException() {
+        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(false);
+
+        assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
+
+        verify(jwtService).validateRefreshToken("refresh-token");
+        verify(jwtService, never()).getRefreshTokenEntity("refresh-token");
     }
 }

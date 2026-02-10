@@ -26,9 +26,8 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(UnFollowUserCommandParams params) {
+        validate(params);
         try {
-            validate(params);
-
             var targetUser =
                     userRepository
                             .findByHandle(params.handle())

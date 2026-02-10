@@ -39,9 +39,8 @@ public class UpdateUserProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSummary execute(UpdateUserProfileCommandParams params) {
+        validate(params);
         try {
-            validate(params);
-
             var request = params.request();
 
             if (request.firstName() != null) {

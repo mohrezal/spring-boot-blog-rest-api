@@ -163,9 +163,15 @@ class PostControllerTest {
     }
 
     @Test
-    void getPostBySlug_whenNotAuthenticated_shouldReturn401() throws Exception {
+    void getPostBySlug_whenNotAuthenticated_shouldReturn200() throws Exception {
+        var postDetail = mock(PostDetail.class);
+
+        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
+        when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
+                .thenReturn(postDetail);
+
         mockMvc.perform(get(Routes.build(Routes.Post.BASE, "existing-slug")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isOk());
     }
 
     @Test

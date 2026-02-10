@@ -20,20 +20,15 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
 
     private final JwtService jwtService;
 
-    @Override
-    public void validate(LogoutUserCommandParams params) {
-        super.validate(params);
-        if (params.refreshToken() == null || params.refreshToken().isBlank()) {
-            throw new UserInvalidRefreshTokenException();
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(LogoutUserCommandParams params) {
 
+        validate(params);
         try {
-            validate(params);
+            if (params.refreshToken() == null || params.refreshToken().isBlank()) {
+                throw new UserInvalidRefreshTokenException();
+            }
             var refreshToken =
                     jwtService
                             .getRefreshTokenEntity(params.refreshToken())
