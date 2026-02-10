@@ -26,15 +26,20 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(LoginUserCommandParams params) {
-        var user = authenticationService.authenticate(params.loginRequest());
+        try {
+            var user = authenticationService.authenticate(params.loginRequest());
 
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user.getId());
-        var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
+            var accessToken = jwtService.generateAccessToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user.getId());
+            var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
-        jwtService.saveRefreshToken(
-                refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
+            jwtService.saveRefreshToken(
+                    refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
-        return new AuthResponse(accessToken, refreshToken);
+            return new AuthResponse(accessToken, refreshToken);
+        } catch (Exception e) {
+            log.error("Unexpected error in LoginUserCommand - params : {}", params);
+            throw e;
+        }
     }
 }
