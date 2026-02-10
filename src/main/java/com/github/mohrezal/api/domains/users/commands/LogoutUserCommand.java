@@ -23,8 +23,7 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
     @Override
     public void validate(LogoutUserCommandParams params) {
         super.validate(params);
-        if (params.refreshToken() == null
-                || !jwtService.validateRefreshToken(params.refreshToken())) {
+        if (params.refreshToken() == null || params.refreshToken().isBlank()) {
             throw new UserInvalidRefreshTokenException();
         }
     }
@@ -34,19 +33,29 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
     public Void execute(LogoutUserCommandParams params) {
         validate(params);
 
-        var currentUserId = user.getId();
+        try {
+            var refreshToken =
+                    jwtService
+                            .getRefreshTokenEntity(params.refreshToken())
+                            .orElseThrow(UserInvalidRefreshTokenException::new);
 
-        var refreshToken =
-                jwtService
-                        .getRefreshTokenEntity(params.refreshToken())
-                        .orElseThrow(UserInvalidRefreshTokenException::new);
+            if (!user.getId().equals(refreshToken.getUser().getId())) {
+                log.warn("Logout forbidden - token ownership mismatch for user session");
+                throw new ForbiddenException();
+            }
 
-        if (!currentUserId.equals(refreshToken.getUser().getId())) {
-            throw new ForbiddenException();
+            jwtService.revokeRefreshToken(params.refreshToken());
+
+            log.info("Logout successful for user session");
+
+            return null;
+
+        } catch (UserInvalidRefreshTokenException | ForbiddenException ex) {
+            log.warn("Logout failed - authentication error: {}", ex.getClass().getSimpleName());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during logout operation", ex);
+            throw ex;
         }
-
-        jwtService.revokeRefreshToken(params.refreshToken());
-
-        return null;
     }
 }
