@@ -35,6 +35,7 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
 
             jwtService.saveRefreshToken(
                     refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
+            log.info("The user with id={} successfully logged in.", user.getId());
 
             return new AuthResponse(accessToken, refreshToken);
         } catch (Exception e) {
