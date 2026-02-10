@@ -1,10 +1,8 @@
 package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.UpdateUserProfileCommandParams;
-import com.github.mohrezal.api.domains.users.dtos.UpdateUserProfileRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
-import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.InvalidRequestException;
@@ -41,23 +39,33 @@ public class UpdateUserProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSummary execute(UpdateUserProfileCommandParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        UpdateUserProfileRequest request = params.request();
+            var request = params.request();
 
-        if (request.firstName() != null) {
-            user.setFirstName(request.firstName());
+            if (request.firstName() != null) {
+                user.setFirstName(request.firstName());
+            }
+
+            if (request.lastName() != null) {
+                user.setLastName(request.lastName());
+            }
+
+            if (request.bio() != null) {
+                user.setBio(request.bio());
+            }
+
+            var updatedUser = userRepository.save(user);
+
+            log.info("User profile update successful.");
+            return userMapper.toUserSummary(updatedUser);
+        } catch (InvalidRequestException ex) {
+            log.warn("User profile update failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during user profile update operation", ex);
+            throw ex;
         }
-
-        if (request.lastName() != null) {
-            user.setLastName(request.lastName());
-        }
-
-        if (request.bio() != null) {
-            user.setBio(request.bio());
-        }
-        User updatedUser = userRepository.save(user);
-
-        return userMapper.toUserSummary(updatedUser);
     }
 }
