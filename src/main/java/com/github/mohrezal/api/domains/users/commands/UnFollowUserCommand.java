@@ -26,24 +26,35 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(UnFollowUserCommandParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        var targetUser =
-                userRepository
-                        .findByHandle(params.handle())
-                        .orElseThrow(UserNotFoundException::new);
+            var targetUser =
+                    userRepository
+                            .findByHandle(params.handle())
+                            .orElseThrow(UserNotFoundException::new);
 
-        if (user.getId().equals(targetUser.getId())) {
-            throw new UserCannotFollowOrUnfollowSelfException();
+            if (user.getId().equals(targetUser.getId())) {
+                throw new UserCannotFollowOrUnfollowSelfException();
+            }
+
+            var userFollow = userFollowRepository.findByFollowedAndFollower(targetUser, user);
+            if (userFollow.isEmpty()) {
+                throw new UserNotFollowingException();
+            }
+
+            userFollowRepository.delete(userFollow.get());
+
+            log.info("User unfollow successful.");
+            return null;
+        } catch (UserNotFoundException
+                | UserCannotFollowOrUnfollowSelfException
+                | UserNotFollowingException ex) {
+            log.warn("User unfollow failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during user unfollow operation", ex);
+            throw ex;
         }
-
-        var userFollow = userFollowRepository.findByFollowedAndFollower(targetUser, user);
-        if (userFollow.isEmpty()) {
-            throw new UserNotFollowingException();
-        }
-
-        userFollowRepository.delete(userFollow.get());
-
-        return null;
     }
 }
