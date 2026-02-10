@@ -19,6 +19,7 @@ import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final UserRepository userRepository;
     private final ApplicationProperties applicationProperties;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
-    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public void validate(RegisterUserCommandParams params) {
@@ -54,24 +55,32 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
-        validate(params);
-        var user = registrationService.register(params.registerUserRequest(), UserRole.USER);
+        try {
+            validate(params);
+            var user = registrationService.register(params.registerUserRequest(), UserRole.USER);
 
-        var notificationPreference = NotificationPreference.builder().user(user).build();
-        notificationPreferenceRepository.save(notificationPreference);
+            var notificationPreference = NotificationPreference.builder().user(user).build();
+            notificationPreferenceRepository.save(notificationPreference);
 
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user.getId());
+            var accessToken = jwtService.generateAccessToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user.getId());
 
-        var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
+            var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
-        jwtService.saveRefreshToken(
-                refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
+            jwtService.saveRefreshToken(
+                    refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
-        eventPublisher.publishEvent(new UserRegisteredEvent(user));
+            eventPublisher.publishEvent(new UserRegisteredEvent(user));
 
-        var authResponse = new AuthResponse(accessToken, refreshToken);
-
-        return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
+            var authResponse = new AuthResponse(accessToken, refreshToken);
+            log.info("User registration successful.");
+            return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
+        } catch (UserHandleReservedException | UserHandleAlreadyExistsException ex) {
+            log.warn("User registration failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during user registration operation", ex);
+            throw ex;
+        }
     }
 }
