@@ -31,9 +31,9 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(LogoutUserCommandParams params) {
-        validate(params);
 
         try {
+            validate(params);
             var refreshToken =
                     jwtService
                             .getRefreshTokenEntity(params.refreshToken())
@@ -51,7 +51,7 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
             return null;
 
         } catch (UserInvalidRefreshTokenException | ForbiddenException ex) {
-            log.warn("Logout failed - authentication error: {}", ex.getClass().getSimpleName());
+            log.warn("Logout failed - authentication error: {}", ex.getMessage());
             throw ex;
         } catch (Exception ex) {
             log.error("Unexpected error during logout operation", ex);
