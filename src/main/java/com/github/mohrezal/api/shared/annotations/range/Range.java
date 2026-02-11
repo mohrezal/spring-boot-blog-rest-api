@@ -1,5 +1,6 @@
 package com.github.mohrezal.api.shared.annotations.range;
 
+import com.github.mohrezal.api.shared.enums.MessageKey;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.Documented;
@@ -17,11 +18,11 @@ public @interface Range {
 
     int max() default Integer.MAX_VALUE;
 
-    String minMessage() default "Value must be at least {min}";
+    String minMessage() default MessageKey.Validation.SHARED_VALIDATION_RANGE_MIN;
 
-    String maxMessage() default "Value cannot exceed {max}";
+    String maxMessage() default MessageKey.Validation.SHARED_VALIDATION_RANGE_MAX;
 
-    String message() default "Value must be between {min} and {max}";
+    String message() default MessageKey.Validation.SHARED_VALIDATION_RANGE;
 
     Class<?>[] groups() default {};
 

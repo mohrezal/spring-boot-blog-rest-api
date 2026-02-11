@@ -8,7 +8,7 @@ public class UserInvalidRefreshTokenException extends UnauthorizedException {
         super(MessageKey.USER_INVALID_REFRESH_TOKEN);
     }
 
-    public UserInvalidRefreshTokenException(MessageKey messageKey) {
+    public UserInvalidRefreshTokenException(String messageKey) {
         super(messageKey);
     }
 }

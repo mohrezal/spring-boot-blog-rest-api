@@ -5,12 +5,17 @@ import com.github.mohrezal.api.domains.storage.exceptions.types.StorageInvalidMi
 import com.github.mohrezal.api.shared.exceptions.AbstractExceptionHandler;
 import com.github.mohrezal.api.shared.exceptions.ErrorResponse;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class StorageExceptionHandler extends AbstractExceptionHandler {
+
+    public StorageExceptionHandler(MessageSource messageSource) {
+        super(messageSource);
+    }
 
     @ExceptionHandler(StorageFileSizeExceededException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleStorageFileSizeExceededException(

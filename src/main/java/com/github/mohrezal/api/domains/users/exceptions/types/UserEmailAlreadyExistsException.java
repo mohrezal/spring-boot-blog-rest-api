@@ -8,7 +8,7 @@ public class UserEmailAlreadyExistsException extends ResourceConflictException {
         super(MessageKey.USER_EMAIL_ALREADY_EXISTS);
     }
 
-    public UserEmailAlreadyExistsException(MessageKey messageKey) {
+    public UserEmailAlreadyExistsException(String messageKey) {
         super(messageKey);
     }
 }

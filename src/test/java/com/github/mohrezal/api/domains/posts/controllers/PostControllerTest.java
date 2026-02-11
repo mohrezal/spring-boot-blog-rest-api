@@ -146,6 +146,13 @@ class PostControllerTest {
     }
 
     @Test
+    void getPosts_whenSizeExceedsMax_shouldReturnBadRequest() throws Exception {
+        mockMvc.perform(get(Routes.build(Routes.Post.BASE)).param("size", "21"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.size").value("Value cannot exceed 20"));
+    }
+
+    @Test
     void getPostBySlug_whenAuthenticatedAndPostExists_shouldReturn200() throws Exception {
         var user =
                 userRepository.save(

@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidRequestException extends BaseException {
     public InvalidRequestException() {
-        super(HttpStatus.BAD_REQUEST, MessageKey.SHARED_ERROR_INVALID_REQUEST);
+        super(MessageKey.SHARED_ERROR_INVALID_REQUEST, HttpStatus.BAD_REQUEST);
     }
 
-    public InvalidRequestException(MessageKey messageKey) {
-        super(HttpStatus.BAD_REQUEST, messageKey);
+    public InvalidRequestException(String messageKey) {
+        super(messageKey, HttpStatus.BAD_REQUEST);
     }
 }

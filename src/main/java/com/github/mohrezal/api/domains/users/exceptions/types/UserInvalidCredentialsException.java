@@ -8,7 +8,7 @@ public class UserInvalidCredentialsException extends UnauthorizedException {
         super(MessageKey.USER_INVALID_CREDENTIALS);
     }
 
-    public UserInvalidCredentialsException(MessageKey messageKey) {
+    public UserInvalidCredentialsException(String messageKey) {
         super(messageKey);
     }
 }

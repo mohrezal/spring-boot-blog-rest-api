@@ -4,11 +4,11 @@ import com.github.mohrezal.api.shared.enums.MessageKey;
 import org.springframework.http.HttpStatus;
 
 public class ForbiddenException extends BaseException {
-    public ForbiddenException(MessageKey messageKey) {
-        super(HttpStatus.FORBIDDEN, messageKey);
+    public ForbiddenException(String messageKey) {
+        super(messageKey, HttpStatus.FORBIDDEN);
     }
 
     public ForbiddenException() {
-        super(HttpStatus.FORBIDDEN, MessageKey.SHARED_ERROR_FORBIDDEN);
+        super(MessageKey.SHARED_ERROR_FORBIDDEN, HttpStatus.FORBIDDEN);
     }
 }

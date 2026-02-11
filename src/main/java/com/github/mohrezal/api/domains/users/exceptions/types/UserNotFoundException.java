@@ -8,7 +8,7 @@ public class UserNotFoundException extends ResourceNotFoundException {
         super(MessageKey.USER_NOT_FOUND);
     }
 
-    public UserNotFoundException(MessageKey messageKey) {
+    public UserNotFoundException(String messageKey) {
         super(messageKey);
     }
 }

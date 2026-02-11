@@ -27,15 +27,11 @@ public class RangeValidator implements ConstraintValidator<Range, Integer> {
         context.disableDefaultConstraintViolation();
 
         if (value < min) {
-            context.buildConstraintViolationWithTemplate(
-                            minMessage.replace("{min}", String.valueOf(min)))
-                    .addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(minMessage).addConstraintViolation();
             return false;
         }
         if (value > max) {
-            context.buildConstraintViolationWithTemplate(
-                            maxMessage.replace("{max}", String.valueOf(max)))
-                    .addConstraintViolation();
+            context.buildConstraintViolationWithTemplate(maxMessage).addConstraintViolation();
             return false;
         }
         return true;

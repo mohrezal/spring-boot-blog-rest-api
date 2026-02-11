@@ -17,6 +17,9 @@ logging:
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
 spring:
+  messages:
+    basename: messages/messages
+    encoding: UTF-8
   config:
     import:  optional:file:.env[.properties]
   rabbitmq:

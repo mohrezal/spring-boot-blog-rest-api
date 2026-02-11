@@ -13,6 +13,7 @@ import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
 import java.util.HashMap;
 import java.util.Map;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -28,6 +29,10 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 
 @RestControllerAdvice
 public class SharedExceptionHandler extends AbstractExceptionHandler {
+
+    public SharedExceptionHandler(MessageSource messageSource) {
+        super(messageSource);
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<@NonNull ErrorResponse> handleResourceNotFoundException(
@@ -82,7 +87,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
             BadCredentialsException ex, WebRequest request) {
         ErrorResponse errorResponse =
                 ErrorResponse.builder()
-                        .message(MessageKey.SHARED_ERROR_BAD_CREDENTIALS.getMessage())
+                        .message(resolveMessage(MessageKey.SHARED_ERROR_BAD_CREDENTIALS))
                         .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
@@ -96,14 +101,14 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                 || auth instanceof AnonymousAuthenticationToken) {
             ErrorResponse errorResponse =
                     ErrorResponse.builder()
-                            .message(MessageKey.SHARED_ERROR_UNAUTHORIZED.getMessage())
+                            .message(resolveMessage(MessageKey.SHARED_ERROR_UNAUTHORIZED))
                             .build();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
 
         ErrorResponse errorResponse =
                 ErrorResponse.builder()
-                        .message(MessageKey.SHARED_ERROR_FORBIDDEN.getMessage())
+                        .message(resolveMessage(MessageKey.SHARED_ERROR_FORBIDDEN))
                         .build();
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
@@ -116,7 +121,10 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                 .getFieldErrors()
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         ErrorResponse errorResponse =
-                ErrorResponse.builder().message("Validation failed").errors(errors).build();
+                ErrorResponse.builder()
+                        .message(resolveMessage(MessageKey.SHARED_VALIDATION_FAILED))
+                        .errors(errors)
+                        .build();
         return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
     }
 
@@ -138,7 +146,10 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                         });
 
         ErrorResponse errorResponse =
-                ErrorResponse.builder().message("Validation failed").errors(errors).build();
+                ErrorResponse.builder()
+                        .message(resolveMessage(MessageKey.SHARED_VALIDATION_FAILED))
+                        .errors(errors)
+                        .build();
 
         return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
     }
@@ -147,7 +158,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
     public ResponseEntity<@NonNull ErrorResponse> handleGenericException(Exception ex) {
         ErrorResponse errorResponse =
                 ErrorResponse.builder()
-                        .message(MessageKey.SHARED_ERROR_UNEXPECTED.getMessage())
+                        .message(resolveMessage(MessageKey.SHARED_ERROR_UNEXPECTED))
                         .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

@@ -32,7 +32,7 @@ class LogoutUserCommandTest {
 
     @InjectMocks private LogoutUserCommand command;
 
-    private final User mockedUser = aUser().build();
+    private final User mockedUser = aUser().withId(UUID.randomUUID()).build();
 
     @Test
     void execute_whenRefreshTokenIsNull_shouldThrowUserInvalidRefreshTokenException() {

@@ -8,7 +8,7 @@ public class UserRefreshTokenNotFoundException extends ResourceNotFoundException
         super(MessageKey.USER_REFRESH_TOKEN_NOT_FOUND);
     }
 
-    public UserRefreshTokenNotFoundException(MessageKey messageKey) {
+    public UserRefreshTokenNotFoundException(String messageKey) {
         super(messageKey);
     }
 }

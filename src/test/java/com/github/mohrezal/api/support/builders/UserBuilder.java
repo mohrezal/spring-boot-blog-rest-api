@@ -70,7 +70,9 @@ public class UserBuilder {
                         .role(role)
                         .isVerified(isVerified)
                         .build();
-        user.setId(id != null ? id : UUID.randomUUID());
+        if (id != null) {
+            user.setId(id);
+        }
 
         return user;
     }
