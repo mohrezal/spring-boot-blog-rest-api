@@ -6,14 +6,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UpdateUserProfileRequest(
-        @Size(min = 2, max = 50, message = MessageKey.Validation.SHARED_SIZE)
-                @Pattern(
-                        regexp = RegexUtils.NAME_PATTERN,
-                        message = MessageKey.Validation.USER_NAME_PATTERN)
+        @Size(min = 2, max = 50, message = MessageKey.SHARED_SIZE)
+                @Pattern(regexp = RegexUtils.NAME_PATTERN, message = MessageKey.USER_NAME_PATTERN)
                 String firstName,
-        @Size(min = 2, max = 50, message = MessageKey.Validation.SHARED_SIZE)
-                @Pattern(
-                        regexp = RegexUtils.NAME_PATTERN,
-                        message = MessageKey.Validation.USER_NAME_PATTERN)
+        @Size(min = 2, max = 50, message = MessageKey.SHARED_SIZE)
+                @Pattern(regexp = RegexUtils.NAME_PATTERN, message = MessageKey.USER_NAME_PATTERN)
                 String lastName,
-        @Size(max = 500, message = MessageKey.Validation.SHARED_VALIDATION_SIZE_MAX) String bio) {}
+        @Size(max = 500, message = MessageKey.SHARED_VALIDATION_SIZE_MAX) String bio) {}

@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
 public record UploadRequest(
-        @NotNull(message = MessageKey.Validation.SHARED_NOT_NULL) MultipartFile file,
+        @NotNull(message = MessageKey.SHARED_NOT_NULL) MultipartFile file,
         String title,
         String alt) {}

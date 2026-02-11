@@ -50,23 +50,19 @@ public final class MessageKey {
 
     public static final String SHARED_VALIDATION_FAILED = "shared.validation.failed";
 
-    public static final class Validation {
-        private Validation() {}
+    public static final String SHARED_NOT_BLANK = "{shared.validation.not-blank}";
+    public static final String SHARED_NOT_NULL = "{shared.validation.not-null}";
+    public static final String SHARED_NOT_EMPTY = "{shared.validation.not-empty}";
+    public static final String SHARED_EMAIL = "{shared.validation.email}";
+    public static final String SHARED_SIZE = "{shared.validation.size}";
+    public static final String SHARED_VALIDATION_SIZE_MAX = "{shared.validation.size-max}";
+    public static final String SHARED_VALIDATION_RANGE = "{shared.validation.range}";
+    public static final String SHARED_VALIDATION_RANGE_MIN = "{shared.validation.range.min}";
+    public static final String SHARED_VALIDATION_RANGE_MAX = "{shared.validation.range.max}";
 
-        public static final String SHARED_NOT_BLANK = "{shared.validation.not-blank}";
-        public static final String SHARED_NOT_NULL = "{shared.validation.not-null}";
-        public static final String SHARED_NOT_EMPTY = "{shared.validation.not-empty}";
-        public static final String SHARED_EMAIL = "{shared.validation.email}";
-        public static final String SHARED_SIZE = "{shared.validation.size}";
-        public static final String SHARED_VALIDATION_SIZE_MAX = "{shared.validation.size-max}";
-        public static final String SHARED_VALIDATION_RANGE = "{shared.validation.range}";
-        public static final String SHARED_VALIDATION_RANGE_MIN = "{shared.validation.range.min}";
-        public static final String SHARED_VALIDATION_RANGE_MAX = "{shared.validation.range.max}";
+    public static final String USER_NAME_PATTERN = "{user.validation.name-pattern}";
+    public static final String USER_HANDLE_PATTERN = "{user.validation.handle-pattern}";
+    public static final String USER_PASSWORD_PATTERN = "{user.validation.password-pattern}";
 
-        public static final String USER_NAME_PATTERN = "{user.validation.name-pattern}";
-        public static final String USER_HANDLE_PATTERN = "{user.validation.handle-pattern}";
-        public static final String USER_PASSWORD_PATTERN = "{user.validation.password-pattern}";
-
-        public static final String POST_SLUG_INVALID_FORMAT = "{post.error.slug-invalid-format}";
-    }
+    public static final String POST_SLUG_INVALID_FORMAT_KEY = "{post.error.slug-invalid-format}";
 }
