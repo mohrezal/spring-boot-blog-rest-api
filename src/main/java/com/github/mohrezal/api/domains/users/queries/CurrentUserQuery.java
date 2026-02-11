@@ -27,7 +27,7 @@ public class CurrentUserQuery extends AuthenticatedQuery<CurrentUserQueryParams,
         try {
             return userMapper.toUserSummary(user);
         } catch (Exception ex) {
-            log.error("Unexpected error in CurrentUserQuery - message={}", ex.getMessage());
+            log.error("Unexpected error during get user summary query : ", ex);
             throw ex;
         }
     }
