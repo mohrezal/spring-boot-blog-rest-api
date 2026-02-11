@@ -24,6 +24,11 @@ public class CurrentUserQuery extends AuthenticatedQuery<CurrentUserQueryParams,
     public UserSummary execute(CurrentUserQueryParams params) {
         validate(params);
 
-        return userMapper.toUserSummary(user);
+        try {
+            return userMapper.toUserSummary(user);
+        } catch (Exception ex) {
+            log.error("Unexpected error in CurrentUserQuery - message={}", ex.getMessage());
+            throw ex;
+        }
     }
 }
