@@ -24,6 +24,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
 public class SharedExceptionHandler extends AbstractExceptionHandler {
@@ -116,6 +117,29 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         ErrorResponse errorResponse =
                 ErrorResponse.builder().message("Validation failed").errors(errors).build();
+        return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<@NonNull ErrorResponse> handleHandlerMethodValidationException(
+            HandlerMethodValidationException ex) {
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getParameterValidationResults()
+                .forEach(
+                        result -> {
+                            String parameterName = result.getMethodParameter().getParameterName();
+                            result.getResolvableErrors()
+                                    .forEach(
+                                            error -> {
+                                                errors.put(
+                                                        parameterName, error.getDefaultMessage());
+                                            });
+                        });
+
+        ErrorResponse errorResponse =
+                ErrorResponse.builder().message("Validation failed").errors(errors).build();
+
         return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
     }
 

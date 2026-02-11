@@ -27,6 +27,7 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabil
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -69,8 +70,8 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Set<String> categorySlugs,
             @RequestParam(required = false) Set<UUID> authorIds) {
 
@@ -162,8 +163,8 @@ public class PostController {
 
     @GetMapping(Routes.Post.SEARCH)
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPostsBySearchQuery(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size,
             @RequestParam(name = "query") String query) {
         var params = new GetPostsBySearchQueryParams(query, size, page);
         return ResponseEntity.ok().body(getPostsBySearchQuery.execute(params));

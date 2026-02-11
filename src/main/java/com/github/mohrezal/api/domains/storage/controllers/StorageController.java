@@ -16,6 +16,7 @@ import com.github.mohrezal.api.domains.storage.queries.GetUserStorageListQuery;
 import com.github.mohrezal.api.domains.storage.queries.params.GetStorageByFilenameQueryParams;
 import com.github.mohrezal.api.domains.storage.queries.params.GetUserStorageListQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -88,8 +89,8 @@ public class StorageController {
     @GetMapping(Routes.Storage.LIST)
     public ResponseEntity<@NonNull PageResponse<StorageSummary>> list(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size) {
         var query = getUserStorageListQueries.getObject();
         var params = new GetUserStorageListQueryParams(userDetails, page, size);
         return ResponseEntity.ok().body(query.execute(params));

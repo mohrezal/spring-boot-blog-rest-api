@@ -15,8 +15,10 @@ import com.github.mohrezal.api.domains.users.queries.params.CurrentUserQueryPara
 import com.github.mohrezal.api.domains.users.queries.params.GetUserFollowersQueryParams;
 import com.github.mohrezal.api.domains.users.queries.params.GetUserFollowingQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
@@ -79,8 +81,8 @@ public class UserController {
     public ResponseEntity<@NonNull PageResponse<FollowerSummary>> getFollowers(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String handle,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
 
         var params = new GetUserFollowersQueryParams(userDetails, handle, page, size);
 
@@ -93,8 +95,8 @@ public class UserController {
     public ResponseEntity<@NonNull PageResponse<FollowerSummary>> getFollowing(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String handle,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
 
         var params = new GetUserFollowingQueryParams(userDetails, handle, page, size);
         var response = getUserFollowingQueries.getObject().execute(params);

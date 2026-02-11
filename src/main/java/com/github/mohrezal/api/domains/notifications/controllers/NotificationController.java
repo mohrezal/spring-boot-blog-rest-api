@@ -19,8 +19,10 @@ import com.github.mohrezal.api.domains.notifications.queries.params.GetNotificat
 import com.github.mohrezal.api.domains.notifications.queries.params.GetUserUnreadNotificationCountQueryParams;
 import com.github.mohrezal.api.domains.notifications.queries.params.SubscribeNotificationStreamQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -64,8 +66,8 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<NotificationSummary>> getNotification(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
+            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
         var params =
                 GetNotificationsQueryParams.builder()
                         .page(page)
