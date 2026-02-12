@@ -29,18 +29,34 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeleteCommandParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        var fileName = params.fileName();
-        var storage =
-                storageRepository
-                        .findByFilename(fileName)
-                        .orElseThrow(ResourceNotFoundException::new);
+            var fileName = params.fileName();
+            var storage =
+                    storageRepository
+                            .findByFilename(fileName)
+                            .orElseThrow(ResourceNotFoundException::new);
 
-        if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
-            throw new AccessDeniedException();
+            if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
+                throw new AccessDeniedException();
+            }
+
+            storageService.delete(storage);
+            log.info("Storage delete successful - filename: {}", fileName);
+            return null;
+        } catch (ResourceNotFoundException | AccessDeniedException ex) {
+            log.warn(
+                    "Storage delete failed - filename: {}, message: {}",
+                    params.fileName(),
+                    ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error(
+                    "Unexpected error during storage delete operation - filename: {}",
+                    params.fileName(),
+                    ex);
+            throw ex;
         }
-        storageService.delete(storage);
-        return null;
     }
 }

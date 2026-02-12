@@ -9,6 +9,7 @@ import com.github.mohrezal.api.domains.storage.mappers.StorageMapper;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,14 +48,29 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadCommandParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        var request = params.uploadRequest();
-        var type = params.type() != null ? params.type() : StorageType.MEDIA;
+            var request = params.uploadRequest();
+            var type = params.type() != null ? params.type() : StorageType.MEDIA;
 
-        var savedStorage =
-                storageService.upload(request.file(), request.title(), request.alt(), type, user);
+            var savedStorage =
+                    storageService.upload(
+                            request.file(), request.title(), request.alt(), type, user);
+            log.info(
+                    "Storage upload successful - type: {}, filename: {}",
+                    type,
+                    savedStorage.getFilename());
 
-        return storageMapper.toStorageSummary(savedStorage);
+            return storageMapper.toStorageSummary(savedStorage);
+        } catch (StorageInvalidMimeTypeException
+                | StorageFileSizeExceededException
+                | AccessDeniedException ex) {
+            log.warn("Storage upload failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during storage upload operation", ex);
+            throw ex;
+        }
     }
 }

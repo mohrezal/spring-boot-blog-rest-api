@@ -10,6 +10,7 @@ import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,27 +53,39 @@ public class UploadProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadProfileCommandParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        if (user.getAvatar() != null) {
-            storageService.delete(user.getAvatar());
+            if (user.getAvatar() != null) {
+                storageService.delete(user.getAvatar());
+            }
+
+            var firstName = user.getFirstName() != null ? user.getFirstName() : "";
+            var lastName = user.getLastName() != null ? user.getLastName() : "";
+            var profileInfo = String.format("%s %s profile image", firstName, lastName).trim();
+
+            var storage =
+                    storageService.upload(
+                            params.uploadProfileRequest().file(),
+                            profileInfo,
+                            profileInfo,
+                            StorageType.PROFILE,
+                            user);
+
+            user.setAvatar(storage);
+            userRepository.save(user);
+
+            log.info("Profile image upload successful - filename: {}", storage.getFilename());
+
+            return storageMapper.toStorageSummary(storage);
+        } catch (StorageInvalidMimeTypeException
+                | StorageFileSizeExceededException
+                | AccessDeniedException ex) {
+            log.warn("Profile image upload failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during profile image upload operation", ex);
+            throw ex;
         }
-
-        var firstName = user.getFirstName() != null ? user.getFirstName() : "";
-        var lastName = user.getLastName() != null ? user.getLastName() : "";
-        var profileInfo = String.format("%s %s profile image", firstName, lastName).trim();
-
-        var storage =
-                storageService.upload(
-                        params.uploadProfileRequest().file(),
-                        profileInfo,
-                        profileInfo,
-                        StorageType.PROFILE,
-                        user);
-
-        user.setAvatar(storage);
-        userRepository.save(user);
-
-        return storageMapper.toStorageSummary(storage);
     }
 }
