@@ -35,24 +35,34 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     public PostDetail execute(CreatePostCommandParams params) {
         validate(params);
 
-        var categoryIds = params.createPostRequest().categoryIds();
-        var categories = this.categoryRepository.findAllByIdIn(categoryIds);
-
-        if (categories.size() != categoryIds.size()) {
-            throw new CategoryNotFoundException();
-        }
-
-        var newPost = this.postMapper.toPost(params.createPostRequest());
-        newPost.setCategories(categories);
-        newPost.setUser(user);
-        newPost.setStatus(PostStatus.DRAFT);
-        var slug = slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
-        newPost.setSlug(slug);
         try {
+            var categoryIds = params.createPostRequest().categoryIds();
+            var categories = this.categoryRepository.findAllByIdIn(categoryIds);
+
+            if (categories.size() != categoryIds.size()) {
+                throw new CategoryNotFoundException();
+            }
+
+            var newPost = this.postMapper.toPost(params.createPostRequest());
+            newPost.setCategories(categories);
+            newPost.setUser(user);
+            newPost.setStatus(PostStatus.DRAFT);
+            var slug =
+                    slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
+            newPost.setSlug(slug);
             var savedPost = postRepository.save(newPost);
+
+            log.info("Create post successful.");
             return this.postMapper.toPostDetail(savedPost);
-        } catch (DataIntegrityViolationException e) {
+        } catch (CategoryNotFoundException | ResourceConflictException ex) {
+            log.warn("Create post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Create post failed - data integrity violation");
             throw new ResourceConflictException();
+        } catch (Exception ex) {
+            log.error("Unexpected error during create post operation", ex);
+            throw ex;
         }
     }
 }
