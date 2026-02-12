@@ -29,25 +29,36 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     @Transactional(readOnly = true)
     @Override
     public PostDetail execute(GetPostBySlugQueryParams params) {
-        if (params.getUserDetails() != null) {
-            validate(params);
+        try {
+            if (params.getUserDetails() != null) {
+                validate(params);
+            }
+
+            var post =
+                    this.postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
+
+            if (post.getStatus().equals(PostStatus.PUBLISHED)) {
+                log.info("Get post by slug query successful.");
+                return this.postMapper.toPostDetail(post);
+            }
+
+            var isAdmin = user != null && userUtilsService.isAdmin(user);
+            var isOwner = user != null && postUtilsService.isOwner(post, user);
+
+            if (isAdmin || isOwner) {
+                log.info("Get post by slug query successful.");
+                return this.postMapper.toPostDetail(post);
+            }
+
+            throw new PostNotFoundException();
+        } catch (PostNotFoundException ex) {
+            log.warn("Get post by slug query failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during get post by slug query operation", ex);
+            throw ex;
         }
-        var post =
-                this.postRepository
-                        .findBySlug(params.slug())
-                        .orElseThrow(PostNotFoundException::new);
-
-        if (post.getStatus().equals(PostStatus.PUBLISHED)) {
-            return this.postMapper.toPostDetail(post);
-        }
-
-        var isAdmin = user != null && userUtilsService.isAdmin(user);
-        var isOwner = user != null && postUtilsService.isOwner(post, user);
-
-        if (isAdmin || isOwner) {
-            return this.postMapper.toPostDetail(post);
-        }
-
-        throw new PostNotFoundException();
     }
 }

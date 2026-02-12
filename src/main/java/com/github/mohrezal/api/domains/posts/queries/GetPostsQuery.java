@@ -29,17 +29,25 @@ public class GetPostsQuery implements Query<GetPostsQueryParams, PageResponse<Po
     @Transactional(readOnly = true)
     @Override
     public PageResponse<PostSummary> execute(GetPostsQueryParams params) {
-        var specification =
-                Specification.where(PostRepository.fetchRelationships())
-                        .and(PostRepository.hasStatus(PostStatus.PUBLISHED))
-                        .and(PostRepository.hasAuthorIds(params.authorIds()))
-                        .and(PostRepository.hasCategorySlugs(params.categorySlugs()));
+        try {
+            var specification =
+                    Specification.where(PostRepository.fetchRelationships())
+                            .and(PostRepository.hasStatus(PostStatus.PUBLISHED))
+                            .and(PostRepository.hasAuthorIds(params.authorIds()))
+                            .and(PostRepository.hasCategorySlugs(params.categorySlugs()));
 
-        var pageable =
-                PageRequest.of(
-                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "publishedAt"));
-        var posts = repository.findAll(specification, pageable);
-
-        return PageResponse.from(posts, postMapper::toPostSummary);
+            var pageable =
+                    PageRequest.of(
+                            params.page(),
+                            params.size(),
+                            Sort.by(Sort.Direction.DESC, "publishedAt"));
+            var posts = repository.findAll(specification, pageable);
+            var response = PageResponse.from(posts, postMapper::toPostSummary);
+            log.info("Get posts query successful.");
+            return response;
+        } catch (Exception ex) {
+            log.error("Unexpected error during get posts query operation", ex);
+            throw ex;
+        }
     }
 }
