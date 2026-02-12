@@ -36,35 +36,48 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     public PostDetail execute(UpdatePostCommandParams params) {
         validate(params);
 
-        var post =
-                this.postRepository
-                        .findBySlug(params.slug())
-                        .orElseThrow(PostNotFoundException::new);
-
-        if (!postUtilsService.isOwner(post, user)) {
-            throw new AccessDeniedException();
-        }
-
-        var categories = categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
-
-        if (categories.size() != params.updatePostRequest().categoryIds().size()) {
-            throw new CategoryNotFoundException();
-        }
-
-        if (!post.getSlug().equals(params.updatePostRequest().slug())) {
-            if (postRepository.existsBySlug(params.updatePostRequest().slug())) {
-                throw new PostSlugAlreadyExistsException();
-            }
-        }
-
-        postMapper.toTargetPost(params.updatePostRequest(), post);
-        post.setCategories(categories);
-
         try {
+            var post =
+                    this.postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
+
+            if (!postUtilsService.isOwner(post, user)) {
+                throw new AccessDeniedException();
+            }
+
+            var categories =
+                    categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
+
+            if (categories.size() != params.updatePostRequest().categoryIds().size()) {
+                throw new CategoryNotFoundException();
+            }
+
+            if (!post.getSlug().equals(params.updatePostRequest().slug())) {
+                if (postRepository.existsBySlug(params.updatePostRequest().slug())) {
+                    throw new PostSlugAlreadyExistsException();
+                }
+            }
+
+            postMapper.toTargetPost(params.updatePostRequest(), post);
+            post.setCategories(categories);
+
             var savedPost = postRepository.save(post);
+
+            log.info("Update post successful.");
             return this.postMapper.toPostDetail(savedPost);
-        } catch (DataIntegrityViolationException e) {
+        } catch (PostNotFoundException
+                | AccessDeniedException
+                | CategoryNotFoundException
+                | ResourceConflictException ex) {
+            log.warn("Update post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Update post failed - data integrity violation");
             throw new ResourceConflictException();
+        } catch (Exception ex) {
+            log.error("Unexpected error during update post operation", ex);
+            throw ex;
         }
     }
 }

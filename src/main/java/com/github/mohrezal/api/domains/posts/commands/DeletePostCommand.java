@@ -25,14 +25,25 @@ public class DeletePostCommand extends AuthenticatedCommand<DeletePostCommandPar
     public Void execute(DeletePostCommandParams params) {
         validate(params);
 
-        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        try {
+            var post =
+                    postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
 
-        if (!user.getId().equals(post.getUser().getId())) {
-            throw new AccessDeniedException();
+            if (!user.getId().equals(post.getUser().getId())) {
+                throw new AccessDeniedException();
+            }
+
+            postRepository.delete(post);
+            log.info("Delete post successful.");
+            return null;
+        } catch (PostNotFoundException | AccessDeniedException ex) {
+            log.warn("Delete post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during delete post operation", ex);
+            throw ex;
         }
-
-        postRepository.delete(post);
-
-        return null;
     }
 }

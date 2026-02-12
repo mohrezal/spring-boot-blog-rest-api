@@ -32,17 +32,31 @@ public class PublishPostCommand extends AuthenticatedCommand<PublishPostCommandP
     public Void execute(PublishPostCommandParams params) {
         validate(params);
 
-        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        try {
+            var post =
+                    postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
 
-        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-            throw new AccessDeniedException();
+            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+                throw new AccessDeniedException();
+            }
+            if (!post.getStatus().equals(PostStatus.DRAFT)) {
+                throw new PostInvalidStatusTransitionException();
+            }
+            post.setStatus(PostStatus.PUBLISHED);
+            post.setPublishedAt(OffsetDateTime.now());
+            postRepository.save(post);
+            log.info("Publish post successful.");
+            return null;
+        } catch (PostNotFoundException
+                | AccessDeniedException
+                | PostInvalidStatusTransitionException ex) {
+            log.warn("Publish post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during publish post operation", ex);
+            throw ex;
         }
-        if (!post.getStatus().equals(PostStatus.DRAFT)) {
-            throw new PostInvalidStatusTransitionException();
-        }
-        post.setStatus(PostStatus.PUBLISHED);
-        post.setPublishedAt(OffsetDateTime.now());
-        postRepository.save(post);
-        return null;
     }
 }

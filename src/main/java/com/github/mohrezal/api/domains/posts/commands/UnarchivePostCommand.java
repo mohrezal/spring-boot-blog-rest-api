@@ -31,16 +31,30 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
     public Void execute(UnarchivePostCommandParams params) {
         validate(params);
 
-        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        try {
+            var post =
+                    postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
 
-        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-            throw new AccessDeniedException();
+            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+                throw new AccessDeniedException();
+            }
+            if (!post.getStatus().equals(PostStatus.ARCHIVED)) {
+                throw new PostInvalidStatusTransitionException();
+            }
+            post.setStatus(PostStatus.PUBLISHED);
+            postRepository.save(post);
+            log.info("Unarchive post successful.");
+            return null;
+        } catch (PostNotFoundException
+                | AccessDeniedException
+                | PostInvalidStatusTransitionException ex) {
+            log.warn("Unarchive post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during unarchive post operation", ex);
+            throw ex;
         }
-        if (!post.getStatus().equals(PostStatus.ARCHIVED)) {
-            throw new PostInvalidStatusTransitionException();
-        }
-        post.setStatus(PostStatus.PUBLISHED);
-        postRepository.save(post);
-        return null;
     }
 }
