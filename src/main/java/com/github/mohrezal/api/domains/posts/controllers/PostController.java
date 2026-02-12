@@ -98,12 +98,7 @@ public class PostController {
             @PathVariable String slug,
             @Valid @RequestBody UpdatePostRequest updatePostRequest) {
 
-        var params =
-                UpdatePostCommandParams.builder()
-                        .updatePostRequest(updatePostRequest)
-                        .slug(slug)
-                        .userDetails(userDetails)
-                        .build();
+        var params = new UpdatePostCommandParams(userDetails, updatePostRequest, slug);
         return ResponseEntity.ok().body(updatePostCommands.getObject().execute(params));
     }
 
@@ -127,7 +122,7 @@ public class PostController {
     @IsAdminOrUser
     public ResponseEntity<@NonNull Void> publishPost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
-        var params = PublishPostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        var params = new PublishPostCommandParams(userDetails, slug);
         publishPostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
     }
@@ -136,7 +131,7 @@ public class PostController {
     @IsAdminOrUser
     public ResponseEntity<@NonNull Void> archivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
-        var params = ArchivePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        var params = new ArchivePostCommandParams(userDetails, slug);
         archivePostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
     }
@@ -145,8 +140,7 @@ public class PostController {
     @IsAdminOrUser
     public ResponseEntity<@NonNull Void> unarchivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
-        var params =
-                UnarchivePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        var params = new UnarchivePostCommandParams(userDetails, slug);
         unarchivePostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
     }
@@ -156,7 +150,7 @@ public class PostController {
     public ResponseEntity<Void> deletePostBySlug(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
 
-        var params = DeletePostCommandParams.builder().slug(slug).userDetails(userDetails).build();
+        var params = new DeletePostCommandParams(userDetails, slug);
         deletePostCommands.getObject().execute(params);
         return ResponseEntity.noContent().build();
     }
