@@ -57,8 +57,7 @@ public class NotificationController {
     @IsAdminOrUser
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                SubscribeNotificationStreamQueryParams.builder().userDetails(userDetails).build();
+        var params = new SubscribeNotificationStreamQueryParams(userDetails);
         return subscribeNotificationStreamQuery.execute(params);
     }
 
@@ -68,12 +67,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
             @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
-        var params =
-                GetNotificationsQueryParams.builder()
-                        .page(page)
-                        .size(size)
-                        .userDetails(userDetails)
-                        .build();
+        var params = new GetNotificationsQueryParams(userDetails, page, size);
         return ResponseEntity.ok().body(getNotificationsQuery.execute(params));
     }
 
@@ -81,10 +75,7 @@ public class NotificationController {
     @GetMapping(Routes.Notification.UN_READ)
     public ResponseEntity<@NonNull Integer> getUnReadNotifications(
             @AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                GetUserUnreadNotificationCountQueryParams.builder()
-                        .userDetails(userDetails)
-                        .build();
+        var params = new GetUserUnreadNotificationCountQueryParams(userDetails);
         return ResponseEntity.ok().body(getUserUnreadNotificationCountQuery.execute(params));
     }
 
@@ -92,8 +83,7 @@ public class NotificationController {
     @GetMapping(Routes.Notification.PREFERENCES)
     public ResponseEntity<NotificationPreferenceSummary> getNotificationPreference(
             @AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                GetNotificationPreferencesQueryParams.builder().userDetails(userDetails).build();
+        var params = new GetNotificationPreferencesQueryParams(userDetails);
         return ResponseEntity.ok().body(getNotificationPreferencesQuery.execute(params));
     }
 

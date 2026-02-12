@@ -7,6 +7,7 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationRe
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class GetNotificationsQuery
         extends AuthenticatedQuery<GetNotificationsQueryParams, PageResponse<NotificationSummary>> {
     private final NotificationRepository notificationRepository;
@@ -26,10 +28,20 @@ public class GetNotificationsQuery
     @Override
     public PageResponse<NotificationSummary> execute(GetNotificationsQueryParams params) {
         validate(params);
-        var pageable =
-                PageRequest.of(
-                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
-        var notificationPage = this.notificationRepository.findByRecipient(user, pageable);
-        return PageResponse.from(notificationPage, notificationMapper::toNotificationSummary);
+        try {
+            var pageable =
+                    PageRequest.of(
+                            params.page(),
+                            params.size(),
+                            Sort.by(Sort.Direction.DESC, "createdAt"));
+            var notificationPage = this.notificationRepository.findByRecipient(user, pageable);
+            var response =
+                    PageResponse.from(notificationPage, notificationMapper::toNotificationSummary);
+            log.info("Get notifications query successful.");
+            return response;
+        } catch (Exception ex) {
+            log.error("Unexpected error during get notifications query operation", ex);
+            throw ex;
+        }
     }
 }
