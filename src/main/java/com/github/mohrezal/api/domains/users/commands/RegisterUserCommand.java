@@ -55,8 +55,8 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     @Transactional(rollbackFor = Exception.class)
     @Override
     public RegisterResponse execute(RegisterUserCommandParams params) {
+        validate(params);
         try {
-            validate(params);
             var user = registrationService.register(params.registerUserRequest(), UserRole.USER);
 
             var notificationPreference = NotificationPreference.builder().user(user).build();

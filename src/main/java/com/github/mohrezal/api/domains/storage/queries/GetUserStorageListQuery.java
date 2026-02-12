@@ -30,9 +30,9 @@ public class GetUserStorageListQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<StorageSummary> execute(GetUserStorageListQueryParams params) {
-        try {
-            validate(params);
+        validate(params);
 
+        try {
             var pageable =
                     PageRequest.of(
                             params.page(),

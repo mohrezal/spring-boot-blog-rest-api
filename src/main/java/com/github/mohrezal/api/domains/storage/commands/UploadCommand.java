@@ -48,9 +48,9 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadCommandParams params) {
-        try {
-            validate(params);
+        validate(params);
 
+        try {
             var request = params.uploadRequest();
             var type = params.type() != null ? params.type() : StorageType.MEDIA;
 

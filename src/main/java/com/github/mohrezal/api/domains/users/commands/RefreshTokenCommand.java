@@ -39,9 +39,9 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(RefreshTokenCommandParams params) {
-        try {
-            validate(params);
+        validate(params);
 
+        try {
             var refreshTokenEntity =
                     jwtService
                             .getRefreshTokenEntity(params.refreshToken())

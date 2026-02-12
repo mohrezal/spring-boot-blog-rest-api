@@ -29,9 +29,8 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeleteCommandParams params) {
+        validate(params);
         try {
-            validate(params);
-
             var fileName = params.fileName();
             var storage =
                     storageRepository

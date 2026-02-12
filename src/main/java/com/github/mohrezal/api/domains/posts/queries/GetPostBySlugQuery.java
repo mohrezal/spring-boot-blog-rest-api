@@ -29,11 +29,10 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     @Transactional(readOnly = true)
     @Override
     public PostDetail execute(GetPostBySlugQueryParams params) {
+        if (params.getUserDetails() != null) {
+            validate(params);
+        }
         try {
-            if (params.getUserDetails() != null) {
-                validate(params);
-            }
-
             var post =
                     this.postRepository
                             .findBySlug(params.slug())

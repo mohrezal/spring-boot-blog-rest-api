@@ -53,9 +53,9 @@ public class UploadProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadProfileCommandParams params) {
-        try {
-            validate(params);
+        validate(params);
 
+        try {
             if (user.getAvatar() != null) {
                 storageService.delete(user.getAvatar());
             }
