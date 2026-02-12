@@ -101,11 +101,7 @@ public class NotificationController {
     @PatchMapping(Routes.Notification.MARK_READ)
     public ResponseEntity<Void> markNotificationAsRead(
             @PathVariable UUID id, @AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                MarkNotificationReadCommandParams.builder()
-                        .notificationId(id)
-                        .userDetails(userDetails)
-                        .build();
+        var params = new MarkNotificationReadCommandParams(id, userDetails);
         markNotificationReadCommand.execute(params);
         return ResponseEntity.noContent().build();
     }
@@ -114,8 +110,7 @@ public class NotificationController {
     @PatchMapping(Routes.Notification.MARK_ALL_READ)
     public ResponseEntity<Void> markAllNotificationsAsRead(
             @AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                MarkAllNotificationsReadCommandParams.builder().userDetails(userDetails).build();
+        var params = new MarkAllNotificationsReadCommandParams(userDetails);
         markAllNotificationsReadCommand.execute(params);
         return ResponseEntity.noContent().build();
     }
@@ -125,11 +120,7 @@ public class NotificationController {
     public ResponseEntity<NotificationPreferenceSummary> updateNotificationPreferences(
             @RequestBody UpdateNotificationPreferenceRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        var params =
-                UpdateNotificationPreferencesCommandParams.builder()
-                        .userDetails(userDetails)
-                        .request(request)
-                        .build();
+        var params = new UpdateNotificationPreferencesCommandParams(userDetails, request);
         return ResponseEntity.ok().body(updateNotificationPreferencesCommand.execute(params));
     }
 }

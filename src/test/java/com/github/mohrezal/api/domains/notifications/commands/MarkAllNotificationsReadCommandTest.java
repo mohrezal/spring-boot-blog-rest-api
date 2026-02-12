@@ -32,7 +32,7 @@ class MarkAllNotificationsReadCommandTest {
     @BeforeEach
     void setUp() {
         user = aUser().withId(UUID.randomUUID()).withEmail("recipient@example.com").build();
-        params = MarkAllNotificationsReadCommandParams.builder().userDetails(user).build();
+        params = new MarkAllNotificationsReadCommandParams(user);
     }
 
     @Test

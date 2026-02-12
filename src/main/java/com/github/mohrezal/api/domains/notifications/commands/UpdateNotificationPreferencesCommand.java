@@ -2,12 +2,13 @@ package com.github.mohrezal.api.domains.notifications.commands;
 
 import com.github.mohrezal.api.domains.notifications.commands.params.UpdateNotificationPreferencesCommandParams;
 import com.github.mohrezal.api.domains.notifications.dtos.NotificationPreferenceSummary;
-import com.github.mohrezal.api.domains.notifications.dtos.UpdateNotificationPreferenceRequest;
 import com.github.mohrezal.api.domains.notifications.mappers.NotificationPreferenceMapper;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Slf4j
 public class UpdateNotificationPreferencesCommand
         extends AuthenticatedCommand<
                 UpdateNotificationPreferencesCommandParams, NotificationPreferenceSummary> {
@@ -28,17 +30,31 @@ public class UpdateNotificationPreferencesCommand
     public NotificationPreferenceSummary execute(
             UpdateNotificationPreferencesCommandParams params) {
         validate(params);
-        UpdateNotificationPreferenceRequest request = params.request();
 
-        NotificationPreference preference =
-                notificationPreferenceRepository
-                        .findByUserId(user.getId())
-                        .orElseGet(() -> NotificationPreference.builder().user(user).build());
+        try {
+            var request = params.request();
 
-        preference.setInAppEnabled(request.inAppEnabled());
-        preference.setEmailEnabled(request.emailEnabled());
+            var preference =
+                    notificationPreferenceRepository
+                            .findByUserId(user.getId())
+                            .orElseGet(() -> NotificationPreference.builder().user(user).build());
 
-        NotificationPreference saved = notificationPreferenceRepository.save(preference);
-        return notificationPreferenceMapper.toNotificationPreferenceSummary(saved);
+            preference.setInAppEnabled(request.inAppEnabled());
+            preference.setEmailEnabled(request.emailEnabled());
+
+            var saved = notificationPreferenceRepository.save(preference);
+            log.info("Update notification preferences command successful.");
+            return notificationPreferenceMapper.toNotificationPreferenceSummary(saved);
+        } catch (AccessDeniedException ex) {
+            log.warn(
+                    "Update notification preferences command failed - message: {}",
+                    ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error(
+                    "Unexpected error during update notification preferences command operation",
+                    ex);
+            throw ex;
+        }
     }
 }

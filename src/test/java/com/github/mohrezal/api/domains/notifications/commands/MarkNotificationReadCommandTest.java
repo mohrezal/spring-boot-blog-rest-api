@@ -61,12 +61,7 @@ class MarkNotificationReadCommandTest {
         when(notificationRepository.save(any(Notification.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        MarkNotificationReadCommandParams params =
-                MarkNotificationReadCommandParams.builder()
-                        .notificationId(notificationId)
-                        .userDetails(recipient)
-                        .build();
-
+        var params = new MarkNotificationReadCommandParams(notificationId, recipient);
         command.execute(params);
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
@@ -81,12 +76,7 @@ class MarkNotificationReadCommandTest {
     void execute_whenNotificationNotFound_shouldThrowNotFoundException() {
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
 
-        MarkNotificationReadCommandParams params =
-                MarkNotificationReadCommandParams.builder()
-                        .notificationId(notificationId)
-                        .userDetails(recipient)
-                        .build();
-
+        var params = new MarkNotificationReadCommandParams(notificationId, recipient);
         assertThrows(NotificationNotFoundException.class, () -> command.execute(params));
     }
 
@@ -101,11 +91,7 @@ class MarkNotificationReadCommandTest {
 
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
 
-        MarkNotificationReadCommandParams params =
-                MarkNotificationReadCommandParams.builder()
-                        .notificationId(notificationId)
-                        .userDetails(otherUser)
-                        .build();
+        var params = new MarkNotificationReadCommandParams(notificationId, otherUser);
 
         assertThrows(AccessDeniedException.class, () -> command.execute(params));
     }
@@ -124,11 +110,7 @@ class MarkNotificationReadCommandTest {
 
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
 
-        MarkNotificationReadCommandParams params =
-                MarkNotificationReadCommandParams.builder()
-                        .notificationId(notificationId)
-                        .userDetails(recipient)
-                        .build();
+        var params = new MarkNotificationReadCommandParams(notificationId, recipient);
 
         command.execute(params);
 

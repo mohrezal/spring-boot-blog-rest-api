@@ -52,11 +52,7 @@ class UpdateNotificationPreferencesCommandTest {
         UpdateNotificationPreferenceRequest request =
                 new UpdateNotificationPreferenceRequest(false, false);
 
-        UpdateNotificationPreferencesCommandParams params =
-                UpdateNotificationPreferencesCommandParams.builder()
-                        .userDetails(user)
-                        .request(request)
-                        .build();
+        var params = new UpdateNotificationPreferencesCommandParams(user, request);
 
         when(notificationPreferenceRepository.findByUserId(user.getId()))
                 .thenReturn(Optional.of(existingPreference));
@@ -80,11 +76,7 @@ class UpdateNotificationPreferencesCommandTest {
         UpdateNotificationPreferenceRequest request =
                 new UpdateNotificationPreferenceRequest(true, false);
 
-        UpdateNotificationPreferencesCommandParams params =
-                UpdateNotificationPreferencesCommandParams.builder()
-                        .userDetails(user)
-                        .request(request)
-                        .build();
+        var params = new UpdateNotificationPreferencesCommandParams(user, request);
 
         when(notificationPreferenceRepository.findByUserId(user.getId()))
                 .thenReturn(Optional.empty());
@@ -117,11 +109,7 @@ class UpdateNotificationPreferencesCommandTest {
         UpdateNotificationPreferenceRequest request =
                 new UpdateNotificationPreferenceRequest(true, true);
 
-        UpdateNotificationPreferencesCommandParams params =
-                UpdateNotificationPreferencesCommandParams.builder()
-                        .userDetails(user)
-                        .request(request)
-                        .build();
+        var params = new UpdateNotificationPreferencesCommandParams(user, request);
 
         NotificationPreferenceSummary expectedSummary =
                 new NotificationPreferenceSummary(true, true);
