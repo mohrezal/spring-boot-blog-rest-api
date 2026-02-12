@@ -31,16 +31,31 @@ public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandP
     public Void execute(ArchivePostCommandParams params) {
         validate(params);
 
-        var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
+        try {
+            var post =
+                    postRepository
+                            .findBySlug(params.slug())
+                            .orElseThrow(PostNotFoundException::new);
 
-        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-            throw new AccessDeniedException();
+            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+                throw new AccessDeniedException();
+            }
+            if (!post.getStatus().equals(PostStatus.PUBLISHED)) {
+                throw new PostInvalidStatusTransitionException();
+            }
+            post.setStatus(PostStatus.ARCHIVED);
+            postRepository.save(post);
+            log.info("Archive post successful.");
+
+            return null;
+        } catch (PostNotFoundException
+                | PostInvalidStatusTransitionException
+                | AccessDeniedException ex) {
+            log.warn("Archive post failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during archive post operation", ex);
+            throw ex;
         }
-        if (!post.getStatus().equals(PostStatus.PUBLISHED)) {
-            throw new PostInvalidStatusTransitionException();
-        }
-        post.setStatus(PostStatus.ARCHIVED);
-        postRepository.save(post);
-        return null;
     }
 }
