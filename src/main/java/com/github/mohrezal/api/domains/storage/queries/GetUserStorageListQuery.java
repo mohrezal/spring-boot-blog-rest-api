@@ -7,6 +7,7 @@ import com.github.mohrezal.api.domains.storage.queries.params.GetUserStorageList
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
+import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -29,13 +30,26 @@ public class GetUserStorageListQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<StorageSummary> execute(GetUserStorageListQueryParams params) {
-        validate(params);
+        try {
+            validate(params);
 
-        var pageable =
-                PageRequest.of(
-                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
-        var storageList = storageRepository.findAllByUserAndType(user, StorageType.MEDIA, pageable);
+            var pageable =
+                    PageRequest.of(
+                            params.page(),
+                            params.size(),
+                            Sort.by(Sort.Direction.DESC, "createdAt"));
+            var storageList =
+                    storageRepository.findAllByUserAndType(user, StorageType.MEDIA, pageable);
 
-        return PageResponse.from(storageList, storageMapper::toStorageSummary);
+            var response = PageResponse.from(storageList, storageMapper::toStorageSummary);
+            log.info("Get user storage list query successful.");
+            return response;
+        } catch (AccessDeniedException ex) {
+            log.warn("Get user storage list query failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during get user storage list query operation", ex);
+            throw ex;
+        }
     }
 }

@@ -26,13 +26,22 @@ public class GetStorageByFilenameQuery
     @Transactional(readOnly = true)
     @Override
     public StorageFileResponse execute(GetStorageByFilenameQueryParams params) {
-        var storage =
-                storageRepository
-                        .findByFilename(params.filename())
-                        .orElseThrow(ResourceNotFoundException::new);
+        try {
+            var storage =
+                    storageRepository
+                            .findByFilename(params.filename())
+                            .orElseThrow(ResourceNotFoundException::new);
 
-        var data = s3StorageService.download(storage.getFilename());
+            var data = s3StorageService.download(storage.getFilename());
+            log.info("Get storage by filename query successful.");
 
-        return new StorageFileResponse(data, storage.getMimeType(), storage.getFilename());
+            return new StorageFileResponse(data, storage.getMimeType(), storage.getFilename());
+        } catch (ResourceNotFoundException ex) {
+            log.warn("Get storage by filename query failed - message: {}", ex.getMessage());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Unexpected error during get storage by filename query operation", ex);
+            throw ex;
+        }
     }
 }
