@@ -82,7 +82,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String handle,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "20") int size) {
 
         var params = new GetUserFollowersQueryParams(userDetails, handle, page, size);
 
@@ -96,7 +96,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String handle,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "20") int size) {
 
         var params = new GetUserFollowingQueryParams(userDetails, handle, page, size);
         var response = getUserFollowingQueries.getObject().execute(params);

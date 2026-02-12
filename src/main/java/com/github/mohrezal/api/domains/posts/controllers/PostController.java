@@ -71,7 +71,7 @@ public class PostController {
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPosts(
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size,
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Set<String> categorySlugs,
             @RequestParam(required = false) Set<UUID> authorIds) {
 
@@ -158,7 +158,7 @@ public class PostController {
     @GetMapping(Routes.Post.SEARCH)
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPostsBySearchQuery(
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size,
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "10") int size,
             @RequestParam(name = "query") String query) {
         var params = new GetPostsBySearchQueryParams(query, size, page);
         return ResponseEntity.ok().body(getPostsBySearchQuery.execute(params));

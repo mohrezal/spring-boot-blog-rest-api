@@ -90,7 +90,7 @@ public class StorageController {
     public ResponseEntity<@NonNull PageResponse<StorageSummary>> list(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "10") int size) {
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "10") int size) {
         var query = getUserStorageListQueries.getObject();
         var params = new GetUserStorageListQueryParams(userDetails, page, size);
         return ResponseEntity.ok().body(query.execute(params));

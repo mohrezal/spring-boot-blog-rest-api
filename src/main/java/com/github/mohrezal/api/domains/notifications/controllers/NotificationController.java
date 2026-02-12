@@ -66,7 +66,7 @@ public class NotificationController {
     public ResponseEntity<@NonNull PageResponse<NotificationSummary>> getNotification(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
-            @Valid @Range(max = 20) @RequestParam(defaultValue = "20") int size) {
+            @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "20") int size) {
         var params = new GetNotificationsQueryParams(userDetails, page, size);
         return ResponseEntity.ok().body(getNotificationsQuery.execute(params));
     }
