@@ -11,6 +11,7 @@ public final class Routes {
 
     public static final class Auth {
         public static final String BASE = API_BASE + "auth";
+        public static final String CSRF = "csrf";
         public static final String REGISTER = "register";
         public static final String LOGIN = "login";
         public static final String REFRESH = "refresh";

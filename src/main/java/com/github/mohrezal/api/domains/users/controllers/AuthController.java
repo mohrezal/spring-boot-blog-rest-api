@@ -9,6 +9,7 @@ import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandPar
 import com.github.mohrezal.api.domains.users.commands.params.LogoutUserCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
+import com.github.mohrezal.api.domains.users.dtos.CsrfTokenResponse;
 import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
@@ -27,6 +28,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +47,12 @@ public class AuthController {
     private final ObjectProvider<@NonNull LogoutUserCommand> logoutUserCommandProvider;
     private final CookieUtils cookieUtils;
     private final RequestInfoService requestInfoService;
+
+    @GetMapping(Routes.Auth.CSRF)
+    public ResponseEntity<CsrfTokenResponse> csrf(CsrfToken csrfToken) {
+        return ResponseEntity.ok(
+                new CsrfTokenResponse(csrfToken.getToken(), csrfToken.getHeaderName()));
+    }
 
     @PostMapping(Routes.Auth.REGISTER)
     public ResponseEntity<@NonNull UserSummary> register(
