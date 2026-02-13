@@ -39,6 +39,7 @@ out/
 
 .env
 .DS_Store
+configs/s3.json
 
 ### Logs ###
 logs/

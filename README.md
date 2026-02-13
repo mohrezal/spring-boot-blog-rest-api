@@ -48,7 +48,7 @@ cp .env.example .env
 
 3. Build and start all services:
 ```bash
-docker compose up --build -d
+./scripts/up.sh
 ```
 
 4. Open in your browser:
