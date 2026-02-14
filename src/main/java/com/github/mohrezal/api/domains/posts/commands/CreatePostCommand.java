@@ -5,9 +5,11 @@ import com.github.mohrezal.api.domains.categories.repositories.CategoryRepositor
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostCreateExceptionContext;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
 import lombok.RequiredArgsConstructor;
@@ -34,16 +36,19 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     @Override
     public PostDetail execute(CreatePostCommandParams params) {
         validate(params);
+        var request = params.createPostRequest();
+        var userId = user.getId() != null ? user.getId().toString() : null;
+        var context = new PostCreateExceptionContext(userId);
 
         try {
-            var categoryIds = params.createPostRequest().categoryIds();
+            var categoryIds = request.categoryIds();
             var categories = this.categoryRepository.findAllByIdIn(categoryIds);
 
             if (categories.size() != categoryIds.size()) {
-                throw new CategoryNotFoundException();
+                throw new CategoryNotFoundException(context);
             }
 
-            var newPost = this.postMapper.toPost(params.createPostRequest());
+            var newPost = this.postMapper.toPost(request);
             newPost.setCategories(categories);
             newPost.setUser(user);
             newPost.setStatus(PostStatus.DRAFT);
@@ -54,15 +59,9 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
 
             log.info("Create post successful.");
             return this.postMapper.toPostDetail(savedPost);
-        } catch (CategoryNotFoundException | ResourceConflictException ex) {
-            log.warn("Create post failed - message: {}", ex.getMessage());
-            throw ex;
         } catch (DataIntegrityViolationException ex) {
-            log.warn("Create post failed - data integrity violation");
-            throw new ResourceConflictException();
-        } catch (Exception ex) {
-            log.error("Unexpected error during create post operation", ex);
-            throw ex;
+            throw new ResourceConflictException(
+                    MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, context, ex);
         }
     }
 }

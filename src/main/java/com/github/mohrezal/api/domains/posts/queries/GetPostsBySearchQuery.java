@@ -27,41 +27,36 @@ public class GetPostsBySearchQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<PostSummary> execute(GetPostsBySearchQueryParams params) {
-        try {
-            var pageable = PageRequest.of(params.page(), params.size());
-            var searchResult = postRepository.findAllPostBySearchQuery(params.query(), pageable);
+        var pageable = PageRequest.of(params.page(), params.size());
+        var searchResult = postRepository.findAllPostBySearchQuery(params.query(), pageable);
 
-            var rankedIds = searchResult.getContent();
-            var posts = postRepository.findAllByIdIn(rankedIds);
+        var rankedIds = searchResult.getContent();
+        var posts = postRepository.findAllByIdIn(rankedIds);
 
-            var postById = posts.stream().collect(Collectors.toMap(Post::getId, post -> post));
+        var postById = posts.stream().collect(Collectors.toMap(Post::getId, post -> post));
 
-            var orderedSummaries =
-                    rankedIds.stream()
-                            .map(postById::get)
-                            .filter(Objects::nonNull)
-                            .map(postMapper::toPostSummary)
-                            .toList();
+        var orderedSummaries =
+                rankedIds.stream()
+                        .map(postById::get)
+                        .filter(Objects::nonNull)
+                        .map(postMapper::toPostSummary)
+                        .toList();
 
-            var response =
-                    new PageResponse<>(
-                            orderedSummaries,
-                            searchResult.getNumber(),
-                            searchResult.getSize(),
-                            searchResult.getTotalElements(),
-                            searchResult.getTotalPages(),
-                            searchResult.isFirst(),
-                            searchResult.isLast(),
-                            searchResult.isEmpty(),
-                            searchResult.hasNext(),
-                            searchResult.hasPrevious());
+        var response =
+                new PageResponse<>(
+                        orderedSummaries,
+                        searchResult.getNumber(),
+                        searchResult.getSize(),
+                        searchResult.getTotalElements(),
+                        searchResult.getTotalPages(),
+                        searchResult.isFirst(),
+                        searchResult.isLast(),
+                        searchResult.isEmpty(),
+                        searchResult.hasNext(),
+                        searchResult.hasPrevious());
 
-            log.info("Get posts by search query successful.");
+        log.info("Get posts by search query successful.");
 
-            return response;
-        } catch (Exception ex) {
-            log.error("Unexpected error during get posts by search query operation", ex);
-            throw ex;
-        }
+        return response;
     }
 }

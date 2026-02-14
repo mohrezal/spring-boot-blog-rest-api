@@ -4,12 +4,14 @@ import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryNotFo
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostUpdateExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import lombok.RequiredArgsConstructor;
@@ -35,49 +37,42 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     @Override
     public PostDetail execute(UpdatePostCommandParams params) {
         validate(params);
+        var request = params.updatePostRequest();
+        var userId = user.getId() != null ? user.getId().toString() : null;
+        var context = new PostUpdateExceptionContext(userId, params.slug());
 
         try {
             var post =
                     this.postRepository
                             .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+                            .orElseThrow(() -> new PostNotFoundException(context));
 
             if (!postUtilsService.isOwner(post, user)) {
-                throw new AccessDeniedException();
+                throw new AccessDeniedException(context);
             }
 
-            var categories =
-                    categoryRepository.findAllByIdIn(params.updatePostRequest().categoryIds());
+            var categories = categoryRepository.findAllByIdIn(request.categoryIds());
 
-            if (categories.size() != params.updatePostRequest().categoryIds().size()) {
-                throw new CategoryNotFoundException();
+            if (categories.size() != request.categoryIds().size()) {
+                throw new CategoryNotFoundException(context);
             }
 
-            if (!post.getSlug().equals(params.updatePostRequest().slug())) {
-                if (postRepository.existsBySlug(params.updatePostRequest().slug())) {
-                    throw new PostSlugAlreadyExistsException();
+            if (!post.getSlug().equals(request.slug())) {
+                if (postRepository.existsBySlug(request.slug())) {
+                    throw new PostSlugAlreadyExistsException(context);
                 }
             }
 
-            postMapper.toTargetPost(params.updatePostRequest(), post);
+            postMapper.toTargetPost(request, post);
             post.setCategories(categories);
 
             var savedPost = postRepository.save(post);
 
             log.info("Update post successful.");
             return this.postMapper.toPostDetail(savedPost);
-        } catch (PostNotFoundException
-                | AccessDeniedException
-                | CategoryNotFoundException
-                | ResourceConflictException ex) {
-            log.warn("Update post failed - message: {}", ex.getMessage());
-            throw ex;
         } catch (DataIntegrityViolationException ex) {
-            log.warn("Update post failed - data integrity violation");
-            throw new ResourceConflictException();
-        } catch (Exception ex) {
-            log.error("Unexpected error during update post operation", ex);
-            throw ex;
+            throw new ResourceConflictException(
+                    MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, context, ex);
         }
     }
 }

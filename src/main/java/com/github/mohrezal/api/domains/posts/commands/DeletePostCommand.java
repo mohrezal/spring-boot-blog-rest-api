@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.DeletePostCommandParams;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostDeleteExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
@@ -24,26 +25,20 @@ public class DeletePostCommand extends AuthenticatedCommand<DeletePostCommandPar
     @Override
     public Void execute(DeletePostCommandParams params) {
         validate(params);
+        var userId = user.getId() != null ? user.getId().toString() : null;
 
-        try {
-            var post =
-                    postRepository
-                            .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+        var context = new PostDeleteExceptionContext(userId, params.slug());
+        var post =
+                postRepository
+                        .findBySlug(params.slug())
+                        .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (!user.getId().equals(post.getUser().getId())) {
-                throw new AccessDeniedException();
-            }
-
-            postRepository.delete(post);
-            log.info("Delete post successful.");
-            return null;
-        } catch (PostNotFoundException | AccessDeniedException ex) {
-            log.warn("Delete post failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during delete post operation", ex);
-            throw ex;
+        if (!user.getId().equals(post.getUser().getId())) {
+            throw new AccessDeniedException(context);
         }
+
+        postRepository.delete(post);
+        log.info("Delete post successful.");
+        return null;
     }
 }

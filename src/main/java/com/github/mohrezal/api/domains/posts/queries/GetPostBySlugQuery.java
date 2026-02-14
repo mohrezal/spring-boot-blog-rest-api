@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.queries;
 
 import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostGetBySlugExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
@@ -32,32 +33,26 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
         if (params.getUserDetails() != null) {
             validate(params);
         }
-        try {
-            var post =
-                    this.postRepository
-                            .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+        var userId = user != null && user.getId() != null ? user.getId().toString() : null;
+        var context = new PostGetBySlugExceptionContext(userId, params.slug());
+        var post =
+                this.postRepository
+                        .findBySlug(params.slug())
+                        .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (post.getStatus().equals(PostStatus.PUBLISHED)) {
-                log.info("Get post by slug query successful.");
-                return this.postMapper.toPostDetail(post);
-            }
-
-            var isAdmin = user != null && userUtilsService.isAdmin(user);
-            var isOwner = user != null && postUtilsService.isOwner(post, user);
-
-            if (isAdmin || isOwner) {
-                log.info("Get post by slug query successful.");
-                return this.postMapper.toPostDetail(post);
-            }
-
-            throw new PostNotFoundException();
-        } catch (PostNotFoundException ex) {
-            log.warn("Get post by slug query failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during get post by slug query operation", ex);
-            throw ex;
+        if (post.getStatus().equals(PostStatus.PUBLISHED)) {
+            log.info("Get post by slug query successful.");
+            return this.postMapper.toPostDetail(post);
         }
+
+        var isAdmin = user != null && userUtilsService.isAdmin(user);
+        var isOwner = user != null && postUtilsService.isOwner(post, user);
+
+        if (isAdmin || isOwner) {
+            log.info("Get post by slug query successful.");
+            return this.postMapper.toPostDetail(post);
+        }
+
+        throw new PostNotFoundException(context);
     }
 }

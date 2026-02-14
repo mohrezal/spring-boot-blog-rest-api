@@ -34,21 +34,13 @@ public class GetPostSlugAvailabilityQuery
     @Override
     public SlugAvailability execute(GetPostSlugAvailabilityQueryParams params) {
         validate(params);
-        try {
-            if (postRepository.existsBySlug(params.slug())) {
-                return new SlugAvailability(
-                        false,
-                        slugGeneratorService.getSlug(params.slug(), postRepository::existsBySlug));
-            }
-
-            log.info("Get post slug availability query successful.");
-            return new SlugAvailability(true, null);
-        } catch (PostSlugFormatException ex) {
-            log.warn("Get post slug availability query failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during get post slug availability query operation", ex);
-            throw ex;
+        if (postRepository.existsBySlug(params.slug())) {
+            return new SlugAvailability(
+                    false,
+                    slugGeneratorService.getSlug(params.slug(), postRepository::existsBySlug));
         }
+
+        log.info("Get post slug availability query successful.");
+        return new SlugAvailability(true, null);
     }
 }

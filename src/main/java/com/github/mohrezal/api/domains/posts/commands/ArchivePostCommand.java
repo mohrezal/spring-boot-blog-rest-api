@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.ArchivePostCommandParams;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostArchiveExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
@@ -30,32 +31,24 @@ public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandP
     @Override
     public Void execute(ArchivePostCommandParams params) {
         validate(params);
+        var userId = user.getId() != null ? user.getId().toString() : null;
+        var context = new PostArchiveExceptionContext(userId, params.slug());
 
-        try {
-            var post =
-                    postRepository
-                            .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+        var post =
+                postRepository
+                        .findBySlug(params.slug())
+                        .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-                throw new AccessDeniedException();
-            }
-            if (!post.getStatus().equals(PostStatus.PUBLISHED)) {
-                throw new PostInvalidStatusTransitionException();
-            }
-            post.setStatus(PostStatus.ARCHIVED);
-            postRepository.save(post);
-            log.info("Archive post successful.");
-
-            return null;
-        } catch (PostNotFoundException
-                | PostInvalidStatusTransitionException
-                | AccessDeniedException ex) {
-            log.warn("Archive post failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during archive post operation", ex);
-            throw ex;
+        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+            throw new AccessDeniedException(context);
         }
+        if (!post.getStatus().equals(PostStatus.PUBLISHED)) {
+            throw new PostInvalidStatusTransitionException(context);
+        }
+        post.setStatus(PostStatus.ARCHIVED);
+        postRepository.save(post);
+        log.info("Archive post successful.");
+
+        return null;
     }
 }

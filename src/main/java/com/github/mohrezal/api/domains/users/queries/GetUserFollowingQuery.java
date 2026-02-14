@@ -38,11 +38,7 @@ public class GetUserFollowingQuery
 
         var context =
                 new UserGetFollowingExceptionContext(
-                        user.getId().toString(),
-                        user.getHandle(),
-                        params.handle(),
-                        params.page(),
-                        params.size());
+                        user.getId().toString(), params.handle(), params.page(), params.size());
 
         var targetUser =
                 userRepository

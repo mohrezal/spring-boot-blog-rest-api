@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.PublishPostCommandParams;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostPublishExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
@@ -31,32 +32,24 @@ public class PublishPostCommand extends AuthenticatedCommand<PublishPostCommandP
     @Override
     public Void execute(PublishPostCommandParams params) {
         validate(params);
+        var userId = user.getId() != null ? user.getId().toString() : null;
+        var context = new PostPublishExceptionContext(userId, params.slug());
 
-        try {
-            var post =
-                    postRepository
-                            .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+        var post =
+                postRepository
+                        .findBySlug(params.slug())
+                        .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-                throw new AccessDeniedException();
-            }
-            if (!post.getStatus().equals(PostStatus.DRAFT)) {
-                throw new PostInvalidStatusTransitionException();
-            }
-            post.setStatus(PostStatus.PUBLISHED);
-            post.setPublishedAt(OffsetDateTime.now());
-            postRepository.save(post);
-            log.info("Publish post successful.");
-            return null;
-        } catch (PostNotFoundException
-                | AccessDeniedException
-                | PostInvalidStatusTransitionException ex) {
-            log.warn("Publish post failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during publish post operation", ex);
-            throw ex;
+        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+            throw new AccessDeniedException(context);
         }
+        if (!post.getStatus().equals(PostStatus.DRAFT)) {
+            throw new PostInvalidStatusTransitionException(context);
+        }
+        post.setStatus(PostStatus.PUBLISHED);
+        post.setPublishedAt(OffsetDateTime.now());
+        postRepository.save(post);
+        log.info("Publish post successful.");
+        return null;
     }
 }

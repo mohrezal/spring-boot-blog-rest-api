@@ -34,14 +34,11 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
         validate(params);
 
         var followerId = user.getId();
-        var followerHandle = user.getHandle();
-        var context =
-                new UserFollowExceptionContext(
-                        followerId.toString(), followerHandle, params.handle());
+        var context = new UserFollowExceptionContext(followerId.toString(), params.handle());
 
         log.debug(
                 "Executing FollowUserCommand - follower: {}, target: {}",
-                followerHandle,
+                followerId,
                 params.handle());
         var targetUser =
                 userRepository

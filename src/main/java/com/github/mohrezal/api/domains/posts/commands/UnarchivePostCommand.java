@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.UnarchivePostCommandParams;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
+import com.github.mohrezal.api.domains.posts.exceptions.context.PostUnarchiveExceptionContext;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusTransitionException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
@@ -30,31 +31,23 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
     @Override
     public Void execute(UnarchivePostCommandParams params) {
         validate(params);
+        var userId = user.getId() != null ? user.getId().toString() : null;
+        var context = new PostUnarchiveExceptionContext(userId, params.slug());
 
-        try {
-            var post =
-                    postRepository
-                            .findBySlug(params.slug())
-                            .orElseThrow(PostNotFoundException::new);
+        var post =
+                postRepository
+                        .findBySlug(params.slug())
+                        .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
-                throw new AccessDeniedException();
-            }
-            if (!post.getStatus().equals(PostStatus.ARCHIVED)) {
-                throw new PostInvalidStatusTransitionException();
-            }
-            post.setStatus(PostStatus.PUBLISHED);
-            postRepository.save(post);
-            log.info("Unarchive post successful.");
-            return null;
-        } catch (PostNotFoundException
-                | AccessDeniedException
-                | PostInvalidStatusTransitionException ex) {
-            log.warn("Unarchive post failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during unarchive post operation", ex);
-            throw ex;
+        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+            throw new AccessDeniedException(context);
         }
+        if (!post.getStatus().equals(PostStatus.ARCHIVED)) {
+            throw new PostInvalidStatusTransitionException(context);
+        }
+        post.setStatus(PostStatus.PUBLISHED);
+        postRepository.save(post);
+        log.info("Unarchive post successful.");
+        return null;
     }
 }
