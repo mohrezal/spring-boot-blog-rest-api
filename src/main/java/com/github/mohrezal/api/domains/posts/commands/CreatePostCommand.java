@@ -37,8 +37,7 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     public PostDetail execute(CreatePostCommandParams params) {
         validate(params);
         var request = params.createPostRequest();
-        var userId = user.getId() != null ? user.getId().toString() : null;
-        var context = new PostCreateExceptionContext(userId);
+        var context = new PostCreateExceptionContext(getUserId());
 
         try {
             var categoryIds = request.categoryIds();

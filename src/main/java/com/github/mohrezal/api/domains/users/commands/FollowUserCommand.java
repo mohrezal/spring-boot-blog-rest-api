@@ -33,8 +33,8 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
     public Void execute(FollowUserCommandParams params) {
         validate(params);
 
-        var followerId = user.getId();
-        var context = new UserFollowExceptionContext(followerId.toString(), params.handle());
+        var followerId = getUserId();
+        var context = new UserFollowExceptionContext(followerId, params.handle());
 
         log.debug(
                 "Executing FollowUserCommand - follower: {}, target: {}",

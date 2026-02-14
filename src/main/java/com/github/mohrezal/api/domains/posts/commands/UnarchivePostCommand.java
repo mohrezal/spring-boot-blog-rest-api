@@ -31,8 +31,7 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
     @Override
     public Void execute(UnarchivePostCommandParams params) {
         validate(params);
-        var userId = user.getId() != null ? user.getId().toString() : null;
-        var context = new PostUnarchiveExceptionContext(userId, params.slug());
+        var context = new PostUnarchiveExceptionContext(getUserId(), params.slug());
 
         var post =
                 postRepository

@@ -12,6 +12,7 @@ import com.github.mohrezal.api.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
+@Slf4j
 public class SharedExceptionHandler extends AbstractExceptionHandler {
 
     public SharedExceptionHandler(MessageSource messageSource) {
@@ -156,6 +158,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<@NonNull ErrorResponse> handleGenericException(Exception ex) {
+        log.error("Unhandled exception", ex);
         ErrorResponse errorResponse =
                 ErrorResponse.builder()
                         .message(resolveMessage(MessageKey.SHARED_ERROR_UNEXPECTED))

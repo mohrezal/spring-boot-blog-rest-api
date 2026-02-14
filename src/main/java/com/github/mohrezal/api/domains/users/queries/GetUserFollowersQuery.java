@@ -36,7 +36,7 @@ public class GetUserFollowersQuery
 
         var context =
                 new UserGetFollowersExceptionContext(
-                        user.getId().toString(), params.handle(), params.page(), params.size());
+                        getUserId(), params.handle(), params.page(), params.size());
 
         var targetUser =
                 userRepository

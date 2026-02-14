@@ -32,8 +32,7 @@ public class PublishPostCommand extends AuthenticatedCommand<PublishPostCommandP
     @Override
     public Void execute(PublishPostCommandParams params) {
         validate(params);
-        var userId = user.getId() != null ? user.getId().toString() : null;
-        var context = new PostPublishExceptionContext(userId, params.slug());
+        var context = new PostPublishExceptionContext(getUserId(), params.slug());
 
         var post =
                 postRepository

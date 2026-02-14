@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.storage.services.storage;
 
 import com.github.mohrezal.api.domains.storage.enums.StorageType;
+import com.github.mohrezal.api.domains.storage.exceptions.context.StorageUploadExceptionContext;
 import com.github.mohrezal.api.domains.storage.exceptions.types.StorageUploadFailedException;
 import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
@@ -9,13 +10,11 @@ import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtil
 import com.github.mohrezal.api.domains.users.models.User;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class StorageServiceImpl implements StorageService {
 
     private final StorageUtilsService storageUtilsService;
@@ -25,6 +24,11 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public Storage upload(
             MultipartFile file, String title, String alt, StorageType type, User uploader) {
+        var userId = uploader.getId();
+        var storageType = type != null ? type.name() : null;
+        var context =
+                new StorageUploadExceptionContext(
+                        userId, file.getOriginalFilename(), file.getSize(), storageType);
         try {
             String mimeType = storageUtilsService.getMimeType(file);
             String filename = storageUtilsService.generateFilename(file.getOriginalFilename());
@@ -45,8 +49,7 @@ public class StorageServiceImpl implements StorageService {
 
             return storageRepository.save(storage);
         } catch (IOException e) {
-            log.error("Failed to upload file", e);
-            throw new StorageUploadFailedException();
+            throw new StorageUploadFailedException(context, e);
         }
     }
 

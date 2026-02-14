@@ -31,7 +31,7 @@ public class UpdateUserProfileCommand
         var request = params.request();
         var context =
                 new UserUpdateProfileExceptionContext(
-                        user.getId().toString(),
+                        getUserId(),
                         request.firstName() != null,
                         request.lastName() != null,
                         request.bio() != null);

@@ -25,9 +25,8 @@ public class DeletePostCommand extends AuthenticatedCommand<DeletePostCommandPar
     @Override
     public Void execute(DeletePostCommandParams params) {
         validate(params);
-        var userId = user.getId() != null ? user.getId().toString() : null;
 
-        var context = new PostDeleteExceptionContext(userId, params.slug());
+        var context = new PostDeleteExceptionContext(getUserId(), params.slug());
         var post =
                 postRepository
                         .findBySlug(params.slug())

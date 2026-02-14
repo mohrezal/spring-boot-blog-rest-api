@@ -31,8 +31,7 @@ public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandP
     @Override
     public Void execute(ArchivePostCommandParams params) {
         validate(params);
-        var userId = user.getId() != null ? user.getId().toString() : null;
-        var context = new PostArchiveExceptionContext(userId, params.slug());
+        var context = new PostArchiveExceptionContext(getUserId(), params.slug());
 
         var post =
                 postRepository

@@ -28,7 +28,7 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     @Override
     public Void execute(UnFollowUserCommandParams params) {
         validate(params);
-        var context = new UserFollowExceptionContext(user.getId().toString(), params.handle());
+        var context = new UserFollowExceptionContext(getUserId(), params.handle());
         var targetUser =
                 userRepository
                         .findByHandle(params.handle())

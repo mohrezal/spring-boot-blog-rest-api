@@ -28,7 +28,7 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
         validate(params);
         var context =
                 new UserLogoutExceptionContext(
-                        user.getId().toString(),
+                        getUserId(),
                         params.refreshToken() != null && !params.refreshToken().isBlank());
 
         if (!context.hasRefreshToken()) {

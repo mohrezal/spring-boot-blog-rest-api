@@ -5,7 +5,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import org.thymeleaf.context.Context;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SmtpEmailProvider implements EmailProvider {
 
     private final ApplicationProperties applicationProperties;
@@ -38,9 +36,7 @@ public class SmtpEmailProvider implements EmailProvider {
             helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.debug("Email sent to {}: {}", to, subject);
         } catch (MessagingException e) {
-            log.error("Failed to send email to {}: {}", to, e.getMessage());
             throw new RuntimeException("Failed to send email", e);
         }
     }

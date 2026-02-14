@@ -21,11 +21,7 @@ public class RefreshTokenCleanupTask {
         OffsetDateTime threshold = OffsetDateTime.now().minusDays(30);
         log.info("Starting cleanup of expired refresh tokens older than {}", threshold);
 
-        try {
-            refreshTokenRepository.deleteExpiredTokens(threshold);
-            log.info("Successfully cleaned up expired refresh tokens");
-        } catch (Exception e) {
-            log.error("Error cleaning up expired refresh tokens", e);
-        }
+        refreshTokenRepository.deleteExpiredTokens(threshold);
+        log.info("Successfully cleaned up expired refresh tokens");
     }
 }

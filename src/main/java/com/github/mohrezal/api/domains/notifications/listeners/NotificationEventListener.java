@@ -72,25 +72,13 @@ public class NotificationEventListener {
     }
 
     private void publishTransactionalEmail(TransactionalEmailMessage message) {
-        try {
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.TRANSACTIONAL_EMAIL_ROUTING_KEY,
-                    message);
-            log.debug("Published transactional email to queue for: {}", message.to());
-        } catch (Exception e) {
-            log.error("Failed to publish transactional email to queue", e);
-            throw e;
-        }
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE, RabbitMQConfig.TRANSACTIONAL_EMAIL_ROUTING_KEY, message);
+        log.debug("Published transactional email to queue for: {}", message.to());
     }
 
     private void publishToQueue(String routingKey, UUID notificationId) {
-        try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, routingKey, notificationId);
-            log.debug("Published notification {} to queue: {}", notificationId, routingKey);
-        } catch (Exception e) {
-            log.error("Failed to publish notification to queue {}", routingKey, e);
-            throw e;
-        }
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, routingKey, notificationId);
+        log.debug("Published notification {} to queue: {}", notificationId, routingKey);
     }
 }

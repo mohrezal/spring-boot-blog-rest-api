@@ -33,8 +33,7 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
         if (params.getUserDetails() != null) {
             validate(params);
         }
-        var userId = user != null && user.getId() != null ? user.getId().toString() : null;
-        var context = new PostGetBySlugExceptionContext(userId, params.slug());
+        var context = new PostGetBySlugExceptionContext(getUserId(), params.slug());
         var post =
                 this.postRepository
                         .findBySlug(params.slug())

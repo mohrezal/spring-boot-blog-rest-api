@@ -3,6 +3,7 @@ package com.github.mohrezal.api.shared.abstracts;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.interfaces.AuthenticatedParams;
+import java.util.UUID;
 
 public abstract class AuthenticatedBase<P extends AuthenticatedParams> {
 
@@ -20,5 +21,9 @@ public abstract class AuthenticatedBase<P extends AuthenticatedParams> {
         }
 
         user = (User) userDetails;
+    }
+
+    public UUID getUserId() {
+        return user.getId() != null ? user.getId() : null;
     }
 }

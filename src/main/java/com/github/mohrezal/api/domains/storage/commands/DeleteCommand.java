@@ -1,11 +1,13 @@
 package com.github.mohrezal.api.domains.storage.commands;
 
 import com.github.mohrezal.api.domains.storage.commands.params.DeleteCommandParams;
+import com.github.mohrezal.api.domains.storage.exceptions.context.StorageDeleteExceptionContext;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,32 +32,24 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     @Override
     public Void execute(DeleteCommandParams params) {
         validate(params);
-        try {
-            var fileName = params.fileName();
-            var storage =
-                    storageRepository
-                            .findByFilename(fileName)
-                            .orElseThrow(ResourceNotFoundException::new);
+        var fileName = params.fileName();
+        var context = new StorageDeleteExceptionContext(getUserId(), fileName);
 
-            if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
-                throw new AccessDeniedException();
-            }
+        var storage =
+                storageRepository
+                        .findByFilename(fileName)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
+                                                context));
 
-            storageService.delete(storage);
-            log.info("Storage delete successful - filename: {}", fileName);
-            return null;
-        } catch (ResourceNotFoundException | AccessDeniedException ex) {
-            log.warn(
-                    "Storage delete failed - filename: {}, message: {}",
-                    params.fileName(),
-                    ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error(
-                    "Unexpected error during storage delete operation - filename: {}",
-                    params.fileName(),
-                    ex);
-            throw ex;
+        if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
+            throw new AccessDeniedException(context);
         }
+
+        storageService.delete(storage);
+        log.info("Storage delete successful - filename: {}", fileName);
+        return null;
     }
 }

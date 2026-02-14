@@ -30,7 +30,7 @@ public class MarkNotificationReadCommand
 
         var context =
                 new NotificationMarkReadExceptionContext(
-                        user.getId().toString(), params.notificationId().toString());
+                        getUserId(), params.notificationId().toString());
 
         var notification =
                 notificationRepository

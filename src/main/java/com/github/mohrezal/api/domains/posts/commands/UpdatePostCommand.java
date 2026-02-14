@@ -38,8 +38,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     public PostDetail execute(UpdatePostCommandParams params) {
         validate(params);
         var request = params.updatePostRequest();
-        var userId = user.getId() != null ? user.getId().toString() : null;
-        var context = new PostUpdateExceptionContext(userId, params.slug());
+        var context = new PostUpdateExceptionContext(getUserId(), params.slug());
 
         try {
             var post =
