@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.notifications.commands;
 
 import com.github.mohrezal.api.domains.notifications.commands.params.MarkNotificationReadCommandParams;
+import com.github.mohrezal.api.domains.notifications.exceptions.context.NotificationMarkReadExceptionContext;
 import com.github.mohrezal.api.domains.notifications.exceptions.types.NotificationNotFoundException;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
@@ -27,30 +28,26 @@ public class MarkNotificationReadCommand
     public Void execute(MarkNotificationReadCommandParams params) {
         validate(params);
 
-        try {
-            var notification =
-                    notificationRepository
-                            .findById(params.notificationId())
-                            .orElseThrow(NotificationNotFoundException::new);
+        var context =
+                new NotificationMarkReadExceptionContext(
+                        user.getId().toString(), params.notificationId().toString());
 
-            if (!notification.getRecipient().getId().equals(user.getId())) {
-                throw new AccessDeniedException();
-            }
+        var notification =
+                notificationRepository
+                        .findById(params.notificationId())
+                        .orElseThrow(() -> new NotificationNotFoundException(context));
 
-            if (!notification.getIsRead()) {
-                notification.setIsRead(true);
-                notification.setReadAt(OffsetDateTime.now());
-                notificationRepository.save(notification);
-            }
-
-            log.info("Mark notification read command successful.");
-            return null;
-        } catch (NotificationNotFoundException | AccessDeniedException ex) {
-            log.warn("Mark notification read command failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during mark notification read command operation", ex);
-            throw ex;
+        if (!notification.getRecipient().getId().equals(user.getId())) {
+            throw new AccessDeniedException(context);
         }
+
+        if (!notification.getIsRead()) {
+            notification.setIsRead(true);
+            notification.setReadAt(OffsetDateTime.now());
+            notificationRepository.save(notification);
+        }
+
+        log.info("Mark notification read command successful.");
+        return null;
     }
 }

@@ -22,13 +22,9 @@ public class SubscribeNotificationStreamQuery
     @Override
     public SseEmitter execute(SubscribeNotificationStreamQueryParams params) {
         validate(params);
-        try {
-            var emitter = sseService.subscribe(user.getId());
-            log.info("Subscribe notification stream query successful.");
-            return emitter;
-        } catch (Exception ex) {
-            log.error("Unexpected error during subscribe notification stream query operation", ex);
-            throw ex;
-        }
+
+        var emitter = sseService.subscribe(user.getId());
+        log.info("Subscribe notification stream query successful.");
+        return emitter;
     }
 }

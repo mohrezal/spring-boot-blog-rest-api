@@ -23,15 +23,9 @@ public class GetUserUnreadNotificationCountQuery
     @Override
     public Integer execute(GetUserUnreadNotificationCountQueryParams params) {
         validate(params);
-        try {
-            var unreadCount = this.notificationRepository.countByRecipientAndIsRead(user, false);
-            log.info("Get user unread notification count query successful.");
-            return unreadCount;
-        } catch (Exception ex) {
-            log.error(
-                    "Unexpected error during get user unread notification count query operation",
-                    ex);
-            throw ex;
-        }
+
+        var unreadCount = this.notificationRepository.countByRecipientAndIsRead(user, false);
+        log.info("Get user unread notification count query successful.");
+        return unreadCount;
     }
 }

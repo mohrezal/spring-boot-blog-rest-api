@@ -27,18 +27,14 @@ public class GetNotificationPreferencesQuery
     @Override
     public NotificationPreferenceSummary execute(GetNotificationPreferencesQueryParams params) {
         validate(params);
-        try {
-            var preference =
-                    this.notificationPreferenceRepository
-                            .findByUserId(user.getId())
-                            .orElseGet(NotificationUtils::defaultPreferences);
-            var response =
-                    this.notificationPreferenceMapper.toNotificationPreferenceSummary(preference);
-            log.info("Get notification preferences query successful.");
-            return response;
-        } catch (Exception ex) {
-            log.error("Unexpected error during get notification preferences query operation", ex);
-            throw ex;
-        }
+
+        var preference =
+                this.notificationPreferenceRepository
+                        .findByUserId(user.getId())
+                        .orElseGet(NotificationUtils::defaultPreferences);
+        var response =
+                this.notificationPreferenceMapper.toNotificationPreferenceSummary(preference);
+        log.info("Get notification preferences query successful.");
+        return response;
     }
 }

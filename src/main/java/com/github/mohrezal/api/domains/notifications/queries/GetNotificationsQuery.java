@@ -28,20 +28,14 @@ public class GetNotificationsQuery
     @Override
     public PageResponse<NotificationSummary> execute(GetNotificationsQueryParams params) {
         validate(params);
-        try {
-            var pageable =
-                    PageRequest.of(
-                            params.page(),
-                            params.size(),
-                            Sort.by(Sort.Direction.DESC, "createdAt"));
-            var notificationPage = this.notificationRepository.findByRecipient(user, pageable);
-            var response =
-                    PageResponse.from(notificationPage, notificationMapper::toNotificationSummary);
-            log.info("Get notifications query successful.");
-            return response;
-        } catch (Exception ex) {
-            log.error("Unexpected error during get notifications query operation", ex);
-            throw ex;
-        }
+
+        var pageable =
+                PageRequest.of(
+                        params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
+        var notificationPage = this.notificationRepository.findByRecipient(user, pageable);
+        var response =
+                PageResponse.from(notificationPage, notificationMapper::toNotificationSummary);
+        log.info("Get notifications query successful.");
+        return response;
     }
 }

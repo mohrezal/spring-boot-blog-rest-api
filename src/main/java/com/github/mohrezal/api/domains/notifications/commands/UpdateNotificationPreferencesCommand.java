@@ -6,7 +6,6 @@ import com.github.mohrezal.api.domains.notifications.mappers.NotificationPrefere
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
-import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -31,30 +30,18 @@ public class UpdateNotificationPreferencesCommand
             UpdateNotificationPreferencesCommandParams params) {
         validate(params);
 
-        try {
-            var request = params.request();
+        var request = params.request();
 
-            var preference =
-                    notificationPreferenceRepository
-                            .findByUserId(user.getId())
-                            .orElseGet(() -> NotificationPreference.builder().user(user).build());
+        var preference =
+                notificationPreferenceRepository
+                        .findByUserId(user.getId())
+                        .orElseGet(() -> NotificationPreference.builder().user(user).build());
 
-            preference.setInAppEnabled(request.inAppEnabled());
-            preference.setEmailEnabled(request.emailEnabled());
+        preference.setInAppEnabled(request.inAppEnabled());
+        preference.setEmailEnabled(request.emailEnabled());
 
-            var saved = notificationPreferenceRepository.save(preference);
-            log.info("Update notification preferences command successful.");
-            return notificationPreferenceMapper.toNotificationPreferenceSummary(saved);
-        } catch (AccessDeniedException ex) {
-            log.warn(
-                    "Update notification preferences command failed - message: {}",
-                    ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error(
-                    "Unexpected error during update notification preferences command operation",
-                    ex);
-            throw ex;
-        }
+        var saved = notificationPreferenceRepository.save(preference);
+        log.info("Update notification preferences command successful.");
+        return notificationPreferenceMapper.toNotificationPreferenceSummary(saved);
     }
 }
