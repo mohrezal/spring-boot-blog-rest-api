@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
+import com.github.mohrezal.api.domains.users.exceptions.context.UserRefreshTokenExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserRefreshTokenNotFoundException;
@@ -26,57 +27,45 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
     private final UserRepository userRepository;
     private final RequestInfoService deviceInfoService;
 
-    @Override
-    public void validate(RefreshTokenCommandParams params) {
-        if (params.refreshToken() == null || params.refreshToken().isBlank()) {
-            throw new UserInvalidRefreshTokenException();
-        }
-        if (!jwtService.validateRefreshToken(params.refreshToken())) {
-            throw new UserInvalidRefreshTokenException();
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(RefreshTokenCommandParams params) {
-        validate(params);
+        var context =
+                new UserRefreshTokenExceptionContext(
+                        params.refreshToken() != null && !params.refreshToken().isBlank(),
+                        params.ipAddress(),
+                        params.userAgent());
 
-        try {
-            var refreshTokenEntity =
-                    jwtService
-                            .getRefreshTokenEntity(params.refreshToken())
-                            .orElseThrow(UserRefreshTokenNotFoundException::new);
-
-            var user =
-                    userRepository
-                            .findById(refreshTokenEntity.getUser().getId())
-                            .orElseThrow(UserNotFoundException::new);
-
-            jwtService.revokeRefreshToken(params.refreshToken());
-
-            var newAccessToken = jwtService.generateAccessToken(user);
-            var newRefreshToken = jwtService.generateRefreshToken(user.getId());
-
-            var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
-
-            jwtService.saveRefreshToken(
-                    newRefreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
-
-            log.info("Token refresh successful for user session");
-
-            return new AuthResponse(newAccessToken, newRefreshToken);
-
-        } catch (UserInvalidRefreshTokenException | UserRefreshTokenNotFoundException ex) {
-            log.warn(
-                    "Token refresh failed - invalid or expired token. message: {}",
-                    ex.getMessage());
-            throw ex;
-        } catch (UserNotFoundException ex) {
-            log.warn("Token refresh failed - user not found. message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during token refresh operation", ex);
-            throw ex;
+        if (!context.hasRefreshToken()) {
+            throw new UserInvalidRefreshTokenException(context);
         }
+
+        if (!jwtService.validateRefreshToken(params.refreshToken())) {
+            throw new UserInvalidRefreshTokenException(context);
+        }
+
+        var refreshTokenEntity =
+                jwtService
+                        .getRefreshTokenEntity(params.refreshToken())
+                        .orElseThrow(() -> new UserRefreshTokenNotFoundException(context));
+
+        var user =
+                userRepository
+                        .findById(refreshTokenEntity.getUser().getId())
+                        .orElseThrow(UserNotFoundException::new);
+
+        jwtService.revokeRefreshToken(params.refreshToken());
+
+        var newAccessToken = jwtService.generateAccessToken(user);
+        var newRefreshToken = jwtService.generateRefreshToken(user.getId());
+
+        var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
+
+        jwtService.saveRefreshToken(
+                newRefreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
+
+        log.info("Token refresh successful for user session");
+
+        return new AuthResponse(newAccessToken, newRefreshToken);
     }
 }

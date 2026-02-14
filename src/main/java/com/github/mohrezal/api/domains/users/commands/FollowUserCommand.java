@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
 import com.github.mohrezal.api.domains.users.commands.params.FollowUserCommandParams;
+import com.github.mohrezal.api.domains.users.exceptions.context.UserFollowExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
@@ -34,57 +35,41 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
 
         var followerId = user.getId();
         var followerHandle = user.getHandle();
+        var context =
+                new UserFollowExceptionContext(
+                        followerId.toString(), followerHandle, params.handle());
 
         log.debug(
                 "Executing FollowUserCommand - follower: {}, target: {}",
                 followerHandle,
                 params.handle());
-        try {
-            var targetUser =
-                    userRepository
-                            .findByHandle(params.handle())
-                            .orElseThrow(UserNotFoundException::new);
+        var targetUser =
+                userRepository
+                        .findByHandle(params.handle())
+                        .orElseThrow(() -> new UserNotFoundException(context));
 
-            if (followerId.equals(targetUser.getId())) {
-                throw new UserCannotFollowOrUnfollowSelfException();
-            }
-
-            var isUserAlreadyFollowed =
-                    userFollowRepository.isAlreadyFollowing(followerId, targetUser.getId());
-
-            if (isUserAlreadyFollowed) {
-                throw new UserAlreadyFollowingException();
-            }
-
-            var userFollow = UserFollow.builder().follower(user).followed(targetUser).build();
-
-            userFollowRepository.save(userFollow);
-
-            log.info(
-                    "User followed successfully - follower: {}, followed:{}",
-                    followerId,
-                    targetUser.getId());
-
-            eventPublisher.publishEvent(new UserFollowedEvent(user, targetUser));
-
-            return null;
-
-        } catch (UserNotFoundException ex) {
-            log.warn("Follow failed - target user not found: {}", params.handle());
-            throw ex;
-        } catch (UserAlreadyFollowingException ex) {
-            log.warn("Follow failed - user attempted to follow already following: {}", followerId);
-            throw ex;
-        } catch (UserCannotFollowOrUnfollowSelfException ex) {
-            log.info("Follow failed - user attempted to follow to self: {}", followerId);
-            throw ex;
-        } catch (Exception ex) {
-            log.error(
-                    "Unexpected error in FollowUserCommand - follower: {}, target: {}",
-                    followerId,
-                    params.handle(),
-                    ex);
-            throw ex;
+        if (followerId.equals(targetUser.getId())) {
+            throw new UserCannotFollowOrUnfollowSelfException(context);
         }
+
+        var isUserAlreadyFollowed =
+                userFollowRepository.isAlreadyFollowing(followerId, targetUser.getId());
+
+        if (isUserAlreadyFollowed) {
+            throw new UserAlreadyFollowingException(context);
+        }
+
+        var userFollow = UserFollow.builder().follower(user).followed(targetUser).build();
+
+        userFollowRepository.save(userFollow);
+
+        log.info(
+                "User followed successfully - follower: {}, followed:{}",
+                followerId,
+                targetUser.getId());
+
+        eventPublisher.publishEvent(new UserFollowedEvent(user, targetUser));
+
+        return null;
     }
 }

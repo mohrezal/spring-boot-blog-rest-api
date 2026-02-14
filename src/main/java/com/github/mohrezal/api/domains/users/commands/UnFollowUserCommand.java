@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.UnFollowUserCommandParams;
+import com.github.mohrezal.api.domains.users.exceptions.context.UserFollowExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
@@ -27,33 +28,26 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     @Override
     public Void execute(UnFollowUserCommandParams params) {
         validate(params);
-        try {
-            var targetUser =
-                    userRepository
-                            .findByHandle(params.handle())
-                            .orElseThrow(UserNotFoundException::new);
+        var context =
+                new UserFollowExceptionContext(
+                        user.getId().toString(), user.getHandle(), params.handle());
+        var targetUser =
+                userRepository
+                        .findByHandle(params.handle())
+                        .orElseThrow(() -> new UserNotFoundException(context));
 
-            if (user.getId().equals(targetUser.getId())) {
-                throw new UserCannotFollowOrUnfollowSelfException();
-            }
-
-            var userFollow = userFollowRepository.findByFollowedAndFollower(targetUser, user);
-            if (userFollow.isEmpty()) {
-                throw new UserNotFollowingException();
-            }
-
-            userFollowRepository.delete(userFollow.get());
-
-            log.info("User unfollow successful.");
-            return null;
-        } catch (UserNotFoundException
-                | UserCannotFollowOrUnfollowSelfException
-                | UserNotFollowingException ex) {
-            log.warn("User unfollow failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during user unfollow operation", ex);
-            throw ex;
+        if (user.getId().equals(targetUser.getId())) {
+            throw new UserCannotFollowOrUnfollowSelfException(context);
         }
+
+        var userFollow =
+                userFollowRepository
+                        .findByFollowedAndFollower(targetUser, user)
+                        .orElseThrow(() -> new UserNotFollowingException(context));
+
+        userFollowRepository.delete(userFollow);
+
+        log.info("User unfollow successful.");
+        return null;
     }
 }

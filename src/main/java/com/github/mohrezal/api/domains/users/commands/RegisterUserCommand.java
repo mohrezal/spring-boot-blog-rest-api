@@ -7,6 +7,8 @@ import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommand
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.api.domains.users.dtos.RegisterResponse;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
+import com.github.mohrezal.api.domains.users.exceptions.context.UserRegisterExceptionContext;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleReservedException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
@@ -42,13 +44,15 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     @Override
     public void validate(RegisterUserCommandParams params) {
         String handle = params.registerUserRequest().handle().toLowerCase();
+        var request = params.registerUserRequest();
+        var context = new UserRegisterExceptionContext(request.email(), request.handle());
 
         if (applicationProperties.handle().reservedHandles().contains(handle)) {
-            throw new UserHandleReservedException();
+            throw new UserHandleReservedException(context);
         }
 
         if (userRepository.existsByHandle(handle)) {
-            throw new UserHandleAlreadyExistsException();
+            throw new UserHandleAlreadyExistsException(context);
         }
     }
 
@@ -75,12 +79,10 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
             var authResponse = new AuthResponse(accessToken, refreshToken);
             log.info("User registration successful.");
             return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
-        } catch (UserHandleReservedException | UserHandleAlreadyExistsException ex) {
-            log.warn("User registration failed - message: {}", ex.getMessage());
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Unexpected error during user registration operation", ex);
-            throw ex;
+        } catch (UserEmailAlreadyExistsException ex) {
+            var request = params.registerUserRequest();
+            var context = new UserRegisterExceptionContext(request.email(), request.handle());
+            throw new UserEmailAlreadyExistsException(context, ex);
         }
     }
 }

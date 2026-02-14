@@ -2,6 +2,8 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
+import com.github.mohrezal.api.domains.users.exceptions.context.UserLoginExceptionContext;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.services.authentication.AuthenticationService;
 import com.github.mohrezal.api.shared.interfaces.Command;
@@ -28,12 +30,14 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
     @Transactional(rollbackFor = Exception.class)
     @Override
     public AuthResponse execute(LoginUserCommandParams params) {
+        String deviceName = null;
+
         try {
             var user = authenticationService.authenticate(params.loginRequest());
+            deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
             var accessToken = jwtService.generateAccessToken(user);
             var refreshToken = jwtService.generateRefreshToken(user.getId());
-            var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
 
             jwtService.saveRefreshToken(
                     refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
@@ -41,11 +45,8 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
 
             return new AuthResponse(accessToken, refreshToken);
         } catch (BadCredentialsException | UserNotFoundException e) {
-            log.warn("Login failed: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("Unexpected error in LoginUserCommand - params : {}", params);
-            throw e;
+            var context = new UserLoginExceptionContext(params.loginRequest().email(), deviceName);
+            throw new UserInvalidCredentialsException(context, e);
         }
     }
 }
