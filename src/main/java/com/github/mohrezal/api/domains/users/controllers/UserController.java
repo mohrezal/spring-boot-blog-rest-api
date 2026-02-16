@@ -21,7 +21,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,20 +37,20 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "User")
 public class UserController {
 
-    private final ObjectProvider<@NonNull CurrentUserQuery> currentUserQueries;
-    private final ObjectProvider<@NonNull UpdateUserProfileCommand> updateUserProfileCommands;
-    private final ObjectProvider<@NonNull FollowUserCommand> followUserCommands;
-    private final ObjectProvider<@NonNull UnFollowUserCommand> unFollowUserCommands;
+    private final CurrentUserQuery currentUserQueries;
+    private final UpdateUserProfileCommand updateUserProfileCommands;
+    private final FollowUserCommand followUserCommands;
+    private final UnFollowUserCommand unFollowUserCommands;
 
-    private final ObjectProvider<@NonNull GetUserFollowersQuery> getUserFollowersQueries;
-    private final ObjectProvider<@NonNull GetUserFollowingQuery> getUserFollowingQueries;
+    private final GetUserFollowersQuery getUserFollowersQueries;
+    private final GetUserFollowingQuery getUserFollowingQueries;
 
     @IsAdminOrUser
     @GetMapping(Routes.User.ME)
     public ResponseEntity<@NonNull UserSummary> getCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails) {
         var params = new CurrentUserQueryParams(userDetails);
-        var response = currentUserQueries.getObject().execute(params);
+        var response = currentUserQueries.execute(params);
         return ResponseEntity.ok(response);
     }
 
@@ -61,8 +60,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
         var params = new FollowUserCommandParams(userDetails, handle);
 
-        var command = followUserCommands.getObject();
-        command.execute(params);
+        followUserCommands.execute(params);
         return ResponseEntity.ok().build();
     }
 
@@ -70,9 +68,8 @@ public class UserController {
     @PostMapping(Routes.User.UNFOLLOW_USER)
     public ResponseEntity<Void> unFollowUser(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
-        var command = unFollowUserCommands.getObject();
         var params = new UnFollowUserCommandParams(userDetails, handle);
-        command.execute(params);
+        unFollowUserCommands.execute(params);
         return ResponseEntity.ok().build();
     }
 
@@ -86,7 +83,7 @@ public class UserController {
 
         var params = new GetUserFollowersQueryParams(userDetails, handle, page, size);
 
-        var response = getUserFollowersQueries.getObject().execute(params);
+        var response = getUserFollowersQueries.execute(params);
         return ResponseEntity.ok(response);
     }
 
@@ -99,7 +96,7 @@ public class UserController {
             @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "20") int size) {
 
         var params = new GetUserFollowingQueryParams(userDetails, handle, page, size);
-        var response = getUserFollowingQueries.getObject().execute(params);
+        var response = getUserFollowingQueries.execute(params);
         return ResponseEntity.ok(response);
     }
 }

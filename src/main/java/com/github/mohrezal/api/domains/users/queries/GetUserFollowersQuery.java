@@ -12,15 +12,12 @@ import com.github.mohrezal.api.shared.dtos.PageResponse;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 public class GetUserFollowersQuery
         extends AuthenticatedQuery<GetUserFollowersQueryParams, PageResponse<FollowerSummary>> {
@@ -32,11 +29,11 @@ public class GetUserFollowersQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<FollowerSummary> execute(GetUserFollowersQueryParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
         var context =
                 new UserGetFollowersExceptionContext(
-                        getUserId(), params.handle(), params.page(), params.size());
+                        currentUser.getId(), params.handle(), params.page(), params.size());
 
         var targetUser =
                 userRepository
@@ -57,7 +54,7 @@ public class GetUserFollowersQuery
         var followedByCurrentUser =
                 followerIds.isEmpty()
                         ? Set.of()
-                        : userFollowRepository.findFollowedIdsIn(user.getId(), followerIds);
+                        : userFollowRepository.findFollowedIdsIn(currentUser.getId(), followerIds);
 
         return PageResponse.from(
                 followersPage,

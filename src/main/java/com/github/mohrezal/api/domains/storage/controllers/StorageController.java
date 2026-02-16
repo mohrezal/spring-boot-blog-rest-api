@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,32 +42,27 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Storage")
 public class StorageController {
 
-    private final ObjectProvider<@NonNull UploadCommand> uploadCommands;
-    private final ObjectProvider<@NonNull DeleteCommand> deleteCommands;
-    private final ObjectProvider<@NonNull UploadProfileCommand> uploadProfileCommands;
+    private final UploadCommand uploadCommands;
+    private final DeleteCommand deleteCommands;
+    private final UploadProfileCommand uploadProfileCommands;
 
-    private final ObjectProvider<@NonNull GetStorageByFilenameQuery> getStorageByFilenameQueries;
-    private final ObjectProvider<@NonNull GetUserStorageListQuery> getUserStorageListQueries;
+    private final GetStorageByFilenameQuery getStorageByFilenameQueries;
+    private final GetUserStorageListQuery getUserStorageListQueries;
 
     @IsAdminOrUser
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<@NonNull StorageSummary> upload(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @ModelAttribute UploadRequest uploadRequest) {
-        var command = uploadCommands.getObject();
         var params = new UploadCommandParams(userDetails, uploadRequest, StorageType.MEDIA);
-
-        command.validate(params);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(command.execute(params));
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploadCommands.execute(params));
     }
 
     @GetMapping(Routes.Storage.BY_FILENAME)
     public ResponseEntity<byte[]> download(@PathVariable String filename) {
-        var query = getStorageByFilenameQueries.getObject();
         var params = new GetStorageByFilenameQueryParams(filename);
 
-        var response = query.execute(params);
+        var response = getStorageByFilenameQueries.execute(params);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(response.mimeType()))
@@ -79,9 +73,8 @@ public class StorageController {
     @DeleteMapping(Routes.Storage.BY_FILENAME)
     public ResponseEntity<Void> deleteByFilename(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String filename) {
-        var command = deleteCommands.getObject();
         var params = new DeleteCommandParams(userDetails, filename);
-        command.execute(params);
+        deleteCommands.execute(params);
         return ResponseEntity.noContent().build();
     }
 
@@ -91,9 +84,8 @@ public class StorageController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @Range(max = 1000) @RequestParam(defaultValue = "0") int page,
             @Valid @Range(min = 1, max = 20) @RequestParam(defaultValue = "10") int size) {
-        var query = getUserStorageListQueries.getObject();
         var params = new GetUserStorageListQueryParams(userDetails, page, size);
-        return ResponseEntity.ok().body(query.execute(params));
+        return ResponseEntity.ok().body(getUserStorageListQueries.execute(params));
     }
 
     @IsAdminOrUser
@@ -101,11 +93,7 @@ public class StorageController {
     public ResponseEntity<@NonNull StorageSummary> profile(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @ModelAttribute UploadProfileRequest request) {
-        var command = uploadProfileCommands.getObject();
         var params = new UploadProfileCommandParams(userDetails, request);
-
-        command.validate(params);
-
-        return ResponseEntity.ok().body(command.execute(params));
+        return ResponseEntity.ok().body(uploadProfileCommands.execute(params));
     }
 }

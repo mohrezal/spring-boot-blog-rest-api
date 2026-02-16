@@ -12,13 +12,10 @@ import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Void> {
@@ -31,9 +28,9 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(DeleteCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
         var fileName = params.fileName();
-        var context = new StorageDeleteExceptionContext(getUserId(), fileName);
+        var context = new StorageDeleteExceptionContext(currentUser.getId(), fileName);
 
         var storage =
                 storageRepository
@@ -44,7 +41,8 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
                                                 MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
                                                 context));
 
-        if (!storageUtilsService.isOwner(user, storage) && !userUtilsService.isAdmin(user)) {
+        if (!storageUtilsService.isOwner(currentUser, storage)
+                && !userUtilsService.isAdmin(currentUser)) {
             throw new AccessDeniedException(context);
         }
 

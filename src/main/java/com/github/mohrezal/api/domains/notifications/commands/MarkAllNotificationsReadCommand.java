@@ -6,14 +6,11 @@ import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class MarkAllNotificationsReadCommand
         extends AuthenticatedCommand<MarkAllNotificationsReadCommandParams, Void> {
@@ -23,9 +20,10 @@ public class MarkAllNotificationsReadCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(MarkAllNotificationsReadCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
-        notificationRepository.markAllAsReadByRecipientId(user.getId(), OffsetDateTime.now());
+        notificationRepository.markAllAsReadByRecipientId(
+                currentUser.getId(), OffsetDateTime.now());
         log.info("Mark all notifications read command successful.");
         return null;
     }

@@ -25,11 +25,7 @@ class AuthenticatedBaseTest {
         }
     }
 
-    static class TestBase extends AuthenticatedBase<TestParams> {
-        User getUser() {
-            return user;
-        }
-    }
+    static class TestBase extends AuthenticatedBase<TestParams> {}
 
     private TestBase base;
 
@@ -39,23 +35,22 @@ class AuthenticatedBaseTest {
     }
 
     @Test
-    void validate_whenUserDetailsIsNull_shouldThrowAccessDenied() {
+    void getCurrentUser_whenUserDetailsIsNull_shouldThrowAccessDenied() {
         var params = new TestParams(null);
-        assertThrows(AccessDeniedException.class, () -> base.validate(params));
+        assertThrows(AccessDeniedException.class, () -> base.getCurrentUser(params));
     }
 
     @Test
-    void validate_whenUserDetailsIsNotUser_shouldThrowAccessDenied() {
+    void getCurrentUser_whenUserDetailsIsNotUser_shouldThrowAccessDenied() {
         UserDetails notAUser = mock(UserDetails.class);
         var params = new TestParams(notAUser);
-        assertThrows(AccessDeniedException.class, () -> base.validate(params));
+        assertThrows(AccessDeniedException.class, () -> base.getCurrentUser(params));
     }
 
     @Test
-    void validate_whenUserDetailsIsValidUser_shouldSetUserField() {
+    void getCurrentUser_whenUserDetailsIsValidUser_shouldReturnUser() {
         User user = aUser().withId(UUID.randomUUID()).build();
         var params = new TestParams(user);
-        base.validate(params);
-        assertThat(base.getUser()).isEqualTo(user);
+        assertThat(base.getCurrentUser(params)).isEqualTo(user);
     }
 }

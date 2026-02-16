@@ -12,13 +12,10 @@ import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandParams, Void> {
@@ -30,15 +27,16 @@ public class ArchivePostCommand extends AuthenticatedCommand<ArchivePostCommandP
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(ArchivePostCommandParams params) {
-        validate(params);
-        var context = new PostArchiveExceptionContext(getUserId(), params.slug());
+        var currentUser = getCurrentUser(params);
+        var context = new PostArchiveExceptionContext(currentUser.getId(), params.slug());
 
         var post =
                 postRepository
                         .findBySlug(params.slug())
                         .orElseThrow(() -> new PostNotFoundException(context));
 
-        if (!postUtilsService.isOwner(post, user) && !userUtilsService.isAdmin(user)) {
+        if (!postUtilsService.isOwner(post, currentUser)
+                && !userUtilsService.isAdmin(currentUser)) {
             throw new AccessDeniedException(context);
         }
         if (!post.getStatus().equals(PostStatus.PUBLISHED)) {

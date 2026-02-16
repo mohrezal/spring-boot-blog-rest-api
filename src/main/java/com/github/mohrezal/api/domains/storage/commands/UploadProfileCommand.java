@@ -12,16 +12,14 @@ import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtil
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class UploadProfileCommand
@@ -32,14 +30,12 @@ public class UploadProfileCommand
     private final StorageMapper storageMapper;
     private final UserRepository userRepository;
 
-    @Override
-    public void validate(UploadProfileCommandParams params) {
-        super.validate(params);
-
+    private void assertProfileUploadConstraints(
+            UploadProfileCommandParams params, UUID currentUserId) {
         MultipartFile file = params.uploadProfileRequest().file();
         var context =
                 new StorageUploadExceptionContext(
-                        getUserId(),
+                        currentUserId,
                         file.getOriginalFilename(),
                         file.getSize(),
                         StorageType.PROFILE.name());
@@ -59,14 +55,15 @@ public class UploadProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadProfileCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
+        assertProfileUploadConstraints(params, currentUser.getId());
 
-        if (user.getAvatar() != null) {
-            storageService.delete(user.getAvatar());
+        if (currentUser.getAvatar() != null) {
+            storageService.delete(currentUser.getAvatar());
         }
 
-        var firstName = user.getFirstName() != null ? user.getFirstName() : "";
-        var lastName = user.getLastName() != null ? user.getLastName() : "";
+        var firstName = currentUser.getFirstName() != null ? currentUser.getFirstName() : "";
+        var lastName = currentUser.getLastName() != null ? currentUser.getLastName() : "";
         var profileInfo = String.format("%s %s profile image", firstName, lastName).trim();
 
         var storage =
@@ -75,10 +72,10 @@ public class UploadProfileCommand
                         profileInfo,
                         profileInfo,
                         StorageType.PROFILE,
-                        user);
+                        currentUser);
 
-        user.setAvatar(storage);
-        userRepository.save(user);
+        currentUser.setAvatar(storage);
+        userRepository.save(currentUser);
 
         log.info("Profile image upload successful - filename: {}", storage.getFilename());
 

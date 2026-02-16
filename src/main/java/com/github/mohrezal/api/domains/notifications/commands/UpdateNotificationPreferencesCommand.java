@@ -8,14 +8,11 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class UpdateNotificationPreferencesCommand
         extends AuthenticatedCommand<
@@ -28,14 +25,15 @@ public class UpdateNotificationPreferencesCommand
     @Override
     public NotificationPreferenceSummary execute(
             UpdateNotificationPreferencesCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
         var request = params.request();
 
         var preference =
                 notificationPreferenceRepository
-                        .findByUserId(user.getId())
-                        .orElseGet(() -> NotificationPreference.builder().user(user).build());
+                        .findByUserId(currentUser.getId())
+                        .orElseGet(
+                                () -> NotificationPreference.builder().user(currentUser).build());
 
         preference.setInAppEnabled(request.inAppEnabled());
         preference.setEmailEnabled(request.emailEnabled());

@@ -8,13 +8,10 @@ import com.github.mohrezal.api.shared.exceptions.types.ForbiddenException;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandParams, Void> {
@@ -24,11 +21,10 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(LogoutUserCommandParams params) {
-
-        validate(params);
+        var currentUser = getCurrentUser(params);
         var context =
                 new UserLogoutExceptionContext(
-                        getUserId(),
+                        currentUser.getId(),
                         params.refreshToken() != null && !params.refreshToken().isBlank());
 
         if (!context.hasRefreshToken()) {
@@ -40,7 +36,7 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
                         .getRefreshTokenEntity(params.refreshToken())
                         .orElseThrow(() -> new UserInvalidRefreshTokenException(context));
 
-        if (!user.getId().equals(refreshToken.getUser().getId())) {
+        if (!currentUser.getId().equals(refreshToken.getUser().getId())) {
             throw new ForbiddenException(context);
         }
 

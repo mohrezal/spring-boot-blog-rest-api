@@ -5,14 +5,11 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationRe
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class GetUserUnreadNotificationCountQuery
         extends AuthenticatedQuery<GetUserUnreadNotificationCountQueryParams, Integer> {
@@ -22,9 +19,9 @@ public class GetUserUnreadNotificationCountQuery
     @Transactional(readOnly = true)
     @Override
     public Integer execute(GetUserUnreadNotificationCountQueryParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
-        var unreadCount = this.notificationRepository.countByRecipientAndIsRead(user, false);
+        var unreadCount = this.notificationRepository.countByRecipientAndIsRead(currentUser, false);
         log.info("Get user unread notification count query successful.");
         return unreadCount;
     }

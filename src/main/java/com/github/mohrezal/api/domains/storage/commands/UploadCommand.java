@@ -11,15 +11,13 @@ import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, StorageSummary> {
@@ -28,15 +26,13 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
     private final StorageService storageService;
     private final StorageMapper storageMapper;
 
-    @Override
-    public void validate(UploadCommandParams params) {
-        super.validate(params);
+    private void assertUploadRequestConstraints(UploadCommandParams params, UUID currentUserId) {
         var request = params.uploadRequest();
         var file = request.file();
         var type = params.type() != null ? params.type().name() : null;
         var context =
                 new StorageUploadExceptionContext(
-                        getUserId(), file.getOriginalFilename(), file.getSize(), type);
+                        currentUserId, file.getOriginalFilename(), file.getSize(), type);
 
         try {
             if (!storageUtils.isValidMimeType(file)) {
@@ -54,13 +50,15 @@ public class UploadCommand extends AuthenticatedCommand<UploadCommandParams, Sto
     @Transactional(rollbackFor = Exception.class)
     @Override
     public StorageSummary execute(UploadCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
+        assertUploadRequestConstraints(params, currentUser.getId());
 
         var request = params.uploadRequest();
         var type = params.type() != null ? params.type() : StorageType.MEDIA;
 
         var savedStorage =
-                storageService.upload(request.file(), request.title(), request.alt(), type, user);
+                storageService.upload(
+                        request.file(), request.title(), request.alt(), type, currentUser);
         log.info(
                 "Storage upload successful - type: {}, filename: {}",
                 type,

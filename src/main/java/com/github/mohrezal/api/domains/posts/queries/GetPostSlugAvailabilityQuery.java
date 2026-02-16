@@ -9,13 +9,10 @@ import com.github.mohrezal.api.shared.interfaces.Query;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class GetPostSlugAvailabilityQuery

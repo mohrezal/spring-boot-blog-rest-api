@@ -16,14 +16,11 @@ import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandParams, PostDetail> {
@@ -36,9 +33,9 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public PostDetail execute(UpdatePostCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
         var request = params.updatePostRequest();
-        var context = new PostUpdateExceptionContext(getUserId(), params.slug());
+        var context = new PostUpdateExceptionContext(currentUser.getId(), params.slug());
 
         try {
             var post =
@@ -46,7 +43,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
                             .findBySlug(params.slug())
                             .orElseThrow(() -> new PostNotFoundException(context));
 
-            if (!postUtilsService.isOwner(post, user)) {
+            if (!postUtilsService.isOwner(post, currentUser)) {
                 throw new AccessDeniedException(context);
             }
 

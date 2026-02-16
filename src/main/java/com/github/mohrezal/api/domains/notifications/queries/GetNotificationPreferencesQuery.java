@@ -8,14 +8,11 @@ import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class GetNotificationPreferencesQuery
         extends AuthenticatedQuery<
@@ -26,11 +23,11 @@ public class GetNotificationPreferencesQuery
     @Transactional(readOnly = true)
     @Override
     public NotificationPreferenceSummary execute(GetNotificationPreferencesQueryParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
         var preference =
                 this.notificationPreferenceRepository
-                        .findByUserId(user.getId())
+                        .findByUserId(currentUser.getId())
                         .orElseGet(NotificationUtils::defaultPreferences);
         var response =
                 this.notificationPreferenceMapper.toNotificationPreferenceSummary(preference);

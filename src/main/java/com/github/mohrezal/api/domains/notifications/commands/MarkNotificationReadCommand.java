@@ -9,14 +9,11 @@ import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 public class MarkNotificationReadCommand
         extends AuthenticatedCommand<MarkNotificationReadCommandParams, Void> {
@@ -26,18 +23,18 @@ public class MarkNotificationReadCommand
     @Transactional
     @Override
     public Void execute(MarkNotificationReadCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
         var context =
                 new NotificationMarkReadExceptionContext(
-                        getUserId(), params.notificationId().toString());
+                        currentUser.getId(), params.notificationId().toString());
 
         var notification =
                 notificationRepository
                         .findById(params.notificationId())
                         .orElseThrow(() -> new NotificationNotFoundException(context));
 
-        if (!notification.getRecipient().getId().equals(user.getId())) {
+        if (!notification.getRecipient().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(context);
         }
 

@@ -12,13 +12,10 @@ import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -31,9 +28,9 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(FollowUserCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
-        var followerId = getUserId();
+        var followerId = currentUser.getId();
         var context = new UserFollowExceptionContext(followerId, params.handle());
 
         log.debug(
@@ -56,7 +53,7 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
             throw new UserAlreadyFollowingException(context);
         }
 
-        var userFollow = UserFollow.builder().follower(user).followed(targetUser).build();
+        var userFollow = UserFollow.builder().follower(currentUser).followed(targetUser).build();
 
         userFollowRepository.save(userFollow);
 
@@ -65,7 +62,7 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
                 followerId,
                 targetUser.getId());
 
-        eventPublisher.publishEvent(new UserFollowedEvent(user, targetUser));
+        eventPublisher.publishEvent(new UserFollowedEvent(currentUser, targetUser));
 
         return null;
     }

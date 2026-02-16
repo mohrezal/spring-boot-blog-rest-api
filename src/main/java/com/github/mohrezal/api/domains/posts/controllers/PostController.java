@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,17 +54,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "Post")
 public class PostController {
-    private final ObjectProvider<@NonNull CreatePostCommand> createPostCommands;
-    private final ObjectProvider<@NonNull UpdatePostCommand> updatePostCommands;
-    private final ObjectProvider<@NonNull PublishPostCommand> publishPostCommands;
-    private final ObjectProvider<@NonNull ArchivePostCommand> archivePostCommands;
-    private final ObjectProvider<@NonNull UnarchivePostCommand> unarchivePostCommands;
-    private final ObjectProvider<@NonNull DeletePostCommand> deletePostCommands;
+    private final CreatePostCommand createPostCommands;
+    private final UpdatePostCommand updatePostCommands;
+    private final PublishPostCommand publishPostCommands;
+    private final ArchivePostCommand archivePostCommands;
+    private final UnarchivePostCommand unarchivePostCommands;
+    private final DeletePostCommand deletePostCommands;
 
-    private final ObjectProvider<@NonNull GetPostsQuery> getPostsQueries;
-    private final ObjectProvider<@NonNull GetPostBySlugQuery> getPostBySlugQueries;
-    private final ObjectProvider<@NonNull GetPostSlugAvailabilityQuery>
-            getPostSlugAvailabilityQueries;
+    private final GetPostsQuery getPostsQueries;
+    private final GetPostBySlugQuery getPostBySlugQueries;
+    private final GetPostSlugAvailabilityQuery getPostSlugAvailabilityQueries;
     private final GetPostsBySearchQuery getPostsBySearchQuery;
 
     @GetMapping
@@ -77,8 +75,7 @@ public class PostController {
 
         var params = new GetPostsQueryParams(page, size, categorySlugs, authorIds);
 
-        var query = getPostsQueries.getObject();
-        return ResponseEntity.ok(query.execute(params));
+        return ResponseEntity.ok(getPostsQueries.execute(params));
     }
 
     @IsAdminOrUser
@@ -87,8 +84,7 @@ public class PostController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody CreatePostRequest createPostRequest) {
         var params = new CreatePostCommandParams(userDetails, createPostRequest);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createPostCommands.getObject().execute(params));
+        return ResponseEntity.status(HttpStatus.CREATED).body(createPostCommands.execute(params));
     }
 
     @IsAdminOrUser
@@ -99,7 +95,7 @@ public class PostController {
             @Valid @RequestBody UpdatePostRequest updatePostRequest) {
 
         var params = new UpdatePostCommandParams(userDetails, updatePostRequest, slug);
-        return ResponseEntity.ok().body(updatePostCommands.getObject().execute(params));
+        return ResponseEntity.ok().body(updatePostCommands.execute(params));
     }
 
     @GetMapping(Routes.Post.GET_POST_BY_SLUG)
@@ -107,7 +103,7 @@ public class PostController {
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new GetPostBySlugQueryParams(userDetails, slug);
 
-        return ResponseEntity.ok().body(getPostBySlugQueries.getObject().execute(params));
+        return ResponseEntity.ok().body(getPostBySlugQueries.execute(params));
     }
 
     @GetMapping(Routes.Post.SLUG_AVAILABILITY)
@@ -115,7 +111,7 @@ public class PostController {
             @RequestParam(name = "slug") String slug) {
         var params = new GetPostSlugAvailabilityQueryParams(slug);
 
-        return ResponseEntity.ok().body(getPostSlugAvailabilityQueries.getObject().execute(params));
+        return ResponseEntity.ok().body(getPostSlugAvailabilityQueries.execute(params));
     }
 
     @PostMapping(Routes.Post.PUBLISH_POST)
@@ -123,7 +119,7 @@ public class PostController {
     public ResponseEntity<@NonNull Void> publishPost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new PublishPostCommandParams(userDetails, slug);
-        publishPostCommands.getObject().execute(params);
+        publishPostCommands.execute(params);
         return ResponseEntity.noContent().build();
     }
 
@@ -132,7 +128,7 @@ public class PostController {
     public ResponseEntity<@NonNull Void> archivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new ArchivePostCommandParams(userDetails, slug);
-        archivePostCommands.getObject().execute(params);
+        archivePostCommands.execute(params);
         return ResponseEntity.noContent().build();
     }
 
@@ -141,7 +137,7 @@ public class PostController {
     public ResponseEntity<@NonNull Void> unarchivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new UnarchivePostCommandParams(userDetails, slug);
-        unarchivePostCommands.getObject().execute(params);
+        unarchivePostCommands.execute(params);
         return ResponseEntity.noContent().build();
     }
 
@@ -151,7 +147,7 @@ public class PostController {
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
 
         var params = new DeletePostCommandParams(userDetails, slug);
-        deletePostCommands.getObject().execute(params);
+        deletePostCommands.execute(params);
         return ResponseEntity.noContent().build();
     }
 

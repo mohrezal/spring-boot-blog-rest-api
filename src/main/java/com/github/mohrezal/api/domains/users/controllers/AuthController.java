@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +40,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Auth")
 public class AuthController {
 
-    private final ObjectProvider<@NonNull RegisterUserCommand> registerUserCommandProvider;
-    private final ObjectProvider<@NonNull LoginUserCommand> loginUserCommandProvider;
-    private final ObjectProvider<@NonNull RefreshTokenCommand> refreshTokenCommandProvider;
-    private final ObjectProvider<@NonNull LogoutUserCommand> logoutUserCommandProvider;
+    private final RegisterUserCommand registerUserCommand;
+    private final LoginUserCommand loginUserCommand;
+    private final RefreshTokenCommand refreshTokenCommand;
+    private final LogoutUserCommand logoutUserCommand;
     private final CookieUtils cookieUtils;
     private final RequestInfoService requestInfoService;
 
@@ -64,8 +63,7 @@ public class AuthController {
                         requestInfoService.getClientIp(request),
                         request.getHeader(HttpHeaders.USER_AGENT));
 
-        var command = registerUserCommandProvider.getObject();
-        var registerResponse = command.execute(params);
+        var registerResponse = registerUserCommand.execute(params);
 
         var accessTokenCookie =
                 cookieUtils.createAccessTokenCookie(registerResponse.authResponse().accessToken());
@@ -89,7 +87,7 @@ public class AuthController {
                         requestInfoService.getClientIp(request),
                         request.getHeader(HttpHeaders.USER_AGENT));
 
-        var authResponse = loginUserCommandProvider.getObject().execute(params);
+        var authResponse = loginUserCommand.execute(params);
 
         var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.accessToken());
         var refreshTokenCookie = cookieUtils.createRefreshTokenCookie(authResponse.refreshToken());
@@ -112,7 +110,7 @@ public class AuthController {
                         requestInfoService.getClientIp(request),
                         request.getHeader(HttpHeaders.USER_AGENT));
 
-        var authResponse = refreshTokenCommandProvider.getObject().execute(params);
+        var authResponse = refreshTokenCommand.execute(params);
 
         var accessTokenCookie = cookieUtils.createAccessTokenCookie(authResponse.accessToken());
         var refreshTokenCookie = cookieUtils.createRefreshTokenCookie(authResponse.refreshToken());
@@ -133,7 +131,7 @@ public class AuthController {
 
         var params = new LogoutUserCommandParams(userDetails, refreshToken);
 
-        logoutUserCommandProvider.getObject().execute(params);
+        logoutUserCommand.execute(params);
 
         var accessTokenCookie = cookieUtils.deleteAccessTokenCookie();
         var refreshTokenCookie = cookieUtils.deleteRefreshTokenCookie();

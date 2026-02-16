@@ -4,18 +4,16 @@ import com.github.mohrezal.api.domains.users.commands.params.UpdateUserProfileCo
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserUpdateProfileExceptionContext;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
+import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.InvalidRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class UpdateUserProfileCommand
@@ -24,14 +22,11 @@ public class UpdateUserProfileCommand
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    @Override
-    public void validate(UpdateUserProfileCommandParams params) {
-        super.validate(params);
-
+    private void validateRequest(User currentUser, UpdateUserProfileCommandParams params) {
         var request = params.request();
         var context =
                 new UserUpdateProfileExceptionContext(
-                        getUserId(),
+                        currentUser.getId(),
                         request.firstName() != null,
                         request.lastName() != null,
                         request.bio() != null);
@@ -46,22 +41,23 @@ public class UpdateUserProfileCommand
     @Transactional(rollbackFor = Exception.class)
     @Override
     public UserSummary execute(UpdateUserProfileCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
+        validateRequest(currentUser, params);
         var request = params.request();
 
         if (request.firstName() != null) {
-            user.setFirstName(request.firstName());
+            currentUser.setFirstName(request.firstName());
         }
 
         if (request.lastName() != null) {
-            user.setLastName(request.lastName());
+            currentUser.setLastName(request.lastName());
         }
 
         if (request.bio() != null) {
-            user.setBio(request.bio());
+            currentUser.setBio(request.bio());
         }
 
-        var updatedUser = userRepository.save(user);
+        var updatedUser = userRepository.save(currentUser);
 
         log.info("User profile update successful.");
         return userMapper.toUserSummary(updatedUser);

@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -87,34 +86,21 @@ class PostControllerTest {
 
     @MockitoBean private CreatePostCommand createPostCommand;
 
-    @MockitoBean private ObjectProvider<CreatePostCommand> createPostCommands;
-
     @MockitoBean private UpdatePostCommand updatePostCommand;
 
-    @MockitoBean private ObjectProvider<UpdatePostCommand> updatePostCommands;
-
     @MockitoBean private PublishPostCommand publishPostCommand;
-    @MockitoBean private ObjectProvider<PublishPostCommand> publishPostCommands;
 
     @MockitoBean private ArchivePostCommand archivePostCommand;
-    @MockitoBean private ObjectProvider<ArchivePostCommand> archivePostCommands;
 
     @MockitoBean private UnarchivePostCommand unarchivePostCommand;
-    @MockitoBean private ObjectProvider<UnarchivePostCommand> unarchivePostCommands;
 
     @MockitoBean private DeletePostCommand deletePostCommand;
-    @MockitoBean private ObjectProvider<DeletePostCommand> deletePostCommands;
 
     @MockitoBean private GetPostsQuery getPostsQuery;
 
     @MockitoBean private GetPostBySlugQuery getPostBySlugQuery;
 
-    @MockitoBean private ObjectProvider<GetPostBySlugQuery> getPostBySlugQueries;
-
     @MockitoBean private GetPostSlugAvailabilityQuery getPostSlugAvailabilityQuery;
-
-    @MockitoBean
-    private ObjectProvider<GetPostSlugAvailabilityQuery> getPostSlugAvailabilityQueries;
 
     @MockitoBean private GetPostsBySearchQuery getPostsBySearchQuery;
 
@@ -158,8 +144,6 @@ class PostControllerTest {
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
         var postDetail = mock(PostDetail.class);
-
-        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenReturn(postDetail);
 
@@ -172,8 +156,6 @@ class PostControllerTest {
     @Test
     void getPostBySlug_whenNotAuthenticated_shouldReturn200() throws Exception {
         var postDetail = mock(PostDetail.class);
-
-        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenReturn(postDetail);
 
@@ -186,8 +168,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(getPostBySlugQueries.getObject()).thenReturn(getPostBySlugQuery);
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenThrow(new PostNotFoundException());
 
@@ -199,7 +179,6 @@ class PostControllerTest {
 
     @Test
     void getSlugAvailability_whenSlugAvailable_shouldReturn200() throws Exception {
-        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenReturn(new SlugAvailability(true, null));
 
@@ -213,7 +192,6 @@ class PostControllerTest {
 
     @Test
     void getSlugAvailability_whenSlugTaken_shouldReturn200WithSuggestion() throws Exception {
-        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenReturn(new SlugAvailability(false, "unique-slug-1"));
 
@@ -227,7 +205,6 @@ class PostControllerTest {
 
     @Test
     void getSlugAvailability_whenInvalidSlug_shouldReturn400() throws Exception {
-        when(getPostSlugAvailabilityQueries.getObject()).thenReturn(getPostSlugAvailabilityQuery);
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenThrow(new PostSlugFormatException());
 
@@ -245,8 +222,6 @@ class PostControllerTest {
         var category = categoryRepository.save(aCategory().build());
 
         var postDetail = mock(PostDetail.class);
-
-        when(createPostCommands.getObject()).thenReturn(createPostCommand);
         when(createPostCommand.execute(any(CreatePostCommandParams.class))).thenReturn(postDetail);
 
         var body =
@@ -310,8 +285,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(createPostCommands.getObject()).thenReturn(createPostCommand);
         when(createPostCommand.execute(any(CreatePostCommandParams.class)))
                 .thenThrow(CategoryNotFoundException.class);
 
@@ -338,8 +311,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(createPostCommands.getObject()).thenReturn(createPostCommand);
         when(createPostCommand.execute(any(CreatePostCommandParams.class)))
                 .thenThrow(new PostSlugAlreadyExistsException());
 
@@ -367,8 +338,6 @@ class PostControllerTest {
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
         var postDetail = mock(PostDetail.class);
-
-        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class))).thenReturn(postDetail);
 
         var body =
@@ -430,8 +399,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new PostNotFoundException());
 
@@ -458,8 +425,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new CategoryNotFoundException());
 
@@ -486,8 +451,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new PostSlugAlreadyExistsException());
 
@@ -514,8 +477,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(updatePostCommands.getObject()).thenReturn(updatePostCommand);
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new AccessDeniedException());
 
@@ -542,8 +503,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
         doNothing()
                 .when(publishPostCommand)
                 .execute(
@@ -571,8 +530,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
         doThrow(new PostNotFoundException())
                 .when(publishPostCommand)
                 .execute(
@@ -592,8 +549,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
         doThrow(new PostInvalidStatusTransitionException())
                 .when(publishPostCommand)
                 .execute(
@@ -613,8 +568,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(publishPostCommands.getObject()).thenReturn(publishPostCommand);
         doThrow(new AccessDeniedException())
                 .when(publishPostCommand)
                 .execute(
@@ -634,8 +587,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
         doNothing()
                 .when(archivePostCommand)
                 .execute(
@@ -663,8 +614,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
         doThrow(new PostNotFoundException())
                 .when(archivePostCommand)
                 .execute(
@@ -684,8 +633,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
         doThrow(new PostInvalidStatusTransitionException())
                 .when(archivePostCommand)
                 .execute(
@@ -705,8 +652,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(archivePostCommands.getObject()).thenReturn(archivePostCommand);
         doThrow(new AccessDeniedException())
                 .when(archivePostCommand)
                 .execute(
@@ -726,8 +671,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
         doNothing()
                 .when(unarchivePostCommand)
                 .execute(
@@ -755,8 +698,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
         doThrow(new PostNotFoundException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -776,8 +717,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
         doThrow(new PostInvalidStatusTransitionException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -797,8 +736,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(unarchivePostCommands.getObject()).thenReturn(unarchivePostCommand);
         doThrow(new AccessDeniedException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -818,8 +755,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
         doNothing()
                 .when(deletePostCommand)
                 .execute(
@@ -845,8 +780,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
         doThrow(new PostNotFoundException())
                 .when(deletePostCommand)
                 .execute(
@@ -866,8 +799,6 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-
-        when(deletePostCommands.getObject()).thenReturn(deletePostCommand);
         doThrow(new AccessDeniedException())
                 .when(deletePostCommand)
                 .execute(

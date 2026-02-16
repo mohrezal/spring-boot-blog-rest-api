@@ -8,17 +8,16 @@ import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryParams, PostDetail> {
@@ -30,10 +29,13 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     @Transactional(readOnly = true)
     @Override
     public PostDetail execute(GetPostBySlugQueryParams params) {
+        UUID currentUserId = null;
+        User currentUser = null;
         if (params.getUserDetails() != null) {
-            validate(params);
+            currentUser = getCurrentUser(params);
+            currentUserId = currentUser.getId();
         }
-        var context = new PostGetBySlugExceptionContext(getUserId(), params.slug());
+        var context = new PostGetBySlugExceptionContext(currentUserId, params.slug());
         var post =
                 this.postRepository
                         .findBySlug(params.slug())
@@ -44,8 +46,8 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
             return this.postMapper.toPostDetail(post);
         }
 
-        var isAdmin = user != null && userUtilsService.isAdmin(user);
-        var isOwner = user != null && postUtilsService.isOwner(post, user);
+        var isAdmin = currentUser != null && userUtilsService.isAdmin(currentUser);
+        var isOwner = currentUser != null && postUtilsService.isOwner(post, currentUser);
 
         if (isAdmin || isOwner) {
             log.info("Get post by slug query successful.");

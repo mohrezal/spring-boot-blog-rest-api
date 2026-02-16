@@ -14,14 +14,11 @@ import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandParams, PostDetail> {
@@ -35,9 +32,9 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     @Transactional(rollbackFor = Exception.class)
     @Override
     public PostDetail execute(CreatePostCommandParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
         var request = params.createPostRequest();
-        var context = new PostCreateExceptionContext(getUserId());
+        var context = new PostCreateExceptionContext(currentUser.getId());
 
         try {
             var categoryIds = request.categoryIds();
@@ -49,7 +46,7 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
 
             var newPost = this.postMapper.toPost(request);
             newPost.setCategories(categories);
-            newPost.setUser(user);
+            newPost.setUser(currentUser);
             newPost.setStatus(PostStatus.DRAFT);
             var slug =
                     slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);

@@ -9,14 +9,11 @@ import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -29,12 +26,13 @@ public class GetUserStorageListQuery
     @Transactional(readOnly = true)
     @Override
     public PageResponse<StorageSummary> execute(GetUserStorageListQueryParams params) {
-        validate(params);
+        var currentUser = getCurrentUser(params);
 
         var pageable =
                 PageRequest.of(
                         params.page(), params.size(), Sort.by(Sort.Direction.DESC, "createdAt"));
-        var storageList = storageRepository.findAllByUserAndType(user, StorageType.MEDIA, pageable);
+        var storageList =
+                storageRepository.findAllByUserAndType(currentUser, StorageType.MEDIA, pageable);
 
         var response = PageResponse.from(storageList, storageMapper::toStorageSummary);
         log.info("Get user storage list query successful.");

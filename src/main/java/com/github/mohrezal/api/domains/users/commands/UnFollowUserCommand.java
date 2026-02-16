@@ -10,12 +10,9 @@ import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -27,20 +24,20 @@ public class UnFollowUserCommand extends AuthenticatedCommand<UnFollowUserComman
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Void execute(UnFollowUserCommandParams params) {
-        validate(params);
-        var context = new UserFollowExceptionContext(getUserId(), params.handle());
+        var currentUser = getCurrentUser(params);
+        var context = new UserFollowExceptionContext(currentUser.getId(), params.handle());
         var targetUser =
                 userRepository
                         .findByHandle(params.handle())
                         .orElseThrow(() -> new UserNotFoundException(context));
 
-        if (user.getId().equals(targetUser.getId())) {
+        if (currentUser.getId().equals(targetUser.getId())) {
             throw new UserCannotFollowOrUnfollowSelfException(context);
         }
 
         var userFollow =
                 userFollowRepository
-                        .findByFollowedAndFollower(targetUser, user)
+                        .findByFollowedAndFollower(targetUser, currentUser)
                         .orElseThrow(() -> new UserNotFollowingException(context));
 
         userFollowRepository.delete(userFollow);
