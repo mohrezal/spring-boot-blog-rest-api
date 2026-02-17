@@ -1,12 +1,13 @@
 package com.github.mohrezal.api.domains.notifications.services.sse;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.mohrezal.api.domains.notifications.dtos.NotificationSummary;
 import java.io.IOException;
-import java.util.Map;
+import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -16,16 +17,25 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class NotificationSseServiceImpl implements NotificationSseService {
 
     private static final long SSE_TIMEOUT = 30 * 60 * 1000L;
+    private static final Duration USER_EMITTERS_TTL = Duration.ofMinutes(31);
 
-    private final Map<UUID, Set<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
+    private final Cache<UUID, Set<SseEmitter>> userEmitters =
+            Caffeine.newBuilder().expireAfterAccess(USER_EMITTERS_TTL).build();
 
     @Override
     public SseEmitter subscribe(UUID userId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
 
-        Set<SseEmitter> emitters =
-                userEmitters.computeIfAbsent(userId, k -> new CopyOnWriteArraySet<>());
-        emitters.add(emitter);
+        userEmitters
+                .asMap()
+                .compute(
+                        userId,
+                        (id, emitters) -> {
+                            Set<SseEmitter> updatedEmitters =
+                                    emitters != null ? emitters : ConcurrentHashMap.newKeySet();
+                            updatedEmitters.add(emitter);
+                            return updatedEmitters;
+                        });
 
         emitter.onCompletion(() -> removeEmitter(userId, emitter));
         emitter.onTimeout(() -> removeEmitter(userId, emitter));
@@ -37,7 +47,7 @@ public class NotificationSseServiceImpl implements NotificationSseService {
 
     @Override
     public void push(UUID userId, NotificationSummary notification) {
-        Set<SseEmitter> emitters = userEmitters.get(userId);
+        Set<SseEmitter> emitters = userEmitters.getIfPresent(userId);
         if (emitters == null || emitters.isEmpty()) {
             log.debug("No active SSE connections for user {}", userId);
             return;
@@ -51,7 +61,7 @@ public class NotificationSseServiceImpl implements NotificationSseService {
                                 .name("notification")
                                 .data(notification));
                 log.debug("Pushed notification {} to user {}", notification.id(), userId);
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 log.debug("Failed to send SSE to user {}: {}", userId, e.getMessage());
                 removeEmitter(userId, emitter);
             }
@@ -59,13 +69,14 @@ public class NotificationSseServiceImpl implements NotificationSseService {
     }
 
     private void removeEmitter(UUID userId, SseEmitter emitter) {
-        Set<SseEmitter> emitters = userEmitters.get(userId);
-        if (emitters != null) {
-            emitters.remove(emitter);
-            if (emitters.isEmpty()) {
-                userEmitters.remove(userId);
-            }
-        }
+        userEmitters
+                .asMap()
+                .computeIfPresent(
+                        userId,
+                        (id, emitters) -> {
+                            emitters.remove(emitter);
+                            return emitters.isEmpty() ? null : emitters;
+                        });
         log.debug("Removed SSE emitter for user {}", userId);
     }
 }
