@@ -23,6 +23,7 @@ public final class PostDetailBuilder {
     private OffsetDateTime publishedAt = OffsetDateTime.now();
     private OffsetDateTime createdAt = OffsetDateTime.now();
     private OffsetDateTime updatedAt = OffsetDateTime.now();
+    private Long viewCount = 0L;
 
     private PostDetailBuilder() {}
 
@@ -42,6 +43,11 @@ public final class PostDetailBuilder {
 
     public PostDetailBuilder withSlug(String slug) {
         this.slug = slug;
+        return this;
+    }
+
+    public PostDetailBuilder withViewCount(Long viewCount) {
+        this.viewCount = viewCount;
         return this;
     }
 
@@ -102,6 +108,7 @@ public final class PostDetailBuilder {
                 author,
                 categories,
                 publishedAt,
+                viewCount,
                 createdAt,
                 updatedAt);
     }

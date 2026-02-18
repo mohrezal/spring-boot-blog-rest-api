@@ -22,6 +22,7 @@ public final class PostSummaryBuilder {
     private OffsetDateTime publishedAt = OffsetDateTime.now();
     private OffsetDateTime createdAt = OffsetDateTime.now();
     private OffsetDateTime updatedAt = OffsetDateTime.now();
+    private Long viewCount = 0L;
 
     private PostSummaryBuilder() {}
 
@@ -36,6 +37,11 @@ public final class PostSummaryBuilder {
 
     public PostSummaryBuilder withTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    public PostSummaryBuilder withViewCount(Long viewCount) {
+        this.viewCount = viewCount;
         return this;
     }
 
@@ -95,6 +101,7 @@ public final class PostSummaryBuilder {
                 status,
                 author,
                 publishedAt,
+                viewCount,
                 createdAt,
                 updatedAt);
     }

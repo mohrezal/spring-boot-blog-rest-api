@@ -16,5 +16,6 @@ public record PostSummary(
         PostStatus status,
         AuthorSummary author,
         OffsetDateTime publishedAt,
+        Long viewCount,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {}

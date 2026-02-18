@@ -17,5 +17,6 @@ public record PostDetail(
         AuthorSummary author,
         Set<CategorySummary> categories,
         OffsetDateTime publishedAt,
+        Long viewCount,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt) {}
