@@ -81,6 +81,7 @@ public class Post extends BaseModel {
     private User user;
 
     @Column(name = "view_count", nullable = false)
+    @Builder.Default
     private Long viewCount = 0L;
 
     @ManyToMany

@@ -1,14 +1,13 @@
 package com.github.mohrezal.api.domains.posts.queries;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
+import static com.github.mohrezal.api.support.builders.PostSummaryBuilder.aPostSummary;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
@@ -61,8 +60,8 @@ class GetPostsBySearchQueryTest {
         var post1 = aPost().withId(id1).build();
         var post2 = aPost().withId(id2).build();
 
-        var summary1 = mock(PostSummary.class);
-        var summary2 = mock(PostSummary.class);
+        var summary1 = aPostSummary().withId(id1).build();
+        var summary2 = aPostSummary().withId(id2).build();
 
         when(postRepository.findAllPostBySearchQuery(eq(params.query()), any(Pageable.class)))
                 .thenReturn(searchPage);

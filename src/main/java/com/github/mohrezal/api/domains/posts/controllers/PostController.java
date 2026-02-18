@@ -4,12 +4,14 @@ import com.github.mohrezal.api.config.Routes;
 import com.github.mohrezal.api.domains.posts.commands.ArchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.CreatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.DeletePostCommand;
+import com.github.mohrezal.api.domains.posts.commands.PostViewCommand;
 import com.github.mohrezal.api.domains.posts.commands.PublishPostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UpdatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.params.ArchivePostCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.DeletePostCommandParams;
+import com.github.mohrezal.api.domains.posts.commands.params.PostViewCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.PublishPostCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.UnarchivePostCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
@@ -37,6 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -63,6 +66,7 @@ public class PostController {
     private final ArchivePostCommand archivePostCommands;
     private final UnarchivePostCommand unarchivePostCommands;
     private final DeletePostCommand deletePostCommands;
+    private final PostViewCommand postViewCommand;
 
     private final GetPostsQuery getPostsQueries;
     private final GetPostBySlugQuery getPostBySlugQueries;
@@ -167,9 +171,20 @@ public class PostController {
 
     @PostMapping(Routes.Post.VIEW)
     public ResponseEntity<Boolean> view(
-            @PathVariable UUID slug,
-            @CookieValue(name = CookieConstants.VID, required = false) String vid) {
+            @PathVariable String slug,
+            @CookieValue(name = CookieConstants.VID, required = false) String vid,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        var params = new PostViewCommandParams(slug, vid, userDetails);
+        var result = postViewCommand.execute(params);
 
-        return ResponseEntity.ok().build();
+        var response = ResponseEntity.ok();
+        if (vid == null || vid.isBlank()) {
+            var vidCookie =
+                    cookieUtils.createCookie(
+                            CookieConstants.VID, result.vid(), 365L * 24 * 60 * 60, "/", "Lax");
+            response.header(HttpHeaders.SET_COOKIE, vidCookie.toString());
+        }
+
+        return response.body(result.response());
     }
 }

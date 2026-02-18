@@ -1,19 +1,23 @@
 package com.github.mohrezal.api.domains.posts.controllers;
 
 import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory;
+import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
+import static com.github.mohrezal.api.support.builders.PostSummaryBuilder.aPostSummary;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,14 +29,15 @@ import com.github.mohrezal.api.domains.categories.repositories.CategoryRepositor
 import com.github.mohrezal.api.domains.posts.commands.ArchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.CreatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.DeletePostCommand;
+import com.github.mohrezal.api.domains.posts.commands.PostViewCommand;
 import com.github.mohrezal.api.domains.posts.commands.PublishPostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UnarchivePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.UpdatePostCommand;
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.CreatePostRequest;
-import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
+import com.github.mohrezal.api.domains.posts.dtos.PostViewCommandResponse;
 import com.github.mohrezal.api.domains.posts.dtos.SlugAvailability;
 import com.github.mohrezal.api.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
@@ -49,6 +54,7 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabil
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.api.shared.constants.CookieConstants;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
@@ -67,6 +73,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -95,6 +102,8 @@ class PostControllerTest {
     @MockitoBean private UnarchivePostCommand unarchivePostCommand;
 
     @MockitoBean private DeletePostCommand deletePostCommand;
+
+    @MockitoBean private PostViewCommand postViewCommand;
 
     @MockitoBean private GetPostsQuery getPostsQuery;
 
@@ -143,7 +152,7 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenReturn(postDetail);
 
@@ -155,7 +164,7 @@ class PostControllerTest {
 
     @Test
     void getPostBySlug_whenNotAuthenticated_shouldReturn200() throws Exception {
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenReturn(postDetail);
 
@@ -221,7 +230,7 @@ class PostControllerTest {
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
         var category = categoryRepository.save(aCategory().build());
 
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
         when(createPostCommand.execute(any(CreatePostCommandParams.class))).thenReturn(postDetail);
 
         var body =
@@ -337,7 +346,7 @@ class PostControllerTest {
         var user =
                 userRepository.save(
                         aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class))).thenReturn(postDetail);
 
         var body =
@@ -834,7 +843,7 @@ class PostControllerTest {
 
     @Test
     void getPostsBySearchQuery_whenResultsExist_shouldReturnPage() throws Exception {
-        var summary = mock(PostSummary.class);
+        var summary = aPostSummary().build();
         Page<PostSummary> page = new PageImpl<>(List.of(summary), PageRequest.of(0, 10), 1);
 
         when(getPostsBySearchQuery.execute(any()))
@@ -850,5 +859,43 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.items.length()").value(1))
                 .andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.isEmpty").value(false));
+    }
+
+    @Test
+    void view_whenVidCookieMissing_shouldSetCookieAndReturnBoolean() throws Exception {
+        when(postViewCommand.execute(any()))
+                .thenReturn(new PostViewCommandResponse(true, "vid-generated"));
+
+        mockMvc.perform(post(Routes.build(Routes.Post.BASE, "existing-slug", "view")).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"))
+                .andExpect(
+                        header().string(
+                                        HttpHeaders.SET_COOKIE,
+                                        containsString(CookieConstants.VID + "=vid-generated")));
+    }
+
+    @Test
+    void view_whenVidCookieExists_shouldNotSetCookieAndReturnBoolean() throws Exception {
+        when(postViewCommand.execute(any()))
+                .thenReturn(new PostViewCommandResponse(false, "vid-1"));
+
+        mockMvc.perform(
+                        post(Routes.build(Routes.Post.BASE, "existing-slug", "view"))
+                                .with(csrf())
+                                .cookie(
+                                        new jakarta.servlet.http.Cookie(
+                                                CookieConstants.VID, "vid-1")))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"))
+                .andExpect(header().doesNotExist(HttpHeaders.SET_COOKIE));
+    }
+
+    @Test
+    void view_whenPostNotFound_shouldReturn404() throws Exception {
+        when(postViewCommand.execute(any())).thenThrow(new PostNotFoundException());
+
+        mockMvc.perform(post(Routes.build(Routes.Post.BASE, "missing-slug", "view")).with(csrf()))
+                .andExpect(status().isNotFound());
     }
 }

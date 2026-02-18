@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.posts.commands;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
+import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -16,7 +17,6 @@ import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryNotFo
 import com.github.mohrezal.api.domains.categories.models.Category;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.params.UpdatePostCommandParams;
-import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.dtos.UpdatePostRequest;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExistsException;
@@ -178,7 +178,7 @@ class UpdatePostCommandTest {
 
         var params = new UpdatePostCommandParams(mockedUser, request, "old-slug");
 
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
 
         when(postRepository.findBySlug("old-slug")).thenReturn(Optional.of(post));
 

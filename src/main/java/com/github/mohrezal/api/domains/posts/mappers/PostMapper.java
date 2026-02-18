@@ -28,9 +28,11 @@ public interface PostMapper {
     @Mapping(target = "slug", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
+    @Mapping(target = "language", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "viewCount", ignore = true)
     @Mapping(target = "version", ignore = true)
     Post toPost(CreatePostRequest createPostRequest);
 
@@ -38,9 +40,11 @@ public interface PostMapper {
     @Mapping(target = "categories", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
+    @Mapping(target = "language", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "viewCount", ignore = true)
     @Mapping(target = "version", ignore = true)
     void toTargetPost(UpdatePostRequest request, @MappingTarget Post post);
 }

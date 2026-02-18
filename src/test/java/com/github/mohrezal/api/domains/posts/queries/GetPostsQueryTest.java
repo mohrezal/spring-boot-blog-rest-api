@@ -1,16 +1,15 @@
 package com.github.mohrezal.api.domains.posts.queries;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
+import static com.github.mohrezal.api.support.builders.PostSummaryBuilder.aPostSummary;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.posts.dtos.PostSummary;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
@@ -63,8 +62,8 @@ class GetPostsQueryTest {
         var post1 = aPost().withSlug("post-1").build();
         var post2 = aPost().withSlug("post-2").build();
 
-        var summary1 = mock(PostSummary.class);
-        var summary2 = mock(PostSummary.class);
+        var summary1 = aPostSummary().withSlug("post-1").build();
+        var summary2 = aPostSummary().withSlug("post-2").build();
 
         var page = new PageImpl<@NonNull Post>(List.of(post1, post2));
 

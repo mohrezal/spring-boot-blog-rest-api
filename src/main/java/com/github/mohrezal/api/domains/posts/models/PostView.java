@@ -28,11 +28,8 @@ public class PostView extends BaseModel {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @Column(name = "viewer_hash", nullable = false)
-    private String viewerHash;
-
-    @Column(name = "visitor_id_hash", nullable = false)
-    private String visitorIdHash;
+    @Column(name = "vid_hash", nullable = false)
+    private String vidHash;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

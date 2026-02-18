@@ -4,10 +4,7 @@ import com.github.mohrezal.api.domains.users.models.RefreshToken;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.RefreshTokenRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
-import com.github.mohrezal.api.shared.exceptions.types.InternalException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import com.github.mohrezal.api.shared.services.hash.HashService;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -32,6 +29,7 @@ public class JwtServiceImpl implements JwtService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final HashService hashService;
 
     @Override
     public String generateAccessToken(User user) {
@@ -118,7 +116,7 @@ public class JwtServiceImpl implements JwtService {
     @Transactional
     public void saveRefreshToken(
             String token, User user, String ipAddress, String userAgent, String deviceName) {
-        String tokenHash = hashToken(token);
+        String tokenHash = hashService.sha256(token);
 
         Instant expiration = getExpirationFromToken(token);
         OffsetDateTime expiresAt = OffsetDateTime.ofInstant(expiration, ZoneOffset.UTC);
@@ -144,7 +142,7 @@ public class JwtServiceImpl implements JwtService {
                 return false;
             }
 
-            String tokenHash = hashToken(token);
+            String tokenHash = hashService.sha256(token);
             RefreshToken refreshToken =
                     refreshTokenRepository.findByTokenHash(tokenHash).orElse(null);
 
@@ -157,14 +155,14 @@ public class JwtServiceImpl implements JwtService {
     @Override
     @Transactional(readOnly = true)
     public Optional<RefreshToken> getRefreshTokenEntity(String token) {
-        String tokenHash = hashToken(token);
+        String tokenHash = hashService.sha256(token);
         return refreshTokenRepository.findByTokenHash(tokenHash);
     }
 
     @Override
     @Transactional
     public void revokeRefreshToken(String token) {
-        String tokenHash = hashToken(token);
+        String tokenHash = hashService.sha256(token);
         refreshTokenRepository
                 .findByTokenHash(tokenHash)
                 .ifPresent(
@@ -178,23 +176,5 @@ public class JwtServiceImpl implements JwtService {
     @Transactional
     public void revokeAllUserRefreshTokens(UUID userId) {
         refreshTokenRepository.revokeAllUserTokens(userId, OffsetDateTime.now());
-    }
-
-    private String hashToken(String token) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new InternalException();
-        }
     }
 }

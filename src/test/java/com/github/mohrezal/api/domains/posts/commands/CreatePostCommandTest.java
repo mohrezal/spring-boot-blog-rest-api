@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory;
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
+import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +15,6 @@ import static org.mockito.Mockito.when;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
 import com.github.mohrezal.api.domains.posts.commands.params.CreatePostCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.CreatePostRequest;
-import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
@@ -65,7 +65,7 @@ class CreatePostCommandTest {
 
         var post = aPost().withTitle(request.title()).build();
 
-        var postDetails = mock(PostDetail.class);
+        var postDetails = aPostDetail().build();
         var savedPost = mock(Post.class);
 
         when(categoryRepository.findAllByIdIn(Set.of(categoryId))).thenReturn(Set.of(category));

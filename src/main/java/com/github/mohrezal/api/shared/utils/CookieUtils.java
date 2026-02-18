@@ -31,12 +31,17 @@ public class CookieUtils {
     }
 
     public ResponseCookie createCookie(String name, String value, long maxAgeSeconds, String path) {
+        return createCookie(name, value, maxAgeSeconds, path, "Strict");
+    }
+
+    public ResponseCookie createCookie(
+            String name, String value, long maxAgeSeconds, String path, String sameSite) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(true)
                 .path(path)
                 .maxAge(maxAgeSeconds)
-                .sameSite("Strict")
+                .sameSite(sameSite)
                 .build();
     }
 

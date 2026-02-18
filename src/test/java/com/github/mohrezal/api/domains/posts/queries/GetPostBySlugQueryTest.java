@@ -1,13 +1,12 @@
 package com.github.mohrezal.api.domains.posts.queries;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
+import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.posts.dtos.PostDetail;
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
@@ -51,7 +50,7 @@ class GetPostBySlugQueryTest {
         var params = new GetPostBySlugQueryParams(mockedUser, "published-post");
 
         var post = aPost().withStatus(PostStatus.PUBLISHED).build();
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
         when(postMapper.toPostDetail(post)).thenReturn(postDetail);
         var result = query.execute(params);
@@ -65,7 +64,7 @@ class GetPostBySlugQueryTest {
 
         var post = aPost().withStatus(PostStatus.DRAFT).build();
 
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(true);
@@ -82,7 +81,7 @@ class GetPostBySlugQueryTest {
 
         var post = aPost().withStatus(PostStatus.DRAFT).build();
 
-        var postDetail = mock(PostDetail.class);
+        var postDetail = aPostDetail().build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(false);
