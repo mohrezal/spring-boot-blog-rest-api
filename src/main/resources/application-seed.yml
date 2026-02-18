@@ -1,0 +1,18 @@
+spring:
+  main:
+    web-application-type: none
+  task:
+    scheduling:
+      enabled: false
+  rabbitmq:
+    dynamic: false
+    listener:
+      simple:
+        auto-startup: false
+      direct:
+        auto-startup: false
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false

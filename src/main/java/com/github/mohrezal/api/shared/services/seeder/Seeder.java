@@ -20,6 +20,8 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -40,8 +42,11 @@ public class Seeder implements CommandLineRunner {
 
     private final PlatformTransactionManager transactionManager;
     private final PasswordEncoder passwordEncoder;
+    private final ConfigurableApplicationContext applicationContext;
 
     private final Faker faker = new Faker();
+
+    private static final String AVATAR_API = "https://api.dicebear.com/7.x/";
 
     @Override
     public void run(String... args) throws Exception {
@@ -58,9 +63,11 @@ public class Seeder implements CommandLineRunner {
                     List<Category> categories = generateCategories(categoryCount);
                     List<User> users = generateUsers(userCount);
                     generatePosts(postCount, categories, users);
-                    System.out.println("Seeding done.");
                     return null;
                 });
+
+        System.out.println("Seeding done.");
+        SpringApplication.exit(applicationContext, () -> 0);
     }
 
     private void generatePosts(int postCount, List<Category> categories, List<User> users) {
@@ -76,7 +83,10 @@ public class Seeder implements CommandLineRunner {
                             .slug(slug)
                             .user(getRandomUser(users))
                             .status(postStatus)
-                            .avatarUrl("MOCKED_AVATAR_URL")
+                            .avatarUrl(
+                                    AVATAR_API
+                                            .concat("shapes/jpeg?size=500&seed={SEED}")
+                                            .replace("{SEED}", name))
                             .publishedAt(
                                     !postStatus.equals(PostStatus.DRAFT)
                                             ? OffsetDateTime.now()
