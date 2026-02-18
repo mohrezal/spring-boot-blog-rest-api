@@ -23,4 +23,17 @@ public interface PostViewRepository extends JpaRepository<PostView, UUID> {
             @Param("postId") UUID postId,
             @Param("vidHash") String vidHash,
             @Param("userId") UUID userId);
+
+    @Modifying
+    @Query(
+            value =
+                    """
+                    UPDATE post_views
+                    SET user_id = :userId, updated_at = CURRENT_TIMESTAMP
+                    WHERE vid_hash = :vidHash
+                      AND user_id IS NULL
+                    """,
+            nativeQuery = true)
+    int linkAnonymousViewsToUserByVidHash(
+            @Param("vidHash") String vidHash, @Param("userId") UUID userId);
 }

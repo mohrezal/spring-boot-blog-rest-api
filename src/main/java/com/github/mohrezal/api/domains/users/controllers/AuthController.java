@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -79,13 +80,16 @@ public class AuthController {
 
     @PostMapping(Routes.Auth.LOGIN)
     public ResponseEntity<Void> login(
-            @Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+            @Valid @RequestBody LoginRequest loginRequest,
+            @CookieValue(name = CookieConstants.VID, required = false) String vid,
+            HttpServletRequest request) {
 
         var params =
                 new LoginUserCommandParams(
                         loginRequest,
                         requestInfoService.getClientIp(request),
-                        request.getHeader(HttpHeaders.USER_AGENT));
+                        request.getHeader(HttpHeaders.USER_AGENT),
+                        vid);
 
         var authResponse = loginUserCommand.execute(params);
 
