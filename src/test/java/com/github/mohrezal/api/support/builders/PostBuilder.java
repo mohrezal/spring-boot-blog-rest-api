@@ -24,6 +24,7 @@ public class PostBuilder {
     private PostLanguage language = PostLanguage.ENGLISH;
     private User user;
     private Set<Category> categories = new HashSet<>();
+    private Long viewCount = 0L;
 
     public static PostBuilder aPost() {
         return new PostBuilder();
@@ -31,6 +32,11 @@ public class PostBuilder {
 
     public PostBuilder withId(UUID id) {
         this.id = id;
+        return this;
+    }
+
+    public PostBuilder withViewCount(Long viewCount) {
+        this.viewCount = viewCount;
         return this;
     }
 
@@ -102,6 +108,7 @@ public class PostBuilder {
                         .language(language)
                         .user(user)
                         .categories(categories)
+                        .viewCount(viewCount)
                         .build();
 
         if (id != null) {
