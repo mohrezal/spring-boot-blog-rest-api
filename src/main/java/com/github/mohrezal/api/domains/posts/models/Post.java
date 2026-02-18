@@ -19,6 +19,7 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import java.math.BigInteger;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -79,6 +80,9 @@ public class Post extends BaseModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "view_count")
+    private BigInteger viewCount;
 
     @ManyToMany
     @JoinTable(

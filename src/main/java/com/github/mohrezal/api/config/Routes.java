@@ -41,6 +41,7 @@ public final class Routes {
         public static final String UNARCHIVE_POST = "{slug}/unarchive";
         public static final String DELETE_BY_SLUG = "{slug}";
         public static final String SEARCH = "search";
+        public static final String VIEW = "{slug}/view";
     }
 
     public static final class Storage {

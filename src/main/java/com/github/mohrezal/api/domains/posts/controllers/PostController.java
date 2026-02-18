@@ -28,7 +28,9 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQuer
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.api.shared.annotations.range.Range;
+import com.github.mohrezal.api.shared.constants.CookieConstants;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
+import com.github.mohrezal.api.shared.utils.CookieUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Set;
@@ -39,6 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +68,8 @@ public class PostController {
     private final GetPostBySlugQuery getPostBySlugQueries;
     private final GetPostSlugAvailabilityQuery getPostSlugAvailabilityQueries;
     private final GetPostsBySearchQuery getPostsBySearchQuery;
+
+    private final CookieUtils cookieUtils;
 
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<PostSummary>> getPosts(
@@ -158,5 +163,13 @@ public class PostController {
             @RequestParam(name = "query") String query) {
         var params = new GetPostsBySearchQueryParams(query, size, page);
         return ResponseEntity.ok().body(getPostsBySearchQuery.execute(params));
+    }
+
+    @PostMapping(Routes.Post.VIEW)
+    public ResponseEntity<Boolean> view(
+            @PathVariable UUID slug,
+            @CookieValue(name = CookieConstants.VID, required = false) String vid) {
+
+        return ResponseEntity.ok().build();
     }
 }

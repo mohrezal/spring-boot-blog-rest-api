@@ -50,6 +50,7 @@ public class SecurityConfig {
         Routes.build(Routes.Auth.BASE, Routes.Auth.REGISTER),
         Routes.build(Routes.Auth.BASE, Routes.Auth.LOGIN),
         Routes.build(Routes.Auth.BASE, Routes.Auth.REFRESH),
+        Routes.build(Routes.Post.BASE, Routes.Post.VIEW),
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
