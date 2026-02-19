@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import com.github.mohrezal.api.domains.posts.commands.params.PostViewCommandParams;
 import com.github.mohrezal.api.domains.posts.dtos.PostViewCommandResponse;
+import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.repositories.PostViewRepository;
@@ -27,7 +28,9 @@ public class PostViewCommand implements Command<PostViewCommandParams, PostViewC
     @Override
     public PostViewCommandResponse execute(PostViewCommandParams params) {
         var post = postRepository.findBySlug(params.slug()).orElseThrow(PostNotFoundException::new);
-
+        if (!post.getStatus().equals(PostStatus.PUBLISHED)) {
+            throw new PostNotFoundException();
+        }
         var vid = params.vid();
 
         if (vid == null || vid.isBlank()) {

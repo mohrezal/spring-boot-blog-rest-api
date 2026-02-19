@@ -9,9 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.github.mohrezal.api.domains.posts.commands.params.PostViewCommandParams;
+import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
@@ -41,6 +43,22 @@ class PostViewCommandTest {
         var params = new PostViewCommandParams("missing-slug", "vid-1", null);
 
         assertThrows(PostNotFoundException.class, () -> command.execute(params));
+    }
+
+    @Test
+    void execute_whenPostIsNotPublished_shouldThrowPostNotFoundException() {
+        Post post =
+                aPost().withId(UUID.randomUUID())
+                        .withSlug("post-slug")
+                        .withStatus(PostStatus.DRAFT)
+                        .build();
+
+        when(postRepository.findBySlug("post-slug")).thenReturn(Optional.of(post));
+        var params = new PostViewCommandParams("post-slug", "vid-1", null);
+
+        assertThrows(PostNotFoundException.class, () -> command.execute(params));
+        verifyNoInteractions(hashService, postViewRepository);
+        verify(postRepository, never()).incrementViewCount(post.getId());
     }
 
     @Test
