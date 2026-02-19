@@ -100,6 +100,7 @@ public interface PostRepository
             if (categorySlugs == null || categorySlugs.isEmpty()) {
                 return criteriaBuilder.conjunction();
             }
+            query.distinct(true);
             var categoryJoin = root.join("categories");
             return categoryJoin.get("slug").in(categorySlugs);
         };
