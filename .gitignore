@@ -28,7 +28,8 @@ dataSources/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+org/**
+org/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
