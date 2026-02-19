@@ -16,6 +16,7 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,8 +60,11 @@ class GetPostsQueryTest {
     void execute_whenPostsFound_shouldReturnPaginatedPostSummary() {
         var params = new GetPostsQueryParams(0, 10, Set.of(), Set.of());
 
-        var post1 = aPost().withSlug("post-1").build();
-        var post2 = aPost().withSlug("post-2").build();
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        var post1 = aPost().withId(id1).withSlug("post-1").build();
+        var post2 = aPost().withId(id2).withSlug("post-2").build();
 
         var summary1 = aPostSummary().withSlug("post-1").build();
         var summary2 = aPostSummary().withSlug("post-2").build();
@@ -70,6 +74,7 @@ class GetPostsQueryTest {
         when(repository.findAll(
                         argThat((Specification<@NonNull Post> spec) -> true), any(Pageable.class)))
                 .thenReturn(page);
+        when(repository.findAllByIdIn(List.of(id1, id2))).thenReturn(List.of(post2, post1));
         when(postMapper.toPostSummary(post1)).thenReturn(summary1);
         when(postMapper.toPostSummary(post2)).thenReturn(summary2);
 
@@ -77,6 +82,7 @@ class GetPostsQueryTest {
 
         verify(repository, times(1))
                 .findAll(argThat((Specification<@NonNull Post> spec) -> true), any(Pageable.class));
+        verify(repository, times(1)).findAllByIdIn(List.of(id1, id2));
 
         assertEquals(2, result.items().size());
         assertEquals(summary1, result.items().get(0));

@@ -4,6 +4,7 @@ import com.github.mohrezal.api.config.Routes;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.constants.CookieConstants;
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -26,16 +27,17 @@ public class CookieUtils {
                 .orElse(null);
     }
 
-    public ResponseCookie createCookie(String name, String value, long maxAgeSeconds) {
+    public ResponseCookie createCookie(String name, String value, Duration maxAgeSeconds) {
         return createCookie(name, value, maxAgeSeconds, "/");
     }
 
-    public ResponseCookie createCookie(String name, String value, long maxAgeSeconds, String path) {
+    public ResponseCookie createCookie(
+            String name, String value, Duration maxAgeSeconds, String path) {
         return createCookie(name, value, maxAgeSeconds, path, "Strict");
     }
 
     public ResponseCookie createCookie(
-            String name, String value, long maxAgeSeconds, String path, String sameSite) {
+            String name, String value, Duration maxAgeSeconds, String path, String sameSite) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(true)

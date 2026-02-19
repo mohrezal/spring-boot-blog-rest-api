@@ -16,9 +16,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.unit.DataSize;
@@ -27,15 +27,31 @@ import org.springframework.web.multipart.MultipartFile;
 @ExtendWith(MockitoExtension.class)
 class StorageUtilsServiceImplTest {
 
-    @InjectMocks private StorageUtilsServiceImpl storageUtilsService;
-
-    @Mock private ApplicationProperties applicationProperties;
-
-    @Mock private ApplicationProperties.Storage storage;
-
-    @Mock private DataSize dataSize;
-
     @Mock private MultipartFile multipartFile;
+
+    private StorageUtilsServiceImpl storageUtilsService;
+
+    @BeforeEach
+    void setUp() {
+        storageUtilsService =
+                createService(List.of("text/plain", "image/jpeg"), DataSize.ofBytes(1000L));
+    }
+
+    private static StorageUtilsServiceImpl createService(
+            List<String> allowedMimeTypes, DataSize maxFileSize) {
+        ApplicationProperties.Storage storageProperties =
+                new ApplicationProperties.Storage(
+                        allowedMimeTypes,
+                        maxFileSize,
+                        "endpoint",
+                        "accessKey",
+                        "secretKey",
+                        "bucket",
+                        "region");
+        ApplicationProperties applicationProperties =
+                new ApplicationProperties(null, storageProperties, null, null);
+        return new StorageUtilsServiceImpl(applicationProperties);
+    }
 
     @Test
     void getExtension_whenInvalidFilename_shouldReturnEmpty() {
@@ -67,19 +83,11 @@ class StorageUtilsServiceImplTest {
 
     @Test
     void isMaxFileSizeExceeded_whenGivenSizeIsLargerThanMaximumFileSize_shouldReturnTrue() {
-        when(applicationProperties.storage()).thenReturn(storage);
-        when(storage.maxFileSize()).thenReturn(dataSize);
-        when(dataSize.toBytes()).thenReturn(1000L);
-
         assertTrue(storageUtilsService.isMaxFileSizeExceeded(1200L));
     }
 
     @Test
     void isMaxFileSizeExceeded_whenGivenSizeIsSmallerThanMaximumFileSize_shouldReturnFalse() {
-        when(applicationProperties.storage()).thenReturn(storage);
-        when(storage.maxFileSize()).thenReturn(dataSize);
-        when(dataSize.toBytes()).thenReturn(1000L);
-
         assertFalse(storageUtilsService.isMaxFileSizeExceeded(900L));
     }
 
@@ -117,8 +125,6 @@ class StorageUtilsServiceImplTest {
         byte[] content = "plain text content".getBytes(StandardCharsets.UTF_8);
         when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(content));
         when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
-        when(applicationProperties.storage()).thenReturn(storage);
-        when(storage.allowedMimeTypes()).thenReturn(List.of("text/plain", "image/jpeg"));
 
         assertTrue(storageUtilsService.isValidMimeType(multipartFile));
     }
@@ -128,9 +134,10 @@ class StorageUtilsServiceImplTest {
         byte[] content = "plain text content".getBytes(StandardCharsets.UTF_8);
         when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(content));
         when(multipartFile.getOriginalFilename()).thenReturn("test.txt");
-        when(applicationProperties.storage()).thenReturn(storage);
-        when(storage.allowedMimeTypes()).thenReturn(List.of("image/jpeg", "image/png"));
 
-        assertFalse(storageUtilsService.isValidMimeType(multipartFile));
+        StorageUtilsServiceImpl service =
+                createService(List.of("image/jpeg", "image/png"), DataSize.ofBytes(1000L));
+
+        assertFalse(service.isValidMimeType(multipartFile));
     }
 }

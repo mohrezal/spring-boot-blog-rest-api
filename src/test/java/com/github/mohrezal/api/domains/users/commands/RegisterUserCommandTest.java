@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -28,10 +27,10 @@ import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.api.support.constants.UserAgents;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -48,15 +47,9 @@ class RegisterUserCommandTest {
 
     @Mock private UserRepository userRepository;
 
-    @Mock private ApplicationProperties applicationProperties;
-
-    @Mock private ApplicationProperties.Handle handleProperties;
-
     @Mock private NotificationPreferenceRepository notificationPreferenceRepository;
 
     @Mock private ApplicationEventPublisher eventPublisher;
-
-    @InjectMocks private RegisterUserCommand command;
 
     private final User user = aUser().build();
 
@@ -72,17 +65,44 @@ class RegisterUserCommandTest {
     private final RegisterUserCommandParams params =
             new RegisterUserCommandParams(request, "127.0.0.1", UserAgents.MAC);
 
+    private RegisterUserCommand command;
+
+    private RegisterUserCommand createCommand(List<String> reservedHandles) {
+        ApplicationProperties applicationProperties =
+                new ApplicationProperties(
+                        null, null, new ApplicationProperties.Handle(reservedHandles), null);
+        return new RegisterUserCommand(
+                registrationService,
+                jwtService,
+                userMapper,
+                deviceInfoService,
+                userRepository,
+                applicationProperties,
+                notificationPreferenceRepository,
+                eventPublisher);
+    }
+
     @BeforeEach
     void setUp() {
-        when(applicationProperties.handle()).thenReturn(handleProperties);
+        command = createCommand(List.of("admin", "owner"));
     }
 
     @Test
     void execute_whenValidRequest_shouldRegisterUserAndReturnRegisterResponse() {
-        var userSummary = mock(UserSummary.class);
+        var userSummary =
+                new UserSummary(
+                        UUID.randomUUID(),
+                        "johndoe@gmail.com",
+                        "john_doe",
+                        "John",
+                        "Doe",
+                        "Hey, I'm John Deo.",
+                        null,
+                        UserRole.USER,
+                        false,
+                        null,
+                        null);
 
-        when(applicationProperties.handle().reservedHandles())
-                .thenReturn(List.of("admin", "owner"));
         when(userRepository.existsByHandle(eq(params.registerUserRequest().handle())))
                 .thenReturn(false);
         when(registrationService.register(eq(params.registerUserRequest()), eq(UserRole.USER)))
@@ -116,7 +136,7 @@ class RegisterUserCommandTest {
 
     @Test
     void execute_whenHandleIsReserved_shouldThrowUserHandleReservedException() {
-        when(applicationProperties.handle().reservedHandles()).thenReturn(List.of("john_doe"));
+        command = createCommand(List.of("john_doe"));
 
         assertThrows(UserHandleReservedException.class, () -> command.execute(params));
 
@@ -125,7 +145,7 @@ class RegisterUserCommandTest {
 
     @Test
     void execute_whenUnexpectedExceptionOccurs_shouldRethrow() {
-        when(applicationProperties.handle().reservedHandles()).thenReturn(List.of());
+        command = createCommand(List.of());
 
         when(userRepository.existsByHandle("john_doe")).thenReturn(false);
 

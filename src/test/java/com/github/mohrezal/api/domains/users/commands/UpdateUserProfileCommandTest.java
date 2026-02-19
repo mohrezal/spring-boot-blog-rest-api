@@ -40,7 +40,8 @@ class UpdateUserProfileCommandTest {
         var request = new UpdateUserProfileRequest("John", "Doe", "Bio text");
 
         var params = new UpdateUserProfileCommandParams(user, request);
-        var summary = org.mockito.Mockito.mock(UserSummary.class);
+        var summary =
+                new UserSummary(null, null, null, null, null, null, null, null, null, null, null);
 
         when(userRepository.save(eq(user))).thenReturn(user);
         when(userMapper.toUserSummary(user)).thenReturn(summary);
@@ -96,7 +97,8 @@ class UpdateUserProfileCommandTest {
         var request = new UpdateUserProfileRequest(null, "UpdatedLastName", null);
 
         var params = new UpdateUserProfileCommandParams(user, request);
-        var summary = org.mockito.Mockito.mock(UserSummary.class);
+        var summary =
+                new UserSummary(null, null, null, null, null, null, null, null, null, null, null);
 
         when(userRepository.save(eq(user))).thenReturn(user);
         when(userMapper.toUserSummary(user)).thenReturn(summary);

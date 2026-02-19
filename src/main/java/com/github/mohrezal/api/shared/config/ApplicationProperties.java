@@ -4,8 +4,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import java.time.Duration;
 import java.util.List;
+import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 import org.springframework.validation.annotation.Validated;
@@ -18,8 +19,8 @@ public record ApplicationProperties(
     @Validated
     public record Security(
             @NotBlank String secret,
-            @NotNull @Positive Long accessTokenLifeTime,
-            @NotNull @Positive Long refreshTokenLifeTime,
+            @NotNull @DurationMin(seconds = 60) Duration accessTokenLifeTime,
+            @NotNull @DurationMin(seconds = 60) Duration refreshTokenLifeTime,
             @NotEmpty List<@NotBlank String> allowedOrigin) {}
 
     @Validated

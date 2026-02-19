@@ -34,8 +34,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateAccessToken(User user) {
         Instant now = Instant.now();
-        Instant expiration =
-                now.plusSeconds(applicationProperties.security().accessTokenLifeTime());
+        Instant expiration = now.plus(applicationProperties.security().accessTokenLifeTime());
 
         List<String> roles =
                 user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
@@ -57,8 +56,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateRefreshToken(UUID userId) {
         Instant now = Instant.now();
-        Instant expiration =
-                now.plusSeconds(applicationProperties.security().refreshTokenLifeTime());
+        Instant expiration = now.plus(applicationProperties.security().refreshTokenLifeTime());
 
         JwtClaimsSet claims =
                 JwtClaimsSet.builder()

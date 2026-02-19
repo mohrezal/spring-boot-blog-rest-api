@@ -63,7 +63,11 @@ class PostViewCommandTest {
 
     @Test
     void execute_whenVidIsMissingAndNewView_shouldGenerateVidAndIncrementCount() {
-        Post post = aPost().withId(UUID.randomUUID()).withSlug("post-slug").build();
+        Post post =
+                aPost().withId(UUID.randomUUID())
+                        .withStatus(PostStatus.PUBLISHED)
+                        .withSlug("post-slug")
+                        .build();
 
         when(postRepository.findBySlug("post-slug")).thenReturn(Optional.of(post));
         when(hashService.sha256(org.mockito.ArgumentMatchers.anyString()))
@@ -83,7 +87,11 @@ class PostViewCommandTest {
 
     @Test
     void execute_whenDuplicateView_shouldReturnFalseAndNotIncrementCount() {
-        Post post = aPost().withId(UUID.randomUUID()).withSlug("post-slug").build();
+        Post post =
+                aPost().withId(UUID.randomUUID())
+                        .withStatus(PostStatus.PUBLISHED)
+                        .withSlug("post-slug")
+                        .build();
 
         when(postRepository.findBySlug("post-slug")).thenReturn(Optional.of(post));
         when(hashService.sha256("vid-1")).thenReturn("vid-hash-value");
@@ -101,7 +109,11 @@ class PostViewCommandTest {
     @Test
     void execute_whenAuthenticatedAndNewView_shouldStoreUserId() {
         User user = aUser().withId(UUID.randomUUID()).build();
-        Post post = aPost().withId(UUID.randomUUID()).withSlug("post-slug").build();
+        Post post =
+                aPost().withId(UUID.randomUUID())
+                        .withStatus(PostStatus.PUBLISHED)
+                        .withSlug("post-slug")
+                        .build();
 
         when(postRepository.findBySlug("post-slug")).thenReturn(Optional.of(post));
         when(hashService.sha256("vid-1")).thenReturn("vid-hash-value");

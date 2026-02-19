@@ -24,8 +24,8 @@ spring:
 app:
   security:
     secret: dGVzdHNlY3JldGtleWZvcmp3dHNpZ25pbmd0aGF0aXNsb25nZW5vdWdoZm9yaHM1MTJhbGdvcml0aG1yZXF1aXJlbWVudHM=
-    accessTokenLifeTime: 3600000
-    refreshTokenLifeTime: 86400000
+    accessTokenLifeTime: 1h
+    refreshTokenLifeTime: 7d
     allowedOrigin: http://localhost:3000
   storage:
     allowedMimeTypes:

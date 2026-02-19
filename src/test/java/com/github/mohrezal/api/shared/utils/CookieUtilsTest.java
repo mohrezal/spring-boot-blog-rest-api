@@ -3,31 +3,34 @@ package com.github.mohrezal.api.shared.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 import com.github.mohrezal.api.config.Routes;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.constants.CookieConstants;
 import jakarta.servlet.http.Cookie;
+import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseCookie;
 
-@ExtendWith(MockitoExtension.class)
 class CookieUtilsTest {
 
     private static final String COOKIE_NAME = "test-cookie";
     private static final String COOKIE_VALUE = "test-value";
-    private static final long MAX_AGE = 3600L;
+    private static final Duration MAX_AGE = Duration.ofSeconds(3500);
 
-    @Mock private ApplicationProperties applicationProperties;
+    private static final ApplicationProperties APPLICATION_PROPERTIES =
+            new ApplicationProperties(
+                    new ApplicationProperties.Security(
+                            "secret",
+                            Duration.ofSeconds(1800L),
+                            Duration.ofSeconds(604800L),
+                            List.of("http://localhost")),
+                    null,
+                    null,
+                    null);
 
-    @Mock private ApplicationProperties.Security security;
-
-    @InjectMocks private CookieUtils cookieUtils;
+    private final CookieUtils cookieUtils = new CookieUtils(APPLICATION_PROPERTIES);
 
     @Test
     void getCookieValue_whenCookiesIsNullOrEmpty_shouldReturnNull() {
@@ -57,7 +60,7 @@ class CookieUtilsTest {
 
         assertEquals(COOKIE_NAME, cookie.getName());
         assertEquals(COOKIE_VALUE, cookie.getValue());
-        assertEquals(MAX_AGE, cookie.getMaxAge().getSeconds());
+        assertEquals(MAX_AGE, cookie.getMaxAge());
         assertEquals("/", cookie.getPath());
         assertTrue(cookie.isHttpOnly());
         assertTrue(cookie.isSecure());
@@ -92,9 +95,6 @@ class CookieUtilsTest {
 
     @Test
     void createAccessTokenCookie_shouldUseConfiguredLifetime() {
-        when(applicationProperties.security()).thenReturn(security);
-        when(security.accessTokenLifeTime()).thenReturn(1800L);
-
         ResponseCookie cookie = cookieUtils.createAccessTokenCookie("access-token");
 
         assertEquals(CookieConstants.ACCESS_TOKEN_COOKIE_NAME, cookie.getName());
@@ -105,9 +105,6 @@ class CookieUtilsTest {
 
     @Test
     void createRefreshTokenCookie_shouldUseConfiguredLifetimeAndPath() {
-        when(applicationProperties.security()).thenReturn(security);
-        when(security.refreshTokenLifeTime()).thenReturn(604800L);
-
         ResponseCookie cookie = cookieUtils.createRefreshTokenCookie("refresh-token");
 
         assertEquals(CookieConstants.REFRESH_TOKEN_COOKIE_NAME, cookie.getName());

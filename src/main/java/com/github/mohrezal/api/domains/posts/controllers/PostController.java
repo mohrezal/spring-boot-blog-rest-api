@@ -35,6 +35,7 @@ import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -181,7 +182,7 @@ public class PostController {
         if (vid == null || vid.isBlank()) {
             var vidCookie =
                     cookieUtils.createCookie(
-                            CookieConstants.VID, result.vid(), 365L * 24 * 60 * 60, "/", "Lax");
+                            CookieConstants.VID, result.vid(), Duration.ofDays(365), "/", "Lax");
             response.header(HttpHeaders.SET_COOKIE, vidCookie.toString());
         }
 
