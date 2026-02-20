@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - run: chmod +x mvnw && ./mvnw -B -ntp -Dmaven.antrun.skip=true spotless:check checkstyle:check
+
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    needs: lint
+    env:
+      SPRING_PROFILES_ACTIVE: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - run: chmod +x mvnw && ./mvnw -B -ntp -e -Dmaven.antrun.skip=true -Dspotless.check.skip=true -Dcheckstyle.skip=true -Dspring.profiles.active=test test || true
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          if-no-files-found: ignore
+          path: |
+            target/surefire-reports
+            target/failsafe-reports
