@@ -35,7 +35,9 @@ public class EmailNotificationConsumer {
         NotificationData data = notification.getData();
 
         switch (data) {
-            case FollowNotificationData _ -> log.debug("Follow notifications do not support email");
+            case FollowNotificationData ignored:
+                log.debug("Follow notifications do not support email");
+                break;
         }
     }
 }

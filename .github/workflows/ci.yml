@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "21"
           cache: maven
 
       - run: chmod +x mvnw && ./mvnw -B -ntp -Dmaven.antrun.skip=true spotless:check checkstyle:check
@@ -40,10 +40,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "21"
           cache: maven
 
-      - run: chmod +x mvnw && ./mvnw -B -ntp -e -Dmaven.antrun.skip=true -Dspotless.check.skip=true -Dcheckstyle.skip=true -Dspring.profiles.active=test test || true
+      - run: chmod +x mvnw && ./mvnw -B -ntp -e -Dmaven.antrun.skip=true -Dspotless.check.skip=true -Dcheckstyle.skip=true -Dspring.profiles.active=test test
 
       - name: Upload test reports
         if: failure()

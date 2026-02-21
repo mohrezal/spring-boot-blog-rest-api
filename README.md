@@ -4,7 +4,7 @@ A personal project to explore Spring Boot and modern Java patterns. It provides 
 
 ## Built With
 
-Java 25, Spring Boot 4, Spring Security, PostgreSQL, RabbitMQ, AWS S3
+Java 21, Spring Boot 4, Spring Security, PostgreSQL, RabbitMQ, AWS S3
 
 ## Features
 
