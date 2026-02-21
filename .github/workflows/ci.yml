@@ -28,6 +28,7 @@ jobs:
 
   test:
     runs-on: ubuntu-22.04
+    environment: test
     timeout-minutes: 20
     needs: lint
     env:
