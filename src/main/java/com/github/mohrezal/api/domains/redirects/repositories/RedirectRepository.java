@@ -14,4 +14,6 @@ public interface RedirectRepository extends JpaRepository<Redirect, UUID> {
     Optional<Redirect> findByTargetTypeAndTargetId(RedirectTargetType type, UUID targetId);
 
     boolean existsByCode(String code);
+
+    void deleteByTargetTypeAndTargetId(RedirectTargetType targetType, UUID targetId);
 }
