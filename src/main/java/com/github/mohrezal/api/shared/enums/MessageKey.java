@@ -48,6 +48,8 @@ public final class MessageKey {
     public static final String NOTIFICATION_PREFERENCE_NOT_FOUND =
             "notification.error.preference-not-found";
 
+    public static final String REDIRECT_NOT_FOUND = "redirect.error.not-found";
+
     public static final String SHARED_VALIDATION_FAILED = "shared.validation.failed";
 
     public static final String SHARED_NOT_BLANK = "{shared.validation.not-blank}";

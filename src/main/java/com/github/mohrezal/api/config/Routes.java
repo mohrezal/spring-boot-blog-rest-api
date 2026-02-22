@@ -59,4 +59,9 @@ public final class Routes {
         public static final String MARK_READ = "{id}/read";
         public static final String MARK_ALL_READ = "read-all";
     }
+
+    public static final class Redirect {
+        public static final String BASE = API_BASE + "r";
+        public static final String BY_CODE = "{code}";
+    }
 }

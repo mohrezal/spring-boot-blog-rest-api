@@ -14,7 +14,11 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record ApplicationProperties(
-        @Valid Security security, @Valid Storage storage, @Valid Handle handle, @Valid Mail mail) {
+        @Valid Security security,
+        @Valid Storage storage,
+        @Valid Handle handle,
+        @Valid Mail mail,
+        @Valid Frontend frontend) {
 
     @Validated
     public record Security(
@@ -38,4 +42,11 @@ public record ApplicationProperties(
 
     @Validated
     public record Mail(@NotBlank String from) {}
+
+    @Validated
+    public record Frontend(@NotNull @Valid Paths paths) {
+        @Validated
+        public record Paths(
+                @NotBlank String base, @NotBlank String users, @NotBlank String posts) {}
+    }
 }

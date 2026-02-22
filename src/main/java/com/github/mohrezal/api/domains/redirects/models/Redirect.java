@@ -6,7 +6,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.util.UUID;
@@ -20,9 +19,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(
         name = "redirects",
-        indexes = {
-            @Index(name = "idx_redirects_target", columnList = "code, target_type", unique = true)
-        },
         uniqueConstraints = {
             @UniqueConstraint(name = "uq_redirects_code", columnNames = "code"),
             @UniqueConstraint(
@@ -37,7 +33,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class Redirect extends BaseModel {
 
-    @Column(name = "code", nullable = false, length = 50, unique = true)
+    @Column(name = "code", nullable = false, length = 50)
     private String code;
 
     @Column(name = "target_type", nullable = false, length = 50)

@@ -97,3 +97,8 @@ app:
     reservedHandles: ${APPLICATION_HANDLE_RESERVED_HANDLES}
   mail:
     from: ${APPLICATION_MAIL_FROM}
+  frontend:
+    paths:
+      base: ${FRONTEND_BASE_URL}
+      users: ${FRONTEND_USERS_PROFILE_URL}
+      posts: ${FRONTEND_POSTS_DETAIL_URL}

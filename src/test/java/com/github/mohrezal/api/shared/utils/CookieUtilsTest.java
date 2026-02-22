@@ -28,6 +28,7 @@ class CookieUtilsTest {
                             List.of("http://localhost")),
                     null,
                     null,
+                    null,
                     null);
 
     private final CookieUtils cookieUtils = new CookieUtils(APPLICATION_PROPERTIES);
