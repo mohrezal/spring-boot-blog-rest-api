@@ -25,4 +25,5 @@
     <include file="/db/changelog/migrations/1769900000_seed_categories.sql" />
     <include file="/db/changelog/migrations/1771403319_add_view_field_to_posts.sql" />
     <include file="/db/changelog/migrations/1771403920_add_post_views_table.sql" />
+    <include file="/db/changelog/migrations/1771753335_add-redirects-table.sql" />
 </databaseChangeLog>
