@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -73,7 +74,8 @@ class CreatePostCommandTest {
         var post = aPost().withTitle(request.title()).build();
 
         var postDetails = aPostDetail().build();
-        var savedPost = mock(Post.class);
+        var savedPostId = UUID.randomUUID();
+        var savedPost = aPost().withId(savedPostId).build();
 
         when(categoryRepository.findAllByIdIn(Set.of(categoryId))).thenReturn(Set.of(category));
 
@@ -84,8 +86,9 @@ class CreatePostCommandTest {
 
         when(postRepository.save(any(Post.class))).thenReturn(savedPost);
 
-        when(redirectRepository.save(any(Redirect.class)))
-                .thenReturn(aRedirect().withCode("abcd").withTargetId(UUID.randomUUID()).build());
+        ArgumentCaptor<Redirect> redirectCaptor = ArgumentCaptor.forClass(Redirect.class);
+        when(redirectRepository.save(redirectCaptor.capture()))
+                .thenReturn(aRedirect().withCode("abcd").withTargetId(savedPostId).build());
 
         when(postMapper.toPostDetail(savedPost, "abcd")).thenReturn(postDetails);
 
@@ -94,6 +97,10 @@ class CreatePostCommandTest {
         assertEquals(postDetails, result);
         assertEquals(PostStatus.DRAFT, post.getStatus());
         assertEquals("new-post-slug", post.getSlug());
+        assertEquals("abcd", redirectCaptor.getValue().getCode());
+        assertEquals(savedPostId, redirectCaptor.getValue().getTargetId());
+
+        verify(slugGeneratorService).getRandomSlug(eq(12), any());
     }
 
     @Test
@@ -125,6 +132,7 @@ class CreatePostCommandTest {
 
         assertThrows(ResourceConflictException.class, () -> command.execute(params));
 
+        verify(redirectRepository, never()).save(any(Redirect.class));
         verify(postMapper, never()).toPostDetail(any(Post.class), anyString());
     }
 }

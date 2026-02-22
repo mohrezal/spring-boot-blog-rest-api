@@ -54,11 +54,12 @@ class GetPostBySlugQueryTest {
     void execute_whenPostIsPublished_shouldReturnPostDetail() {
         var params = new GetPostBySlugQueryParams(mockedUser, "published-post");
 
-        var post = aPost().withStatus(PostStatus.PUBLISHED).build();
+        var postId = java.util.UUID.randomUUID();
+        var post = aPost().withId(postId).withStatus(PostStatus.PUBLISHED).build();
         var postDetail = aPostDetail().build();
         var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
                 .thenReturn(Optional.of(redirect));
         when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
         var result = query.execute(params);
@@ -70,13 +71,14 @@ class GetPostBySlugQueryTest {
     void execute_whenPostIsDraftAndUserIsAdmin_shouldReturnPostDetail() {
         var params = new GetPostBySlugQueryParams(mockedUser, "draft-post");
 
-        var post = aPost().withStatus(PostStatus.DRAFT).build();
+        var postId = java.util.UUID.randomUUID();
+        var post = aPost().withId(postId).withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
         var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
                 .thenReturn(Optional.of(redirect));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(true);
         when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
@@ -90,13 +92,14 @@ class GetPostBySlugQueryTest {
     void execute_whenPostIsDraftAndUserIsOwner_shouldReturnPostDetail() {
         var params = new GetPostBySlugQueryParams(mockedUser, "draft-post");
 
-        var post = aPost().withStatus(PostStatus.DRAFT).build();
+        var postId = java.util.UUID.randomUUID();
+        var post = aPost().withId(postId).withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
         var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
                 .thenReturn(Optional.of(redirect));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(false);
         when(postUtilsService.isOwner(post, mockedUser)).thenReturn(true);

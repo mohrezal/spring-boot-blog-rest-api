@@ -166,8 +166,9 @@ class UpdatePostCommandTest {
 
     @Test
     void execute_whenValidRequest_shouldUpdatePostAndReturnPostDetail() {
-        var post = aPost().withSlug("old-slug").build();
-        var savedPost = aPost().build();
+        var postId = UUID.randomUUID();
+        var post = aPost().withId(postId).withSlug("old-slug").build();
+        var savedPost = aPost().withId(postId).build();
 
         var categoryId = UUID.randomUUID();
         var category = mock(Category.class);
@@ -193,13 +194,13 @@ class UpdatePostCommandTest {
 
         when(postRepository.save(post)).thenReturn(savedPost);
 
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
                 .thenReturn(
                         Optional.of(
                                 aRedirect()
                                         .withCode("abcd")
                                         .withTargetType(RedirectTargetType.POST)
-                                        .withTargetId(UUID.randomUUID())
+                                        .withTargetId(postId)
                                         .build()));
 
         when(postMapper.toPostDetail(savedPost, "abcd")).thenReturn(postDetail);
@@ -211,6 +212,7 @@ class UpdatePostCommandTest {
 
         verify(postMapper).toTargetPost(request, post);
         verify(postRepository).save(post);
+        verify(redirectRepository).findByTargetTypeAndTargetId(RedirectTargetType.POST, postId);
     }
 
     @Test
