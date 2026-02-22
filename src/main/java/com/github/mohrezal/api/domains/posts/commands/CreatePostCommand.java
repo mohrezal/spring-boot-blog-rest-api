@@ -8,6 +8,9 @@ import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.context.PostCreateExceptionContext;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
+import com.github.mohrezal.api.domains.redirects.models.Redirect;
+import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
@@ -26,6 +29,7 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final SlugGeneratorService slugGeneratorService;
+    private final RedirectRepository redirectRepository;
 
     private final PostMapper postMapper;
 
@@ -52,9 +56,16 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
                     slugGeneratorService.getSlug(newPost.getTitle(), postRepository::existsBySlug);
             newPost.setSlug(slug);
             var savedPost = postRepository.save(newPost);
-
+            var code = slugGeneratorService.getRandomSlug(12, redirectRepository::existsByCode);
+            var redirect =
+                    Redirect.builder()
+                            .code(code)
+                            .targetType(RedirectTargetType.POST)
+                            .targetId(savedPost.getId())
+                            .build();
+            var savedRedirect = redirectRepository.save(redirect);
             log.info("Create post successful.");
-            return this.postMapper.toPostDetail(savedPost);
+            return this.postMapper.toPostDetail(savedPost, savedRedirect.getCode());
         } catch (DataIntegrityViolationException ex) {
             throw new ResourceConflictException(
                     MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, context, ex);

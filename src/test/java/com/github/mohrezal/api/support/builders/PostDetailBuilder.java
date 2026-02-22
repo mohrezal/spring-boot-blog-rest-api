@@ -23,6 +23,7 @@ public final class PostDetailBuilder {
     private OffsetDateTime publishedAt = OffsetDateTime.now();
     private OffsetDateTime createdAt = OffsetDateTime.now();
     private OffsetDateTime updatedAt = OffsetDateTime.now();
+    private String shortCode = "abcd";
     private Long viewCount = 0L;
 
     private PostDetailBuilder() {}
@@ -38,6 +39,11 @@ public final class PostDetailBuilder {
 
     public PostDetailBuilder withTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    public PostDetailBuilder withShortCode(String shortCode) {
+        this.shortCode = shortCode;
         return this;
     }
 
@@ -99,6 +105,7 @@ public final class PostDetailBuilder {
     public PostDetail build() {
         return new PostDetail(
                 id,
+                shortCode,
                 title,
                 slug,
                 status,

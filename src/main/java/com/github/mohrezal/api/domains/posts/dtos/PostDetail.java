@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record PostDetail(
         UUID id,
+        String shortCode,
         String title,
         String slug,
         PostStatus status,

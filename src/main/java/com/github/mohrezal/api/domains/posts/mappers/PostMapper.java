@@ -20,8 +20,9 @@ public interface PostMapper {
     @Mapping(source = "user", target = "author")
     PostSummary toPostSummary(Post post);
 
-    @Mapping(source = "user", target = "author")
-    PostDetail toPostDetail(Post post);
+    @Mapping(source = "post.user", target = "author")
+    @Mapping(source = "shortCode", target = "shortCode")
+    PostDetail toPostDetail(Post post, String shortCode);
 
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "categories", ignore = true)

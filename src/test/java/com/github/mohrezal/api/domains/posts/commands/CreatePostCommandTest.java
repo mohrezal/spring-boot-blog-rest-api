@@ -3,10 +3,13 @@ package com.github.mohrezal.api.domains.posts.commands;
 import static com.github.mohrezal.api.support.builders.CategoryBuilder.aCategory;
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
 import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
+import static com.github.mohrezal.api.support.builders.RedirectBuilder.aRedirect;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -20,6 +23,8 @@ import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.redirects.models.Redirect;
+import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
@@ -40,6 +45,8 @@ class CreatePostCommandTest {
     @Mock private CategoryRepository categoryRepository;
 
     @Mock private SlugGeneratorService slugGeneratorService;
+
+    @Mock private RedirectRepository redirectRepository;
 
     @Mock private PostMapper postMapper;
 
@@ -73,10 +80,14 @@ class CreatePostCommandTest {
         when(postMapper.toPost(request)).thenReturn(post);
 
         when(slugGeneratorService.getSlug(any(), any())).thenReturn("new-post-slug");
+        when(slugGeneratorService.getRandomSlug(anyInt(), any())).thenReturn("abcd");
 
         when(postRepository.save(any(Post.class))).thenReturn(savedPost);
 
-        when(postMapper.toPostDetail(savedPost)).thenReturn(postDetails);
+        when(redirectRepository.save(any(Redirect.class)))
+                .thenReturn(aRedirect().withCode("abcd").withTargetId(UUID.randomUUID()).build());
+
+        when(postMapper.toPostDetail(savedPost, "abcd")).thenReturn(postDetails);
 
         var result = command.execute(params);
 
@@ -114,6 +125,6 @@ class CreatePostCommandTest {
 
         assertThrows(ResourceConflictException.class, () -> command.execute(params));
 
-        verify(postMapper, never()).toPostDetail(any(Post.class));
+        verify(postMapper, never()).toPostDetail(any(Post.class), anyString());
     }
 }

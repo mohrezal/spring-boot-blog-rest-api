@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.posts.queries;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
 import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
+import static com.github.mohrezal.api.support.builders.RedirectBuilder.aRedirect;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -13,6 +14,8 @@ import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
+import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import java.util.Optional;
@@ -33,6 +36,8 @@ class GetPostBySlugQueryTest {
 
     @Mock private UserUtilsService userUtilsService;
 
+    @Mock private RedirectRepository redirectRepository;
+
     @InjectMocks private GetPostBySlugQuery query;
 
     private final User mockedUser = aUser().withEmail("test@gmail.com").build();
@@ -51,8 +56,11 @@ class GetPostBySlugQueryTest {
 
         var post = aPost().withStatus(PostStatus.PUBLISHED).build();
         var postDetail = aPostDetail().build();
+        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(postMapper.toPostDetail(post)).thenReturn(postDetail);
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+                .thenReturn(Optional.of(redirect));
+        when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
         var result = query.execute(params);
 
         assertEquals(postDetail, result);
@@ -65,10 +73,13 @@ class GetPostBySlugQueryTest {
         var post = aPost().withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
+        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+                .thenReturn(Optional.of(redirect));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(true);
-        when(postMapper.toPostDetail(post)).thenReturn(postDetail);
+        when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
 
         var result = query.execute(params);
 
@@ -82,11 +93,14 @@ class GetPostBySlugQueryTest {
         var post = aPost().withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
+        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
+        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId()))
+                .thenReturn(Optional.of(redirect));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(false);
         when(postUtilsService.isOwner(post, mockedUser)).thenReturn(true);
-        when(postMapper.toPostDetail(post)).thenReturn(postDetail);
+        when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
 
         var result = query.execute(params);
 

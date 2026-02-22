@@ -47,6 +47,30 @@ public class SlugGeneratorServiceImpl implements SlugGeneratorService {
         return slug;
     }
 
+    @Override
+    public String getRandomSlug(int length, Function<String, Boolean> existsChecker) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("Length must be greater than zero");
+        }
+        if (existsChecker == null) {
+            throw new IllegalArgumentException("Exists checker cannot be null");
+        }
+
+        String slug = getSuffix(length);
+        int attempts = 0;
+
+        while (existsChecker.apply(slug)) {
+            slug = getSuffix(length);
+            attempts++;
+            if (attempts >= MAX_ATTEMPTS) {
+                log.warn("Maximum attempts exceeds");
+                throw new UnexpectedException();
+            }
+        }
+
+        return slug;
+    }
+
     private String getSuffix(int length) {
         String characters = "abcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder suffix = new StringBuilder();

@@ -5,6 +5,9 @@ import com.github.mohrezal.api.domains.categories.repositories.CategoryRepositor
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
+import com.github.mohrezal.api.domains.redirects.models.Redirect;
+import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.models.UserCredentials;
@@ -18,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -28,6 +32,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Profile("seed")
@@ -37,6 +42,7 @@ public class Seeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final UserCredentialsRepository userCredentialsRepository;
     private final PostRepository postRepository;
+    private final RedirectRepository redirectRepository;
 
     private final SlugGeneratorService slugGeneratorService;
 
@@ -72,7 +78,6 @@ public class Seeder implements CommandLineRunner {
 
     private void generatePosts(int postCount, List<Category> categories, List<User> users) {
         List<Post> postList = new ArrayList<>();
-
         for (int i = 0; i < postCount; i++) {
             String name = faker.book().title().concat(" ").concat(faker.random().hex(5));
             String slug = slugGeneratorService.getSlug(name, postRepository::existsBySlug);
@@ -101,7 +106,25 @@ public class Seeder implements CommandLineRunner {
             postList.add(post);
         }
 
-        postRepository.saveAll(postList);
+        var savedPosts = postRepository.saveAll(postList);
+        Set<String> usedCodes = new HashSet<>();
+        List<Redirect> redirects = new ArrayList<>();
+        for (Post post : savedPosts) {
+            String code =
+                    slugGeneratorService.getRandomSlug(
+                            12,
+                            candidate ->
+                                    usedCodes.contains(candidate)
+                                            || redirectRepository.existsByCode(candidate));
+            usedCodes.add(code);
+            redirects.add(
+                    Redirect.builder()
+                            .code(code)
+                            .targetType(RedirectTargetType.POST)
+                            .targetId(post.getId())
+                            .build());
+        }
+        redirectRepository.saveAll(redirects);
     }
 
     private User getRandomUser(List<User> users) {
@@ -176,6 +199,7 @@ public class Seeder implements CommandLineRunner {
         categoryRepository.deleteAllInBatch();
         userCredentialsRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
+        redirectRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
     }
 

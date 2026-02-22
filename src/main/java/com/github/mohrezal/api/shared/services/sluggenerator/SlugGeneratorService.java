@@ -6,4 +6,6 @@ public interface SlugGeneratorService {
     String getSlug(String text, Function<String, Boolean> existsChecker);
 
     String getSlug(String text, int maxLength, Function<String, Boolean> existsChecker);
+
+    String getRandomSlug(int length, Function<String, Boolean> existsChecker);
 }

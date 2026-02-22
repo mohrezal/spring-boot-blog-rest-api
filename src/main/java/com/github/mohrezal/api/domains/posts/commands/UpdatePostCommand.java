@@ -10,6 +10,9 @@ import com.github.mohrezal.api.domains.posts.exceptions.types.PostSlugAlreadyExi
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
+import com.github.mohrezal.api.domains.redirects.models.Redirect;
+import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
@@ -29,6 +32,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
     private final PostMapper postMapper;
     private final CategoryRepository categoryRepository;
     private final PostUtilsService postUtilsService;
+    private final RedirectRepository redirectRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -65,7 +69,13 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
             var savedPost = postRepository.save(post);
 
             log.info("Update post successful.");
-            return this.postMapper.toPostDetail(savedPost);
+
+            var redirectCode =
+                    this.redirectRepository
+                            .findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId())
+                            .map(Redirect::getCode)
+                            .orElse(null);
+            return this.postMapper.toPostDetail(savedPost, redirectCode);
         } catch (DataIntegrityViolationException ex) {
             throw new ResourceConflictException(
                     MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, context, ex);
