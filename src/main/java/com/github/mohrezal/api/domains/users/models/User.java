@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,7 +37,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
 public class User extends BaseModel implements UserDetails {
 
     @Column(name = "email", unique = true, nullable = false)

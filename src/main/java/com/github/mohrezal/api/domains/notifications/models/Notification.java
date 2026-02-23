@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,7 +42,6 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
 public class Notification extends BaseModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
