@@ -3,7 +3,7 @@ package com.github.mohrezal.api.domains.redirects.queries;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.redirects.exceptions.types.RedirectNotFoundException;
 import com.github.mohrezal.api.domains.redirects.queries.params.GetByCodeQueryParams;
-import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.interfaces.Query;
@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public class GetByCodeQuery implements Query<GetByCodeQueryParams, String> {
 
-    private final RedirectRepository redirectRepository;
+    private final RedirectStoreService redirectStoreService;
 
     private final PostRepository postRepository;
 
@@ -28,15 +28,15 @@ public class GetByCodeQuery implements Query<GetByCodeQueryParams, String> {
     @Override
     public String execute(GetByCodeQueryParams params) {
         var redirect =
-                redirectRepository
+                redirectStoreService
                         .findByCode(params.code())
                         .orElseThrow(RedirectNotFoundException::new);
 
-        switch (redirect.getTargetType()) {
+        switch (redirect.targetType()) {
             case POST -> {
                 var post =
                         postRepository
-                                .findById(redirect.getTargetId())
+                                .findById(redirect.targetId())
                                 .orElseThrow(RedirectNotFoundException::new);
                 return UriComponentsBuilder.fromUriString(properties.frontend().paths().base())
                         .path(properties.frontend().paths().posts())
@@ -47,7 +47,7 @@ public class GetByCodeQuery implements Query<GetByCodeQueryParams, String> {
             case PROFILE -> {
                 var user =
                         userRepository
-                                .findById(redirect.getTargetId())
+                                .findById(redirect.targetId())
                                 .orElseThrow(RedirectNotFoundException::new);
                 return UriComponentsBuilder.fromUriString(properties.frontend().paths().base())
                         .path(properties.frontend().paths().users())

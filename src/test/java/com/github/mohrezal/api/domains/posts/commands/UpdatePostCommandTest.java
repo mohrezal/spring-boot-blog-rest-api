@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.posts.commands;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
 import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
-import static com.github.mohrezal.api.support.builders.RedirectBuilder.aRedirect;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +24,7 @@ import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
-import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
@@ -49,7 +48,7 @@ class UpdatePostCommandTest {
 
     @Mock private PostUtilsService postUtilsService;
 
-    @Mock private RedirectRepository redirectRepository;
+    @Mock private RedirectStoreService redirectStoreService;
 
     @InjectMocks private UpdatePostCommand command;
 
@@ -194,14 +193,8 @@ class UpdatePostCommandTest {
 
         when(postRepository.save(post)).thenReturn(savedPost);
 
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
-                .thenReturn(
-                        Optional.of(
-                                aRedirect()
-                                        .withCode("abcd")
-                                        .withTargetType(RedirectTargetType.POST)
-                                        .withTargetId(postId)
-                                        .build()));
+        when(redirectStoreService.findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
+                .thenReturn(Optional.of("abcd"));
 
         when(postMapper.toPostDetail(savedPost, "abcd")).thenReturn(postDetail);
 
@@ -212,7 +205,8 @@ class UpdatePostCommandTest {
 
         verify(postMapper).toTargetPost(request, post);
         verify(postRepository).save(post);
-        verify(redirectRepository).findByTargetTypeAndTargetId(RedirectTargetType.POST, postId);
+        verify(redirectStoreService)
+                .findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, postId);
     }
 
     @Test

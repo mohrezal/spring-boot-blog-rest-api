@@ -16,7 +16,7 @@ import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundExcept
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
-import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import java.util.Optional;
@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DeletePostCommandTest {
     @Mock private PostRepository postRepository;
-    @Mock private RedirectRepository redirectRepository;
+    @Mock private RedirectStoreService redirectStoreService;
 
     @InjectMocks private DeletePostCommand command;
 
@@ -48,7 +48,7 @@ class DeletePostCommandTest {
         assertNull(result);
 
         verify(postRepository, times(1)).findBySlug(anyString());
-        verify(redirectRepository, times(1))
+        verify(redirectStoreService, times(1))
                 .deleteByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId());
         verify(postRepository, times(1)).delete(post);
     }
@@ -62,7 +62,7 @@ class DeletePostCommandTest {
         assertThrows(PostNotFoundException.class, () -> command.execute(params));
 
         verify(postRepository, times(1)).findBySlug(anyString());
-        verify(redirectRepository, never()).deleteByTargetTypeAndTargetId(any(), any());
+        verify(redirectStoreService, never()).deleteByTargetTypeAndTargetId(any(), any());
         verify(postRepository, never()).delete(any(Post.class));
     }
 
@@ -77,7 +77,7 @@ class DeletePostCommandTest {
         assertThrows(AccessDeniedException.class, () -> command.execute(params));
 
         verify(postRepository, times(1)).findBySlug(anyString());
-        verify(redirectRepository, never()).deleteByTargetTypeAndTargetId(any(), any());
+        verify(redirectStoreService, never()).deleteByTargetTypeAndTargetId(any(), any());
         verify(postRepository, never()).delete(any(Post.class));
     }
 }

@@ -9,8 +9,7 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryPa
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
-import com.github.mohrezal.api.domains.redirects.models.Redirect;
-import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
@@ -28,7 +27,7 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     private final PostMapper postMapper;
     private final PostUtilsService postUtilsService;
     private final UserUtilsService userUtilsService;
-    private final RedirectRepository redirectRepository;
+    private final RedirectStoreService redirectStoreService;
 
     @Transactional(readOnly = true)
     @Override
@@ -45,9 +44,8 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
                         .findBySlug(params.slug())
                         .orElseThrow(() -> new PostNotFoundException(context));
         var redirectCode =
-                this.redirectRepository
-                        .findByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId())
-                        .map(Redirect::getCode)
+                this.redirectStoreService
+                        .findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, post.getId())
                         .orElse(null);
         log.info("redirectCode is : {}", redirectCode);
         if (post.getStatus().equals(PostStatus.PUBLISHED)) {

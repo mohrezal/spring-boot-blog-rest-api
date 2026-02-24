@@ -8,9 +8,11 @@ import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.exceptions.context.PostCreateExceptionContext;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectCacheKey;
 import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
 import com.github.mohrezal.api.domains.redirects.models.Redirect;
 import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
@@ -30,6 +32,7 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
     private final CategoryRepository categoryRepository;
     private final SlugGeneratorService slugGeneratorService;
     private final RedirectRepository redirectRepository;
+    private final RedirectStoreService redirectStoreService;
 
     private final PostMapper postMapper;
 
@@ -63,7 +66,7 @@ public class CreatePostCommand extends AuthenticatedCommand<CreatePostCommandPar
                             .targetType(RedirectTargetType.POST)
                             .targetId(savedPost.getId())
                             .build();
-            var savedRedirect = redirectRepository.save(redirect);
+            var savedRedirect = redirectStoreService.save(redirect, RedirectCacheKey.BY_CODE, code);
             log.info("Create post successful.");
             return this.postMapper.toPostDetail(savedPost, savedRedirect.getCode());
         } catch (DataIntegrityViolationException ex) {

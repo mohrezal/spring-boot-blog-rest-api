@@ -23,8 +23,10 @@ import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.redirects.enums.RedirectCacheKey;
 import com.github.mohrezal.api.domains.redirects.models.Redirect;
 import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
@@ -48,6 +50,8 @@ class CreatePostCommandTest {
     @Mock private SlugGeneratorService slugGeneratorService;
 
     @Mock private RedirectRepository redirectRepository;
+
+    @Mock private RedirectStoreService redirectStoreService;
 
     @Mock private PostMapper postMapper;
 
@@ -87,7 +91,8 @@ class CreatePostCommandTest {
         when(postRepository.save(any(Post.class))).thenReturn(savedPost);
 
         ArgumentCaptor<Redirect> redirectCaptor = ArgumentCaptor.forClass(Redirect.class);
-        when(redirectRepository.save(redirectCaptor.capture()))
+        when(redirectStoreService.save(
+                        redirectCaptor.capture(), eq(RedirectCacheKey.BY_CODE), eq("abcd")))
                 .thenReturn(aRedirect().withCode("abcd").withTargetId(savedPostId).build());
 
         when(postMapper.toPostDetail(savedPost, "abcd")).thenReturn(postDetails);
@@ -132,7 +137,7 @@ class CreatePostCommandTest {
 
         assertThrows(ResourceConflictException.class, () -> command.execute(params));
 
-        verify(redirectRepository, never()).save(any(Redirect.class));
+        verify(redirectStoreService, never()).save(any(Redirect.class), any(), anyString());
         verify(postMapper, never()).toPostDetail(any(Post.class), anyString());
     }
 }

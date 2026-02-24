@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.posts.queries;
 
 import static com.github.mohrezal.api.support.builders.PostBuilder.aPost;
 import static com.github.mohrezal.api.support.builders.PostDetailBuilder.aPostDetail;
-import static com.github.mohrezal.api.support.builders.RedirectBuilder.aRedirect;
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,7 +14,7 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryPa
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.redirects.enums.RedirectTargetType;
-import com.github.mohrezal.api.domains.redirects.repositories.RedirectRepository;
+import com.github.mohrezal.api.domains.redirects.services.store.RedirectStoreService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import java.util.Optional;
@@ -36,7 +35,7 @@ class GetPostBySlugQueryTest {
 
     @Mock private UserUtilsService userUtilsService;
 
-    @Mock private RedirectRepository redirectRepository;
+    @Mock private RedirectStoreService redirectStoreService;
 
     @InjectMocks private GetPostBySlugQuery query;
 
@@ -57,10 +56,9 @@ class GetPostBySlugQueryTest {
         var postId = java.util.UUID.randomUUID();
         var post = aPost().withId(postId).withStatus(PostStatus.PUBLISHED).build();
         var postDetail = aPostDetail().build();
-        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
-                .thenReturn(Optional.of(redirect));
+        when(redirectStoreService.findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
+                .thenReturn(Optional.of("abcd"));
         when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
         var result = query.execute(params);
 
@@ -75,11 +73,10 @@ class GetPostBySlugQueryTest {
         var post = aPost().withId(postId).withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
-        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
-                .thenReturn(Optional.of(redirect));
+        when(redirectStoreService.findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
+                .thenReturn(Optional.of("abcd"));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(true);
         when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
 
@@ -96,11 +93,10 @@ class GetPostBySlugQueryTest {
         var post = aPost().withId(postId).withStatus(PostStatus.DRAFT).build();
 
         var postDetail = aPostDetail().build();
-        var redirect = aRedirect().withCode("abcd").withTargetType(RedirectTargetType.POST).build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(redirectRepository.findByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
-                .thenReturn(Optional.of(redirect));
+        when(redirectStoreService.findCodeByTargetTypeAndTargetId(RedirectTargetType.POST, postId))
+                .thenReturn(Optional.of("abcd"));
         when(userUtilsService.isAdmin(mockedUser)).thenReturn(false);
         when(postUtilsService.isOwner(post, mockedUser)).thenReturn(true);
         when(postMapper.toPostDetail(post, "abcd")).thenReturn(postDetail);
