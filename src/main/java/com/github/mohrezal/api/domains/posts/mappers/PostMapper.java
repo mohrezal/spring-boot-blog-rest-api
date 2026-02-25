@@ -28,7 +28,6 @@ public interface PostMapper {
     @Mapping(target = "slug", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "publishedAt", ignore = true)
-    @Mapping(target = "language", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
