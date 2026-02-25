@@ -79,6 +79,13 @@ spring:
       max-file-size: ${APPLICATION_STORAGE_MAX_FILE_SIZE}
       max-request-size: ${APPLICATION_STORAGE_MAX_REQUEST_SIZE}
 
+springdoc:
+  swagger-ui:
+    csrf:
+      enabled: true
+      cookie-name: XSRF-TOKEN
+      header-name: X-XSRF-TOKEN
+
 app:
   security:
     secret: ${APPLICATION_SECURITY_SECRET}
