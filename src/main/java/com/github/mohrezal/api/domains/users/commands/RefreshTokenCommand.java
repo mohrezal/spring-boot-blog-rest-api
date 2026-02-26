@@ -37,7 +37,7 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
             throw new UserInvalidRefreshTokenException(context);
         }
 
-        if (!jwtService.validateRefreshToken(params.refreshToken())) {
+        if (!jwtService.validateToken(params.refreshToken())) {
             throw new UserInvalidRefreshTokenException(context);
         }
 
@@ -46,12 +46,26 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
                         .getRefreshTokenEntity(params.refreshToken())
                         .orElseThrow(() -> new UserRefreshTokenNotFoundException(context));
 
+        if (refreshTokenEntity.isRevoked()) {
+            jwtService.revokeAllUserRefreshTokens(refreshTokenEntity.getUser().getId());
+            log.warn(
+                    "Detected refresh token reuse. Revoked all sessions for user id={}",
+                    refreshTokenEntity.getUser().getId());
+            throw new UserInvalidRefreshTokenException(context);
+        }
+
+        if (refreshTokenEntity.isExpired()) {
+            throw new UserInvalidRefreshTokenException(context);
+        }
+
+        if (!jwtService.revokeRefreshTokenIfActive(params.refreshToken())) {
+            throw new UserInvalidRefreshTokenException(context);
+        }
+
         var user =
                 userRepository
                         .findById(refreshTokenEntity.getUser().getId())
                         .orElseThrow(UserNotFoundException::new);
-
-        jwtService.revokeRefreshToken(params.refreshToken());
 
         var newAccessToken = jwtService.generateAccessToken(user);
         var newRefreshToken = jwtService.generateRefreshToken(user.getId());

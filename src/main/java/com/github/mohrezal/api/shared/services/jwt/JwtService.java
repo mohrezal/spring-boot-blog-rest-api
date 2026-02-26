@@ -23,6 +23,8 @@ public interface JwtService {
 
     Optional<RefreshToken> getRefreshTokenEntity(String token);
 
+    boolean revokeRefreshTokenIfActive(String token);
+
     void revokeRefreshToken(String token);
 
     void revokeAllUserRefreshTokens(UUID userId);

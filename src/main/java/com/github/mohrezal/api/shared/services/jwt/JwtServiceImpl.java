@@ -159,6 +159,14 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     @Transactional
+    public boolean revokeRefreshTokenIfActive(String token) {
+        String tokenHash = hashService.sha256(token);
+        OffsetDateTime revokedAt = OffsetDateTime.now();
+        return refreshTokenRepository.revokeTokenIfActive(tokenHash, revokedAt) > 0;
+    }
+
+    @Override
+    @Transactional
     public void revokeRefreshToken(String token) {
         String tokenHash = hashService.sha256(token);
         refreshTokenRepository

@@ -10,6 +10,7 @@ import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException
 import com.github.mohrezal.api.shared.exceptions.types.SlugGenerationException;
 import com.github.mohrezal.api.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
+import com.github.mohrezal.api.shared.utils.CookieUtils;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +33,8 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 @Slf4j
 public class SharedExceptionHandler extends AbstractExceptionHandler {
 
-    public SharedExceptionHandler(MessageSource messageSource) {
-        super(messageSource);
+    public SharedExceptionHandler(MessageSource messageSource, CookieUtils cookieUtils) {
+        super(messageSource, cookieUtils);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

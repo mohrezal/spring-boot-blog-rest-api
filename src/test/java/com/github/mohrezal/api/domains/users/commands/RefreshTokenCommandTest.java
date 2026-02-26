@@ -49,9 +49,12 @@ class RefreshTokenCommandTest {
     void execute_whenValidRefreshToken_shouldReturnAuthResponse() {
         var refreshTokenEntity = mock(RefreshToken.class);
         when(refreshTokenEntity.getUser()).thenReturn(user);
-        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
+        when(refreshTokenEntity.isRevoked()).thenReturn(false);
+        when(refreshTokenEntity.isExpired()).thenReturn(false);
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token"))
                 .thenReturn(Optional.of(refreshTokenEntity));
+        when(jwtService.revokeRefreshTokenIfActive("refresh-token")).thenReturn(true);
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(jwtService.generateAccessToken(user)).thenReturn("new-access-token");
         when(jwtService.generateRefreshToken(user.getId())).thenReturn("new-refresh-token");
@@ -63,7 +66,7 @@ class RefreshTokenCommandTest {
         assertEquals("new-access-token", result.accessToken());
         assertEquals("new-refresh-token", result.refreshToken());
 
-        verify(jwtService).revokeRefreshToken("refresh-token");
+        verify(jwtService).revokeRefreshTokenIfActive("refresh-token");
 
         verify(jwtService)
                 .saveRefreshToken(
@@ -93,33 +96,36 @@ class RefreshTokenCommandTest {
 
     @Test
     void execute_whenRefreshTokenNotFound_shouldThrowUserRefreshTokenNotFoundException() {
-        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token")).thenReturn(Optional.empty());
 
         assertThrows(UserRefreshTokenNotFoundException.class, () -> command.execute(params));
 
         verify(jwtService).getRefreshTokenEntity("refresh-token");
-        verify(jwtService, never()).revokeRefreshToken(anyString());
+        verify(jwtService, never()).revokeRefreshTokenIfActive(anyString());
     }
 
     @Test
     void execute_whenUserNotFound_shouldThrowUserNotFoundException() {
         var refreshTokenEntity = mock(RefreshToken.class);
 
-        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
         when(refreshTokenEntity.getUser()).thenReturn(user);
+        when(refreshTokenEntity.isRevoked()).thenReturn(false);
+        when(refreshTokenEntity.isExpired()).thenReturn(false);
         when(jwtService.getRefreshTokenEntity("refresh-token"))
                 .thenReturn(Optional.of(refreshTokenEntity));
+        when(jwtService.revokeRefreshTokenIfActive("refresh-token")).thenReturn(true);
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> command.execute(params));
 
-        verify(jwtService, never()).revokeRefreshToken(anyString());
+        verify(jwtService).revokeRefreshTokenIfActive("refresh-token");
     }
 
     @Test
     void execute_whenUnexpectedExceptionOccurs_shouldRethrow() {
-        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(true);
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
         when(jwtService.getRefreshTokenEntity("refresh-token")).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> command.execute(params));
@@ -127,11 +133,45 @@ class RefreshTokenCommandTest {
 
     @Test
     void execute_whenRefreshTokenInvalid_shouldThrowUserInvalidRefreshTokenException() {
-        when(jwtService.validateRefreshToken("refresh-token")).thenReturn(false);
+        when(jwtService.validateToken("refresh-token")).thenReturn(false);
 
         assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
 
-        verify(jwtService).validateRefreshToken("refresh-token");
+        verify(jwtService).validateToken("refresh-token");
         verify(jwtService, never()).getRefreshTokenEntity("refresh-token");
+    }
+
+    @Test
+    void execute_whenRefreshTokenAlreadyRevoked_shouldRevokeAllSessionsAndThrow() {
+        var refreshTokenEntity = mock(RefreshToken.class);
+
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
+        when(refreshTokenEntity.getUser()).thenReturn(user);
+        when(refreshTokenEntity.isRevoked()).thenReturn(true);
+        when(jwtService.getRefreshTokenEntity("refresh-token"))
+                .thenReturn(Optional.of(refreshTokenEntity));
+
+        assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
+
+        verify(jwtService).revokeAllUserRefreshTokens(user.getId());
+        verify(jwtService, never()).revokeRefreshTokenIfActive(anyString());
+    }
+
+    @Test
+    void execute_whenAtomicRevokeFails_shouldThrowInvalidRefreshToken() {
+        var initialTokenEntity = mock(RefreshToken.class);
+
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
+        when(initialTokenEntity.getUser()).thenReturn(user);
+        when(initialTokenEntity.isRevoked()).thenReturn(false);
+        when(initialTokenEntity.isExpired()).thenReturn(false);
+        when(jwtService.getRefreshTokenEntity("refresh-token"))
+                .thenReturn(Optional.of(initialTokenEntity));
+        when(jwtService.revokeRefreshTokenIfActive("refresh-token")).thenReturn(false);
+
+        assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
+
+        verify(jwtService, never()).revokeAllUserRefreshTokens(user.getId());
+        verify(jwtService).getRefreshTokenEntity("refresh-token");
     }
 }

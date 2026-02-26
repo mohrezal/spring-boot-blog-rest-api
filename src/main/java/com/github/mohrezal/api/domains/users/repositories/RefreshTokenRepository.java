@@ -26,6 +26,16 @@ public interface RefreshTokenRepository
     void deleteExpiredTokens(@Param("threshold") OffsetDateTime threshold);
 
     @Modifying
+    @Query(
+            "UPDATE RefreshToken rt "
+                    + "SET rt.revokedAt = :revokedAt "
+                    + "WHERE rt.tokenHash = :tokenHash "
+                    + "AND rt.revokedAt IS NULL "
+                    + "AND rt.expiresAt > :revokedAt")
+    int revokeTokenIfActive(
+            @Param("tokenHash") String tokenHash, @Param("revokedAt") OffsetDateTime revokedAt);
+
+    @Modifying
     @Query("UPDATE RefreshToken rt SET rt.revokedAt = :revokedAt WHERE rt.user.id = :userId")
     void revokeAllUserTokens(
             @Param("userId") UUID userId, @Param("revokedAt") OffsetDateTime revokedAt);
