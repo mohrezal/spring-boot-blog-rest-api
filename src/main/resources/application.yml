@@ -92,6 +92,13 @@ app:
     accessTokenLifeTime: ${APPLICATION_SECURITY_ACCESS_TOKEN_LIFE_TIME}
     refreshTokenLifeTime: ${APPLICATION_SECURITY_REFRESH_TOKEN_LIFE_TIME}
     allowedOrigin: ${APPLICATION_SECURITY_ALLOWED_ORIGIN}
+    swagger:
+      public-enabled: true
+    csrf:
+      cookie:
+        path: /
+        secure: false
+        sameSite: Lax
   storage:
     allowedMimeTypes: ${APPLICATION_STORAGE_ALLOWED_MIME_TYPES}
     maxFileSize: ${APPLICATION_STORAGE_MAX_FILE_SIZE}

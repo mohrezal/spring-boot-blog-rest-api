@@ -21,7 +21,21 @@ public record ApplicationProperties(
             @NotBlank String secret,
             @NotNull @DurationMin(seconds = 60) Duration accessTokenLifeTime,
             @NotNull @DurationMin(seconds = 60) Duration refreshTokenLifeTime,
-            @NotEmpty List<@NotBlank String> allowedOrigin) {}
+            @NotEmpty List<@NotBlank String> allowedOrigin,
+            @Valid Swagger swagger,
+            @Valid Csrf csrf) {
+
+        @Validated
+        public record Swagger(@NotNull Boolean publicEnabled) {}
+
+        @Validated
+        public record Csrf(@Valid Cookie cookie) {
+
+            @Validated
+            public record Cookie(
+                    @NotBlank String path, @NotNull Boolean secure, @NotBlank String sameSite) {}
+        }
+    }
 
     @Validated
     public record Storage(

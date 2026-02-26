@@ -1,0 +1,15 @@
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  security:
+    swagger:
+      public-enabled: false
+    csrf:
+      cookie:
+        path: /api/v1
+        secure: true
+        sameSite: Strict

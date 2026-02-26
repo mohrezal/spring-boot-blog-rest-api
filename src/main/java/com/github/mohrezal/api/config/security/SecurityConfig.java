@@ -77,21 +77,26 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        auth ->
-                                auth.requestMatchers(PUBLIC_SWAGGER_PATHS)
-                                        .permitAll()
-                                        .requestMatchers(PUBLIC_ACTUATOR_PATHS)
-                                        .permitAll()
-                                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
-                                        .permitAll()
-                                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
-                                        .permitAll()
-                                        .requestMatchers(
-                                                HttpMethod.POST,
-                                                Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
-                                        .authenticated()
-                                        .anyRequest()
-                                        .authenticated())
+                        auth -> {
+                            if (applicationProperties.security().swagger().publicEnabled()) {
+                                auth.requestMatchers(PUBLIC_SWAGGER_PATHS).permitAll();
+                            } else {
+                                auth.requestMatchers(PUBLIC_SWAGGER_PATHS).denyAll();
+                            }
+
+                            auth.requestMatchers(PUBLIC_ACTUATOR_PATHS)
+                                    .permitAll()
+                                    .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS)
+                                    .permitAll()
+                                    .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
+                                    .permitAll()
+                                    .requestMatchers(
+                                            HttpMethod.POST,
+                                            Routes.build(Routes.Auth.BASE, Routes.Auth.LOGOUT))
+                                    .authenticated()
+                                    .anyRequest()
+                                    .authenticated();
+                        })
                 .addFilterBefore(skipJwtValidationFilter, BearerTokenAuthenticationFilter.class)
                 .oauth2ResourceServer(
                         oauth2 ->
@@ -106,8 +111,15 @@ public class SecurityConfig {
 
     @Bean
     public CookieCsrfTokenRepository csrfTokenRepository() {
+        var csrfCookie = applicationProperties.security().csrf().cookie();
         CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        repository.setCookiePath("/");
+        repository.setCookiePath(csrfCookie.path());
+        repository.setCookieCustomizer(
+                cookie -> {
+                    cookie.path(csrfCookie.path())
+                            .secure(csrfCookie.secure())
+                            .sameSite(csrfCookie.sameSite());
+                });
         return repository;
     }
 

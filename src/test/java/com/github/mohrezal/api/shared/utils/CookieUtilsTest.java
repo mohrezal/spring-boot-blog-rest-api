@@ -25,7 +25,11 @@ class CookieUtilsTest {
                             "secret",
                             Duration.ofSeconds(1800L),
                             Duration.ofSeconds(604800L),
-                            List.of("http://localhost")),
+                            List.of("http://localhost"),
+                            new ApplicationProperties.Security.Swagger(true),
+                            new ApplicationProperties.Security.Csrf(
+                                    new ApplicationProperties.Security.Csrf.Cookie(
+                                            "/", false, "Lax"))),
                     null,
                     null,
                     null);
