@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
+    private final RateLimitConfig rateLimitConfig;
     private final RateLimitService rateLimitService;
     private final RequestInfoService requestInfoService;
 
@@ -31,7 +32,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         HttpMethod method = HttpMethod.valueOf(request.getMethod());
 
-        RateLimitConfig.RateLimitPolicy policy = RateLimitConfig.fromPath(method, path);
+        RateLimitConfig.RateLimitPolicy policy = rateLimitConfig.fromPath(method, path);
 
         if (policy.ipLimit() != null) {
             String ipKey = buildSubjectKey(policy.key(), requestInfoService.getClientIp(request));

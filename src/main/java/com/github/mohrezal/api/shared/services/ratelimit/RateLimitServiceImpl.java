@@ -2,6 +2,7 @@ package com.github.mohrezal.api.shared.services.ratelimit;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.enums.RateLimitRedisKey;
 import com.github.mohrezal.api.shared.interfaces.CacheService;
 import io.github.bucket4j.Bandwidth;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RateLimitServiceImpl implements RateLimitService {
 
-    private static final Duration RATE_LIMIT_WINDOW = Duration.ofMinutes(1);
-
+    private final ApplicationProperties applicationProperties;
     private final CacheService cacheService;
     private final Cache<String, Bucket> buckets =
             Caffeine.newBuilder().expireAfterAccess(Duration.ofHours(1)).build();
@@ -26,8 +26,9 @@ public class RateLimitServiceImpl implements RateLimitService {
     @Override
     public ConsumptionResult tryConsume(String key, Integer limitPerMinute) {
         String redisKey = RateLimitRedisKey.MAIN.build(key);
+        Duration window = applicationProperties.rateLimit().window();
         return cacheService
-                .increment(redisKey, RATE_LIMIT_WINDOW)
+                .increment(redisKey, window)
                 .map(
                         counterState -> {
                             boolean allowed = counterState.value() <= limitPerMinute;

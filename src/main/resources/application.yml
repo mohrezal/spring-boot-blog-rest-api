@@ -109,6 +109,83 @@ app:
         path: /
         secure: false
         sameSite: Lax
+  rateLimit:
+    window: 1m
+    defaultKey: default
+    defaultIpLimit: 100
+    defaultUserLimit: 50
+    policies:
+      - key: auth-login
+        method: POST
+        path: /api/v1/auth/login
+        ipLimit: 10
+      - key: auth-register
+        method: POST
+        path: /api/v1/auth/register
+        ipLimit: 5
+      - key: auth-refresh
+        method: POST
+        path: /api/v1/auth/refresh
+        ipLimit: 20
+      - key: auth-logout
+        method: POST
+        path: /api/v1/auth/logout
+        ipLimit: 10
+      - key: storage-upload
+        method: POST
+        path: /api/v1/storage
+        ipLimit: 20
+        userLimit: 10
+      - key: storage-profile-upload
+        method: POST
+        path: /api/v1/storage/profile
+        ipLimit: 10
+        userLimit: 5
+      - key: storage-delete
+        method: DELETE
+        path: "/api/v1/storage/*"
+        ipLimit: 20
+        userLimit: 10
+      - key: post-create
+        method: POST
+        path: /api/v1/posts
+        ipLimit: 30
+        userLimit: 10
+      - key: post-update
+        method: PUT
+        path: "/api/v1/posts/*"
+        ipLimit: 30
+        userLimit: 15
+      - key: post-publish
+        method: POST
+        path: "/api/v1/posts/*/publish"
+        ipLimit: 30
+        userLimit: 15
+      - key: post-archive
+        method: POST
+        path: "/api/v1/posts/*/archive"
+        ipLimit: 30
+        userLimit: 15
+      - key: post-unarchive
+        method: POST
+        path: "/api/v1/posts/*/unarchive"
+        ipLimit: 30
+        userLimit: 15
+      - key: post-delete
+        method: DELETE
+        path: "/api/v1/posts/*"
+        ipLimit: 20
+        userLimit: 10
+      - key: user-follow
+        method: POST
+        path: "/api/v1/users/*/follow"
+        ipLimit: 60
+        userLimit: 30
+      - key: user-unfollow
+        method: POST
+        path: "/api/v1/users/*/unfollow"
+        ipLimit: 60
+        userLimit: 30
   storage:
     allowedMimeTypes: ${APPLICATION_STORAGE_ALLOWED_MIME_TYPES}
     maxFileSize: ${APPLICATION_STORAGE_MAX_FILE_SIZE}

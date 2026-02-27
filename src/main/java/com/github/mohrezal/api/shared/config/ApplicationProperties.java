@@ -4,17 +4,23 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.time.Duration;
 import java.util.List;
 import org.hibernate.validator.constraints.time.DurationMin;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.unit.DataSize;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
 public record ApplicationProperties(
-        @Valid Security security, @Valid Storage storage, @Valid Handle handle, @Valid Mail mail) {
+        @Valid Security security,
+        @Valid RateLimit rateLimit,
+        @Valid Storage storage,
+        @Valid Handle handle,
+        @Valid Mail mail) {
 
     @Validated
     public record Security(
@@ -35,6 +41,23 @@ public record ApplicationProperties(
             public record Cookie(
                     @NotBlank String path, @NotNull Boolean secure, @NotBlank String sameSite) {}
         }
+    }
+
+    @Validated
+    public record RateLimit(
+            @NotNull @DurationMin(seconds = 1) Duration window,
+            @NotBlank String defaultKey,
+            @NotNull @Positive Integer defaultIpLimit,
+            @NotNull @Positive Integer defaultUserLimit,
+            @NotEmpty List<@Valid Policy> policies) {
+
+        @Validated
+        public record Policy(
+                @NotNull HttpMethod method,
+                @NotBlank String path,
+                @NotBlank String key,
+                @Positive Integer ipLimit,
+                @Positive Integer userLimit) {}
     }
 
     @Validated
