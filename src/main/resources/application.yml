@@ -64,6 +64,16 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  data:
+    redis:
+      host: ${APPLICATION_REDIS_HOST}
+      port: ${APPLICATION_REDIS_PORT}
+      password: ${APPLICATION_REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
 
   security:
     oauth2:

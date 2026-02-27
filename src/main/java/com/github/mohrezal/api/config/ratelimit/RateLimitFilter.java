@@ -34,7 +34,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         RateLimitConfig.RateLimitPolicy policy = RateLimitConfig.fromPath(method, path);
 
         if (policy.ipLimit() != null) {
-            String ipKey = "ip:" + requestInfoService.getClientIp(request);
+            String ipKey = buildSubjectKey(policy.key(), requestInfoService.getClientIp(request));
             RateLimitService.ConsumptionResult result =
                     rateLimitService.tryConsume(ipKey, policy.ipLimit());
             if (!result.allowed()) {
@@ -46,7 +46,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (policy.userLimit() != null) {
             String userId = getAuthenticatedUserId();
             if (userId != null) {
-                String userKey = "user:" + userId;
+                String userKey = buildSubjectKey(policy.key(), userId);
                 RateLimitService.ConsumptionResult result =
                         rateLimitService.tryConsume(userKey, policy.userLimit());
                 if (!result.allowed()) {
@@ -71,5 +71,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return user.getId().toString();
         }
         return null;
+    }
+
+    private String buildSubjectKey(String policyKey, String subjectId) {
+        return policyKey + ":" + subjectId;
     }
 }

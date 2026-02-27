@@ -16,6 +16,8 @@ services:
       - APPLICATION_RABBIT_MQ_PORT=5672
       - APPLICATION_MAIL_HOST=mail
       - APPLICATION_MAIL_PORT=1025
+      - APPLICATION_REDIS_HOST=redis
+      - APPLICATION_REDIS_PORT=6379
     depends_on:
       db:
         condition: service_healthy
@@ -25,6 +27,8 @@ services:
         condition: service_started
       mail:
         condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - blog-network
     restart: unless-stopped
@@ -87,6 +91,34 @@ services:
       - blog-network
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: blog-redis
+    ports:
+      - "${APPLICATION_REDIS_PORT}:6379"
+    environment:
+      - APPLICATION_REDIS_PASSWORD=${APPLICATION_REDIS_PASSWORD:?APPLICATION_REDIS_PASSWORD is required}
+    command:
+      [
+        "sh",
+        "-c",
+        "exec redis-server --appendonly yes --requirepass \"$APPLICATION_REDIS_PASSWORD\"",
+      ]
+    volumes:
+      - redis-data:/data
+    networks:
+      - blog-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$$APPLICATION_REDIS_PASSWORD\" ping | grep -q PONG",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
 networks:
   blog-network:
     driver: bridge
@@ -94,3 +126,4 @@ networks:
 volumes:
   database:
   static-data:
+  redis-data:
