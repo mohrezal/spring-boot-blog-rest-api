@@ -162,7 +162,6 @@ class RefreshTokenCommandTest {
         var initialTokenEntity = mock(RefreshToken.class);
 
         when(jwtService.validateToken("refresh-token")).thenReturn(true);
-        when(initialTokenEntity.getUser()).thenReturn(user);
         when(initialTokenEntity.isRevoked()).thenReturn(false);
         when(initialTokenEntity.isExpired()).thenReturn(false);
         when(jwtService.getRefreshTokenEntity("refresh-token"))
