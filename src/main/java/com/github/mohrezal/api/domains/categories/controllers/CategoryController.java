@@ -1,15 +1,24 @@
 package com.github.mohrezal.api.domains.categories.controllers;
 
 import com.github.mohrezal.api.config.Routes;
+import com.github.mohrezal.api.domains.categories.commands.CreateCategoryCommand;
+import com.github.mohrezal.api.domains.categories.commands.params.CreateCategoryCommandParams;
 import com.github.mohrezal.api.domains.categories.dtos.CategorySummary;
+import com.github.mohrezal.api.domains.categories.dtos.CreateCategoryRequest;
 import com.github.mohrezal.api.domains.categories.queries.GetCategoriesQuery;
 import com.github.mohrezal.api.domains.categories.queries.params.GetCategoriesQueryParams;
+import com.github.mohrezal.api.shared.annotations.IsAdmin;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,13 +29,23 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Category")
 public class CategoryController {
     private final GetCategoriesQuery categoriesQueries;
+    private final CreateCategoryCommand createCategoryCommand;
 
     @GetMapping
-    public ResponseEntity<@NonNull PageResponse<CategorySummary>> getCategories(
+    public ResponseEntity<PageResponse<CategorySummary>> getCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        GetCategoriesQueryParams params =
-                GetCategoriesQueryParams.builder().page(page).size(size).build();
+        var params = GetCategoriesQueryParams.builder().page(page).size(size).build();
         return ResponseEntity.ok().body(categoriesQueries.execute(params));
+    }
+
+    @PostMapping
+    @IsAdmin
+    public ResponseEntity<CategorySummary> createCategory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid CreateCategoryRequest createCategoryRequest) {
+        var params = new CreateCategoryCommandParams(userDetails, createCategoryRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createCategoryCommand.execute(params));
     }
 }

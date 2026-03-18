@@ -38,6 +38,7 @@ public final class MessageKey {
             "post.error.status-transition-invalid";
 
     public static final String CATEGORIES_NOT_FOUND = "categories.error.not-found";
+    public static final String CATEGORIES_PARENT_NOT_FOUND = "categories.error.parent.not-found";
 
     public static final String STORAGE_FILE_SIZE_EXCEEDED = "storage.error.file-size-exceeded";
     public static final String STORAGE_FILE_MIME_TYPE_NOT_ALLOWED =
