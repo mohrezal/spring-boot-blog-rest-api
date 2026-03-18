@@ -98,7 +98,7 @@ public class PostController {
     }
 
     @IsAdminOrUser
-    @PutMapping(Routes.Post.UPDATE_POST_BY_SLUG)
+    @PutMapping(Routes.Post.BY_SLUG)
     public ResponseEntity<@NonNull PostDetail> updatePostBySlug(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable String slug,
@@ -108,7 +108,7 @@ public class PostController {
         return ResponseEntity.ok().body(updatePostCommands.execute(params));
     }
 
-    @GetMapping(Routes.Post.GET_POST_BY_SLUG)
+    @GetMapping(Routes.Post.BY_SLUG)
     public ResponseEntity<@NonNull PostDetail> getPostBySlug(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new GetPostBySlugQueryParams(userDetails, slug);
@@ -151,7 +151,7 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping(Routes.Post.DELETE_BY_SLUG)
+    @DeleteMapping(Routes.Post.BY_SLUG)
     @IsAdminOrUser
     public ResponseEntity<Void> deletePostBySlug(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {

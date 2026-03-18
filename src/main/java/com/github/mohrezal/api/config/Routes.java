@@ -33,13 +33,11 @@ public final class Routes {
 
     public static final class Post {
         public static final String BASE = API_BASE + "posts";
-        public static final String GET_POST_BY_SLUG = "{slug}";
-        public static final String UPDATE_POST_BY_SLUG = "{slug}";
+        public static final String BY_SLUG = "{slug}";
         public static final String SLUG_AVAILABILITY = "slugs/availability";
         public static final String PUBLISH_POST = "{slug}/publish";
         public static final String ARCHIVE_POST = "{slug}/archive";
         public static final String UNARCHIVE_POST = "{slug}/unarchive";
-        public static final String DELETE_BY_SLUG = "{slug}";
         public static final String SEARCH = "search";
         public static final String VIEW = "{slug}/view";
     }

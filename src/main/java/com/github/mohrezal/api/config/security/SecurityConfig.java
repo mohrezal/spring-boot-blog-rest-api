@@ -57,7 +57,7 @@ public class SecurityConfig {
         Routes.build(Routes.Auth.BASE, Routes.Auth.CSRF),
         Routes.build(Routes.Category.BASE),
         Routes.build(Routes.Post.BASE),
-        Routes.build(Routes.Post.BASE, Routes.Post.GET_POST_BY_SLUG),
+        Routes.build(Routes.Post.BASE, Routes.Post.BY_SLUG),
         Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY),
         Routes.build(Routes.Storage.BASE, Routes.Storage.BY_FILENAME),
         Routes.build(Routes.Post.BASE, Routes.Post.SEARCH)
