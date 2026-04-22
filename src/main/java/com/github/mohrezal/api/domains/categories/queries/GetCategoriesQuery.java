@@ -1,32 +1,28 @@
 package com.github.mohrezal.api.domains.categories.queries;
 
-import com.github.mohrezal.api.domains.categories.dtos.CategorySummary;
+import com.github.mohrezal.api.domains.categories.dtos.CategoryDetail;
 import com.github.mohrezal.api.domains.categories.mappers.CategoryMapper;
 import com.github.mohrezal.api.domains.categories.queries.params.GetCategoriesQueryParams;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
-import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.interfaces.Query;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GetCategoriesQuery
-        implements Query<GetCategoriesQueryParams, PageResponse<CategorySummary>> {
+public class GetCategoriesQuery implements Query<GetCategoriesQueryParams, Set<CategoryDetail>> {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
     @Transactional(readOnly = true)
     @Override
-    public PageResponse<CategorySummary> execute(GetCategoriesQueryParams params) {
-        Pageable pageable = PageRequest.of(params.getPage(), params.getSize());
+    public Set<CategoryDetail> execute(GetCategoriesQueryParams params) {
+        var categories = categoryRepository.findCategoriesWithHasChildren(params.parentId());
 
-        return PageResponse.from(
-                categoryRepository.findAll(pageable), categoryMapper::toCategorySummary);
+        return this.categoryMapper.toCategoryDetails(categories);
     }
 }
