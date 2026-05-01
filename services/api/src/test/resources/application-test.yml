@@ -1,4 +1,9 @@
+server:
+  port: 8080
 spring:
+  mail:
+    host: localhost
+    port: 1025
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -18,12 +23,19 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
+    listener:
+      simple:
+        auto-startup: false
   data:
     redis:
       host: localhost
       port: 6379
   thymeleaf:
     check-template-location: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
 
 app:
   security:

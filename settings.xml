@@ -1,0 +1,10 @@
+<settings>
+    <mirrors>
+        <mirror>
+            <id>myket-maven</id>
+            <name>MyKet Maven Mirror</name>
+            <url>https://maven.myket.ir/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>
