@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import com.github.mohrezal.api.domains.notifications.config.RabbitMQConfig;
 import com.github.mohrezal.api.domains.notifications.data.FollowNotificationData;
 import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
-import com.github.mohrezal.api.domains.notifications.events.UserRegisteredEvent;
 import com.github.mohrezal.api.domains.notifications.messages.TransactionalEmailMessage;
 import com.github.mohrezal.api.domains.notifications.models.Notification;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
@@ -20,6 +19,7 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.common.constants.Templates;
+import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -170,9 +170,15 @@ class NotificationEventListenerTest {
                 aUser().withId(UUID.randomUUID())
                         .withEmail("newuser@example.com")
                         .withFirstName("John")
+                        .withLastName("Doe")
                         .build();
 
-        UserRegisteredEvent event = new UserRegisteredEvent(newUser);
+        UserRegisteredEvent event =
+                new UserRegisteredEvent(
+                        newUser.getId(),
+                        newUser.getFirstName(),
+                        newUser.getLastName(),
+                        newUser.getEmail());
 
         listener.handleUserRegisteredEvent(event);
 

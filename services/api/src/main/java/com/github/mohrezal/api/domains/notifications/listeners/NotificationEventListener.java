@@ -3,7 +3,6 @@ package com.github.mohrezal.api.domains.notifications.listeners;
 import com.github.mohrezal.api.domains.notifications.config.RabbitMQConfig;
 import com.github.mohrezal.api.domains.notifications.data.FollowNotificationData;
 import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
-import com.github.mohrezal.api.domains.notifications.events.UserRegisteredEvent;
 import com.github.mohrezal.api.domains.notifications.messages.TransactionalEmailMessage;
 import com.github.mohrezal.api.domains.notifications.models.Notification;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
@@ -12,6 +11,7 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationRe
 import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.common.constants.Templates;
+import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -57,16 +57,12 @@ public class NotificationEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserRegisteredEvent(UserRegisteredEvent event) {
-        User user = event.user();
-        log.debug("UserRegisteredEvent: queuing welcome email for {}", user.getEmail());
+        log.debug("UserRegisteredEvent: queuing welcome email for {}", event.email());
 
-        Map<String, Object> variables = Map.of("userName", user.getFirstName());
+        Map<String, Object> variables = Map.of("userName", event.firstName());
         TransactionalEmailMessage message =
                 new TransactionalEmailMessage(
-                        user.getEmail(),
-                        "Welcome to Our Blog!",
-                        Templates.Email.WELCOME,
-                        variables);
+                        event.email(), "Welcome to Our Blog!", Templates.Email.WELCOME, variables);
 
         publishTransactionalEmail(message);
     }

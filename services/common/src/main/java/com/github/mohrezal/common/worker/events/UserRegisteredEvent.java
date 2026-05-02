@@ -1,0 +1,7 @@
+package com.github.mohrezal.common.worker.events;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+public record UserRegisteredEvent(UUID id, String firstName, String lastName, String email)
+        implements Serializable {}

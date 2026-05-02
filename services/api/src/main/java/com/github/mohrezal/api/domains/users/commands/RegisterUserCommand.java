@@ -1,6 +1,5 @@
 package com.github.mohrezal.api.domains.users.commands;
 
-import com.github.mohrezal.api.domains.notifications.events.UserRegisteredEvent;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
@@ -18,6 +17,7 @@ import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.interfaces.Command;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
+import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,7 +71,12 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
             jwtService.saveRefreshToken(
                     refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
-            eventPublisher.publishEvent(new UserRegisteredEvent(user));
+            eventPublisher.publishEvent(
+                    new UserRegisteredEvent(
+                            user.getId(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getEmail()));
 
             var authResponse = new AuthResponse(accessToken, refreshToken);
             log.info("User registration successful.");

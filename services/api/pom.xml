@@ -13,8 +13,7 @@
 
     <artifactId>api</artifactId>
 
-    <name>spring-boot-blog-rest-api</name>
-    <description>spring-boot-blog-rest-api</description>
+    <name>api</name>
 
     <properties>
         <java.version>21</java.version>
@@ -28,6 +27,7 @@
         <awaitility.version>4.3.0</awaitility.version>
         <caffeine.version>3.2.3</caffeine.version>
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
+        <lombok.version>1.18.46</lombok.version>
     </properties>
 
     <dependencies>

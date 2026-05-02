@@ -22,6 +22,7 @@
     <modules>
         <module>services/api</module>
         <module>services/common</module>
+        <module>services/worker</module>
     </modules>
 
     <properties>

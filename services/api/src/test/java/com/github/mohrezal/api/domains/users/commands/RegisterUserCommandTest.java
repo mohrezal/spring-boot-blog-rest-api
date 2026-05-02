@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.notifications.events.UserRegisteredEvent;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
@@ -26,6 +25,7 @@ import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.api.support.constants.UserAgents;
+import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
