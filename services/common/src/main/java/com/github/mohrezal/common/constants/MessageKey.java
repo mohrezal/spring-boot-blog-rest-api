@@ -1,4 +1,4 @@
-package com.github.mohrezal.api.shared.enums;
+package com.github.mohrezal.common.constants;
 
 public final class MessageKey {
 

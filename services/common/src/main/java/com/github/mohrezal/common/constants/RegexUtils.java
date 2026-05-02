@@ -1,4 +1,4 @@
-package com.github.mohrezal.api.shared.constants;
+package com.github.mohrezal.common.constants;
 
 public final class RegexUtils {
     private RegexUtils() {}

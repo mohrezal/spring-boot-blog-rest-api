@@ -1,6 +1,6 @@
 package com.github.mohrezal.api.domains.categories.dtos;
 
-import com.github.mohrezal.api.shared.enums.MessageKey;
+import com.github.mohrezal.common.constants.MessageKey;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;

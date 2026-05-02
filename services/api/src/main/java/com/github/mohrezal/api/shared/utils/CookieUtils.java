@@ -2,7 +2,7 @@ package com.github.mohrezal.api.shared.utils;
 
 import com.github.mohrezal.api.config.Routes;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
-import com.github.mohrezal.api.shared.constants.CookieConstants;
+import com.github.mohrezal.common.constants.CookieConstants;
 import jakarta.servlet.http.Cookie;
 import java.time.Duration;
 import java.util.Arrays;

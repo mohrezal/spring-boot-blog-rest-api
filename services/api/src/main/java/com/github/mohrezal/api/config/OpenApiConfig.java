@@ -1,6 +1,6 @@
 package com.github.mohrezal.api.config;
 
-import com.github.mohrezal.api.shared.constants.CookieConstants;
+import com.github.mohrezal.common.constants.CookieConstants;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

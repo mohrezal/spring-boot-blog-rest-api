@@ -1,7 +1,7 @@
 package com.github.mohrezal.api.config.security;
 
-import com.github.mohrezal.api.shared.constants.CookieConstants;
 import com.github.mohrezal.api.shared.constants.SecurityConstants;
+import com.github.mohrezal.common.constants.CookieConstants;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;

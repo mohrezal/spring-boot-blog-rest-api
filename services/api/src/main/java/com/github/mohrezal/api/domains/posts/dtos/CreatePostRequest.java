@@ -1,7 +1,7 @@
 package com.github.mohrezal.api.domains.posts.dtos;
 
 import com.github.mohrezal.api.domains.posts.enums.PostLanguage;
-import com.github.mohrezal.api.shared.enums.MessageKey;
+import com.github.mohrezal.common.constants.MessageKey;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

@@ -1,7 +1,7 @@
 package com.github.mohrezal.api.domains.posts.dtos;
 
-import com.github.mohrezal.api.shared.constants.RegexUtils;
-import com.github.mohrezal.api.shared.enums.MessageKey;
+import com.github.mohrezal.common.constants.MessageKey;
+import com.github.mohrezal.common.constants.RegexUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;

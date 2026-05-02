@@ -9,9 +9,9 @@ import com.github.mohrezal.api.domains.posts.exceptions.context.PostCreateExcept
 import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
-import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
+import com.github.mohrezal.common.constants.MessageKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

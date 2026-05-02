@@ -1,7 +1,7 @@
 package com.github.mohrezal.api.shared.exceptions.types;
 
-import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.context.ExceptionContext;
+import com.github.mohrezal.common.constants.MessageKey;
 
 public class AccessDeniedException extends ForbiddenException {
     public AccessDeniedException() {

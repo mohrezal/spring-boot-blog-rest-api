@@ -54,13 +54,13 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabil
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
-import com.github.mohrezal.api.shared.constants.CookieConstants;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.services.ratelimit.RateLimitService;
 import com.github.mohrezal.api.support.builders.UserBuilder;
 import com.github.mohrezal.api.support.security.AuthenticationUtils;
+import com.github.mohrezal.common.constants.CookieConstants;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;

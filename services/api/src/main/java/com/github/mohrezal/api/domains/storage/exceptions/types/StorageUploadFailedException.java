@@ -1,8 +1,8 @@
 package com.github.mohrezal.api.domains.storage.exceptions.types;
 
-import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.context.ExceptionContext;
 import com.github.mohrezal.api.shared.exceptions.types.InternalException;
+import com.github.mohrezal.common.constants.MessageKey;
 
 public class StorageUploadFailedException extends InternalException {
     public StorageUploadFailedException() {

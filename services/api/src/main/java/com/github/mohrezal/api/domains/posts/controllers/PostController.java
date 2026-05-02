@@ -30,9 +30,9 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQuer
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
 import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
 import com.github.mohrezal.api.shared.annotations.range.Range;
-import com.github.mohrezal.api.shared.constants.CookieConstants;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
+import com.github.mohrezal.common.constants.CookieConstants;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.Duration;

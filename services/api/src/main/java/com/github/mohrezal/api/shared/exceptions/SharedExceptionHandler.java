@@ -1,6 +1,5 @@
 package com.github.mohrezal.api.shared.exceptions;
 
-import com.github.mohrezal.api.shared.enums.MessageKey;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ForbiddenException;
 import com.github.mohrezal.api.shared.exceptions.types.InternalException;
@@ -11,6 +10,7 @@ import com.github.mohrezal.api.shared.exceptions.types.SlugGenerationException;
 import com.github.mohrezal.api.shared.exceptions.types.UnauthorizedException;
 import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
+import com.github.mohrezal.common.constants.MessageKey;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;

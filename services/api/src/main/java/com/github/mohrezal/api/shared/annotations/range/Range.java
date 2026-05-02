@@ -1,6 +1,6 @@
 package com.github.mohrezal.api.shared.annotations.range;
 
-import com.github.mohrezal.api.shared.enums.MessageKey;
+import com.github.mohrezal.common.constants.MessageKey;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.Documented;
