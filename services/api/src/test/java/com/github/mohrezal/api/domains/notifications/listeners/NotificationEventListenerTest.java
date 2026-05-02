@@ -19,7 +19,7 @@ import com.github.mohrezal.api.domains.notifications.models.NotificationPreferen
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
 import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.shared.utils.Templates;
+import com.github.mohrezal.common.constants.Templates;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

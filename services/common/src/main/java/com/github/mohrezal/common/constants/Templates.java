@@ -1,4 +1,4 @@
-package com.github.mohrezal.api.shared.utils;
+package com.github.mohrezal.common.constants;
 
 public final class Templates {
     private Templates() {}

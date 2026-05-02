@@ -11,7 +11,7 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
 import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
 import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.shared.utils.Templates;
+import com.github.mohrezal.common.constants.Templates;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
