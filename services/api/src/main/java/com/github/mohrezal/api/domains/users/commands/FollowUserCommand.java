@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.users.commands;
 
-import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
+import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
+import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
 import com.github.mohrezal.api.domains.users.commands.params.FollowUserCommandParams;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserFollowExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
@@ -10,6 +11,8 @@ import com.github.mohrezal.api.domains.users.models.UserFollow;
 import com.github.mohrezal.api.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
+import com.github.mohrezal.common.worker.contracts.NotificationPreference;
+import com.github.mohrezal.common.worker.events.UserFollowedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,6 +27,7 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationPreferenceRepository notificationPreferenceRepository;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -62,7 +66,24 @@ public class FollowUserCommand extends AuthenticatedCommand<FollowUserCommandPar
                 followerId,
                 targetUser.getId());
 
-        eventPublisher.publishEvent(new UserFollowedEvent(currentUser, targetUser));
+        var notificationPreference =
+                notificationPreferenceRepository
+                        .findByUserId(targetUser.getId())
+                        .orElseGet(NotificationUtils::defaultPreferences);
+
+        var preferences =
+                new NotificationPreference(
+                        notificationPreference.getInAppEnabled(),
+                        notificationPreference.getEmailEnabled());
+
+        eventPublisher.publishEvent(
+                new UserFollowedEvent(
+                        currentUser.getId(),
+                        currentUser.getHandle(),
+                        targetUser.getId(),
+                        targetUser.getHandle(),
+                        targetUser.getEmail(),
+                        preferences));
 
         return null;
     }

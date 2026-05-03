@@ -1,4 +1,4 @@
-package com.github.mohrezal.api.domains.notifications.services.email;
+package com.github.mohrezal.worker.services.email;
 
 import java.util.Map;
 

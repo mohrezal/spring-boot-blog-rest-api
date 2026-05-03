@@ -1,17 +1,17 @@
 package com.github.mohrezal.api.domains.notifications.listeners;
 
-import com.github.mohrezal.api.domains.notifications.config.RabbitMQConfig;
 import com.github.mohrezal.api.domains.notifications.data.FollowNotificationData;
-import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
-import com.github.mohrezal.api.domains.notifications.messages.TransactionalEmailMessage;
+import com.github.mohrezal.api.domains.notifications.mappers.NotificationMapper;
 import com.github.mohrezal.api.domains.notifications.models.Notification;
-import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
-import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
-import com.github.mohrezal.api.domains.notifications.utils.NotificationUtils;
-import com.github.mohrezal.api.domains.users.models.User;
+import com.github.mohrezal.api.domains.notifications.services.sse.NotificationSseService;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
+import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.common.constants.RabbitMQConstants;
 import com.github.mohrezal.common.constants.Templates;
+import com.github.mohrezal.common.worker.events.UserFollowedEvent;
 import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
+import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -29,29 +29,35 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class NotificationEventListener {
 
     private final RabbitTemplate rabbitTemplate;
-    private final NotificationPreferenceRepository preferenceRepository;
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+    private final NotificationSseService sseService;
+    private final NotificationMapper notificationMapper;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserFollowedEvent(UserFollowedEvent event) {
-        User actor = event.actor();
-        User recipient = event.recipient();
-        log.debug("UserFollowedEvent: {} followed {}", actor.getHandle(), recipient.getHandle());
 
-        NotificationPreference preferences =
-                preferenceRepository
-                        .findByUserId(recipient.getId())
-                        .orElseGet(NotificationUtils::defaultPreferences);
+        log.debug(
+                "UserFollowedEvent: {} followed {}", event.actorHandle(), event.recipientHandle());
 
-        FollowNotificationData data = new FollowNotificationData(actor.getId());
+        var data = new FollowNotificationData(event.actorId());
 
-        Notification notification =
+        var actor =
+                userRepository.findById(event.actorId()).orElseThrow(UserNotFoundException::new);
+        var recipient =
+                userRepository
+                        .findById(event.recipientId())
+                        .orElseThrow(UserNotFoundException::new);
+
+        var notification =
                 Notification.builder().recipient(recipient).actor(actor).data(data).build();
         notificationRepository.save(notification);
 
-        if (preferences.getInAppEnabled()) {
-            publishToQueue(RabbitMQConfig.INAPP_ROUTING_KEY, notification.getId());
+        if (event.preferences().inAppEnabled()) {
+            var summary = notificationMapper.toNotificationSummary(notification);
+            sseService.push(recipient.getId(), summary);
+            log.debug("Pushed in-app notification to user {}", recipient.getId());
         }
     }
 
@@ -60,7 +66,7 @@ public class NotificationEventListener {
         log.debug("UserRegisteredEvent: queuing welcome email for {}", event.email());
 
         Map<String, Object> variables = Map.of("userName", event.firstName());
-        TransactionalEmailMessage message =
+        var message =
                 new TransactionalEmailMessage(
                         event.email(), "Welcome to Our Blog!", Templates.Email.WELCOME, variables);
 
@@ -69,12 +75,14 @@ public class NotificationEventListener {
 
     private void publishTransactionalEmail(TransactionalEmailMessage message) {
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE, RabbitMQConfig.TRANSACTIONAL_EMAIL_ROUTING_KEY, message);
+                RabbitMQConstants.EXCHANGE,
+                RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY,
+                message);
         log.debug("Published transactional email to queue for: {}", message.to());
     }
 
     private void publishToQueue(String routingKey, UUID notificationId) {
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, routingKey, notificationId);
+        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE, routingKey, notificationId);
         log.debug("Published notification {} to queue: {}", notificationId, routingKey);
     }
 }

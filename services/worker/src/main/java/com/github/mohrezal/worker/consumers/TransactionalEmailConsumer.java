@@ -1,8 +1,8 @@
-package com.github.mohrezal.api.domains.notifications.consumers;
+package com.github.mohrezal.worker.consumers;
 
-import com.github.mohrezal.api.domains.notifications.config.RabbitMQConfig;
-import com.github.mohrezal.api.domains.notifications.messages.TransactionalEmailMessage;
-import com.github.mohrezal.api.domains.notifications.services.email.EmailProvider;
+import com.github.mohrezal.common.constants.RabbitMQConstants;
+import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
+import com.github.mohrezal.worker.services.email.EmailProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,7 +15,7 @@ public class TransactionalEmailConsumer {
 
     private final EmailProvider emailProvider;
 
-    @RabbitListener(queues = RabbitMQConfig.TRANSACTIONAL_EMAIL_QUEUE)
+    @RabbitListener(queues = RabbitMQConstants.TRANSACTIONAL_EMAIL_QUEUE)
     public void consume(TransactionalEmailMessage message) {
         log.debug("Received transactional email for: {}", message.to());
 

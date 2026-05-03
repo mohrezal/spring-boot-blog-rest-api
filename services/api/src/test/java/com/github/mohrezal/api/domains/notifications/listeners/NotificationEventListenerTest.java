@@ -9,17 +9,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.notifications.config.RabbitMQConfig;
 import com.github.mohrezal.api.domains.notifications.data.FollowNotificationData;
-import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
-import com.github.mohrezal.api.domains.notifications.messages.TransactionalEmailMessage;
+import com.github.mohrezal.api.domains.notifications.mappers.NotificationMapper;
 import com.github.mohrezal.api.domains.notifications.models.Notification;
-import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
-import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationRepository;
+import com.github.mohrezal.api.domains.notifications.services.sse.NotificationSseService;
 import com.github.mohrezal.api.domains.users.models.User;
+import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.common.constants.RabbitMQConstants;
 import com.github.mohrezal.common.constants.Templates;
+import com.github.mohrezal.common.worker.contracts.NotificationPreference;
+import com.github.mohrezal.common.worker.events.UserFollowedEvent;
 import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
+import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,14 +38,19 @@ class NotificationEventListenerTest {
 
     @Mock private RabbitTemplate rabbitTemplate;
 
-    @Mock private NotificationPreferenceRepository preferenceRepository;
-
     @Mock private NotificationRepository notificationRepository;
+
+    @Mock private UserRepository userRepository;
+
+    @Mock private NotificationSseService sseService;
+
+    @Mock private NotificationMapper notificationMapper;
 
     @InjectMocks private NotificationEventListener listener;
 
     private User actor;
     private User recipient;
+    private NotificationPreference preferences;
 
     @BeforeEach
     void setUp() {
@@ -58,15 +65,20 @@ class NotificationEventListenerTest {
                         .withEmail("recipient@example.com")
                         .withHandle("recipient")
                         .build();
+
+        preferences = new NotificationPreference(true, true);
     }
 
     @Test
-    void handleUserFollowedEvent_whenInAppEnabled_shouldPublishToInAppQueue() {
-        NotificationPreference preferences =
-                NotificationPreference.builder().inAppEnabled(true).emailEnabled(true).build();
+    void handleUserFollowedEvent_whenInAppEnabled_shouldPushSse() {
+        UserFollowedEvent event =
+                new UserFollowedEvent(
+                        actor.getId(), actor.getHandle(),
+                        recipient.getId(), recipient.getHandle(),
+                        recipient.getEmail(), preferences);
 
-        when(preferenceRepository.findByUserId(recipient.getId()))
-                .thenReturn(Optional.of(preferences));
+        when(userRepository.findById(actor.getId())).thenReturn(Optional.of(actor));
+        when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
         when(notificationRepository.save(any(Notification.class)))
                 .thenAnswer(
                         invocation -> {
@@ -74,25 +86,23 @@ class NotificationEventListenerTest {
                             n.setId(UUID.randomUUID());
                             return n;
                         });
-
-        UserFollowedEvent event = new UserFollowedEvent(actor, recipient);
 
         listener.handleUserFollowedEvent(event);
 
-        verify(rabbitTemplate)
-                .convertAndSend(
-                        eq(RabbitMQConfig.EXCHANGE),
-                        eq(RabbitMQConfig.INAPP_ROUTING_KEY),
-                        any(UUID.class));
+        verify(sseService).push(eq(recipient.getId()), any());
     }
 
     @Test
-    void handleUserFollowedEvent_whenInAppDisabled_shouldNotPublishToQueue() {
-        NotificationPreference preferences =
-                NotificationPreference.builder().inAppEnabled(false).emailEnabled(true).build();
+    void handleUserFollowedEvent_whenInAppDisabled_shouldNotPushSse() {
+        NotificationPreference disabled = new NotificationPreference(false, true);
+        UserFollowedEvent event =
+                new UserFollowedEvent(
+                        actor.getId(), actor.getHandle(),
+                        recipient.getId(), recipient.getHandle(),
+                        recipient.getEmail(), disabled);
 
-        when(preferenceRepository.findByUserId(recipient.getId()))
-                .thenReturn(Optional.of(preferences));
+        when(userRepository.findById(actor.getId())).thenReturn(Optional.of(actor));
+        when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
         when(notificationRepository.save(any(Notification.class)))
                 .thenAnswer(
                         invocation -> {
@@ -101,46 +111,49 @@ class NotificationEventListenerTest {
                             return n;
                         });
 
-        UserFollowedEvent event = new UserFollowedEvent(actor, recipient);
+        listener.handleUserFollowedEvent(event);
+
+        verify(sseService, never()).push(any(), any());
+    }
+
+    @Test
+    void handleUserFollowedEvent_whenEmailDisabled_shouldNotPublishToEmailQueue() {
+        NotificationPreference disabled = new NotificationPreference(true, false);
+        UserFollowedEvent event =
+                new UserFollowedEvent(
+                        actor.getId(), actor.getHandle(),
+                        recipient.getId(), recipient.getHandle(),
+                        recipient.getEmail(), disabled);
+
+        when(userRepository.findById(actor.getId())).thenReturn(Optional.of(actor));
+        when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
+        when(notificationRepository.save(any(Notification.class)))
+                .thenAnswer(
+                        invocation -> {
+                            Notification n = invocation.getArgument(0);
+                            n.setId(UUID.randomUUID());
+                            return n;
+                        });
 
         listener.handleUserFollowedEvent(event);
 
         verify(rabbitTemplate, never())
                 .convertAndSend(
-                        eq(RabbitMQConfig.EXCHANGE),
-                        eq(RabbitMQConfig.INAPP_ROUTING_KEY),
-                        any(UUID.class));
-    }
-
-    @Test
-    void handleUserFollowedEvent_whenNoPreferences_shouldUseDefaults() {
-        when(preferenceRepository.findByUserId(recipient.getId())).thenReturn(Optional.empty());
-        when(notificationRepository.save(any(Notification.class)))
-                .thenAnswer(
-                        invocation -> {
-                            Notification n = invocation.getArgument(0);
-                            n.setId(UUID.randomUUID());
-                            return n;
-                        });
-
-        UserFollowedEvent event = new UserFollowedEvent(actor, recipient);
-
-        listener.handleUserFollowedEvent(event);
-
-        verify(rabbitTemplate)
-                .convertAndSend(
-                        eq(RabbitMQConfig.EXCHANGE),
-                        eq(RabbitMQConfig.INAPP_ROUTING_KEY),
-                        any(UUID.class));
+                        eq(RabbitMQConstants.EXCHANGE),
+                        eq(RabbitMQConstants.EMAIL_ROUTING_KEY),
+                        any(Object.class));
     }
 
     @Test
     void handleUserFollowedEvent_whenCalled_shouldPersistNotification() {
-        NotificationPreference preferences =
-                NotificationPreference.builder().inAppEnabled(true).emailEnabled(true).build();
+        UserFollowedEvent event =
+                new UserFollowedEvent(
+                        actor.getId(), actor.getHandle(),
+                        recipient.getId(), recipient.getHandle(),
+                        recipient.getEmail(), preferences);
 
-        when(preferenceRepository.findByUserId(recipient.getId()))
-                .thenReturn(Optional.of(preferences));
+        when(userRepository.findById(actor.getId())).thenReturn(Optional.of(actor));
+        when(userRepository.findById(recipient.getId())).thenReturn(Optional.of(recipient));
         when(notificationRepository.save(any(Notification.class)))
                 .thenAnswer(
                         invocation -> {
@@ -148,52 +161,37 @@ class NotificationEventListenerTest {
                             n.setId(UUID.randomUUID());
                             return n;
                         });
-
-        UserFollowedEvent event = new UserFollowedEvent(actor, recipient);
 
         listener.handleUserFollowedEvent(event);
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(notificationRepository).save(captor.capture());
 
-        Notification savedNotification = captor.getValue();
-        assertEquals(recipient, savedNotification.getRecipient());
-        assertEquals(actor, savedNotification.getActor());
-        assertNotNull(savedNotification.getData());
-        assertEquals(
-                actor.getId(), ((FollowNotificationData) savedNotification.getData()).actorId());
+        Notification saved = captor.getValue();
+        assertEquals(recipient, saved.getRecipient());
+        assertEquals(actor, saved.getActor());
+        assertNotNull(saved.getData());
+        assertEquals(actor.getId(), ((FollowNotificationData) saved.getData()).actorId());
     }
 
     @Test
     void handleUserRegisteredEvent_whenCalled_shouldPublishWelcomeEmail() {
-        User newUser =
-                aUser().withId(UUID.randomUUID())
-                        .withEmail("newuser@example.com")
-                        .withFirstName("John")
-                        .withLastName("Doe")
-                        .build();
-
         UserRegisteredEvent event =
-                new UserRegisteredEvent(
-                        newUser.getId(),
-                        newUser.getFirstName(),
-                        newUser.getLastName(),
-                        newUser.getEmail());
+                new UserRegisteredEvent(UUID.randomUUID(), "John", "Doe", "newuser@example.com");
 
         listener.handleUserRegisteredEvent(event);
 
-        ArgumentCaptor<TransactionalEmailMessage> captor =
-                ArgumentCaptor.forClass(TransactionalEmailMessage.class);
+        var captor = ArgumentCaptor.forClass(TransactionalEmailMessage.class);
         verify(rabbitTemplate)
                 .convertAndSend(
-                        eq(RabbitMQConfig.EXCHANGE),
-                        eq(RabbitMQConfig.TRANSACTIONAL_EMAIL_ROUTING_KEY),
+                        eq(RabbitMQConstants.EXCHANGE),
+                        eq(RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY),
                         captor.capture());
 
-        TransactionalEmailMessage message = captor.getValue();
-        assertEquals(newUser.getEmail(), message.to());
+        var message = captor.getValue();
+        assertEquals("newuser@example.com", message.to());
         assertEquals("Welcome to Our Blog!", message.subject());
         assertEquals(Templates.Email.WELCOME, message.template());
-        assertEquals(newUser.getFirstName(), message.variables().get("userName"));
+        assertEquals("John", message.variables().get("userName"));
     }
 }

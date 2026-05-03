@@ -1,8 +1,7 @@
-package com.github.mohrezal.api.domains.notifications.services.email;
+package com.github.mohrezal.worker.services.email;
 
-import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import com.github.mohrezal.worker.config.WorkerProperties;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,7 +14,7 @@ import org.thymeleaf.context.Context;
 @RequiredArgsConstructor
 public class SmtpEmailProvider implements EmailProvider {
 
-    private final ApplicationProperties applicationProperties;
+    private final WorkerProperties workerProperties;
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
 
@@ -23,14 +22,14 @@ public class SmtpEmailProvider implements EmailProvider {
     public void send(
             String to, String subject, String templatePath, Map<String, Object> variables) {
         try {
-            Context context = new Context();
+            var context = new Context();
             context.setVariables(variables);
-            String htmlContent = templateEngine.process(templatePath, context);
+            var htmlContent = templateEngine.process(templatePath, context);
 
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            var message = mailSender.createMimeMessage();
+            var helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(applicationProperties.mail().from());
+            helper.setFrom(workerProperties.mail().from());
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);

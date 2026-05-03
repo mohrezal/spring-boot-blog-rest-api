@@ -8,7 +8,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.github.mohrezal.api.domains.notifications.events.UserFollowedEvent;
 import com.github.mohrezal.api.domains.users.commands.params.FollowUserCommandParams;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
@@ -17,6 +16,7 @@ import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.models.UserFollow;
 import com.github.mohrezal.api.domains.users.repositories.UserFollowRepository;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.common.worker.events.UserFollowedEvent;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.github.mohrezal.api.domains.notifications.messages;
+package com.github.mohrezal.common.worker.messaging;
 
 import java.util.Map;
 
