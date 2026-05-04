@@ -75,14 +75,15 @@ public class NotificationEventListener {
 
     private void publishTransactionalEmail(TransactionalEmailMessage message) {
         rabbitTemplate.convertAndSend(
-                RabbitMQConstants.EXCHANGE,
+                RabbitMQConstants.NOTIFICATION_EXCHANGE,
                 RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY,
                 message);
         log.debug("Published transactional email to queue for: {}", message.to());
     }
 
     private void publishToQueue(String routingKey, UUID notificationId) {
-        rabbitTemplate.convertAndSend(RabbitMQConstants.EXCHANGE, routingKey, notificationId);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConstants.NOTIFICATION_EXCHANGE, routingKey, notificationId);
         log.debug("Published notification {} to queue: {}", notificationId, routingKey);
     }
 }

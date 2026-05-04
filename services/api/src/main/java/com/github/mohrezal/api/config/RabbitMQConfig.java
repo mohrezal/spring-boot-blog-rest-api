@@ -5,6 +5,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -16,30 +17,36 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue emailQueue() {
-        return new Queue(RabbitMQConstants.EMAIL_QUEUE, true);
+        return QueueBuilder.durable(RabbitMQConstants.EMAIL_QUEUE)
+                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DEAD_EMAIL_ROUTING_KEY)
+                .build();
     }
 
     @Bean
     public Queue transactionalEmailQueue() {
-        return new Queue(RabbitMQConstants.TRANSACTIONAL_EMAIL_QUEUE, true);
+        return QueueBuilder.durable(RabbitMQConstants.TRANSACTIONAL_EMAIL_QUEUE)
+                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DEAD_TRANSACTIONAL_EMAIL_ROUTING_KEY)
+                .build();
     }
 
     @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange(RabbitMQConstants.EXCHANGE);
+    public DirectExchange notificationExchange() {
+        return new DirectExchange(RabbitMQConstants.NOTIFICATION_EXCHANGE);
     }
 
     @Bean
     public Binding emailBinding() {
         return BindingBuilder.bind(emailQueue())
-                .to(exchange())
+                .to(notificationExchange())
                 .with(RabbitMQConstants.EMAIL_ROUTING_KEY);
     }
 
     @Bean
     public Binding transactionalEmailBinding() {
         return BindingBuilder.bind(transactionalEmailQueue())
-                .to(exchange())
+                .to(notificationExchange())
                 .with(RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY);
     }
 
