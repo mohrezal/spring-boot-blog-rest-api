@@ -8,7 +8,7 @@ fi
 TIMESTAMP=$(date +%s)
 MIGRATION_NAME=$1
 FILENAME="${TIMESTAMP}_${MIGRATION_NAME}.sql"
-MIGRATION_DIR="src/main/resources/db/changelog/migrations"
+MIGRATION_DIR="services/api/src/main/resources/db/changelog/migrations"
 
 mkdir -p "${MIGRATION_DIR}"
 

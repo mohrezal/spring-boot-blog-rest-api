@@ -65,7 +65,7 @@ public class User extends BaseModel implements UserDetails {
 
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
-    private Boolean isVerified = true;
+    private Boolean isVerified = false;
 
     @OneToOne(
             mappedBy = "user",
