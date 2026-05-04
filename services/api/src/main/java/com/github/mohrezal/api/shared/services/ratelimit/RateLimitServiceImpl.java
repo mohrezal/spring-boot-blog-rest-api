@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.enums.RateLimitRedisKey;
-import com.github.mohrezal.api.shared.interfaces.CacheService;
+import com.github.mohrezal.common.redis.RedisCacheService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class RateLimitServiceImpl implements RateLimitService {
 
     private final ApplicationProperties applicationProperties;
-    private final CacheService cacheService;
+    private final RedisCacheService cacheService;
     private final Cache<String, Bucket> buckets =
             Caffeine.newBuilder().expireAfterAccess(Duration.ofHours(1)).build();
 

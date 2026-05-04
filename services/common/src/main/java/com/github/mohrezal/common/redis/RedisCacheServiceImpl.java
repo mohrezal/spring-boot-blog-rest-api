@@ -1,6 +1,5 @@
-package com.github.mohrezal.api.shared.services.redis;
+package com.github.mohrezal.common.redis;
 
-import com.github.mohrezal.api.shared.interfaces.CacheService;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RedisCacheServiceImpl implements CacheService {
+public class RedisCacheServiceImpl implements RedisCacheService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, Long> redisCounterTemplate;
@@ -42,7 +41,7 @@ public class RedisCacheServiceImpl implements CacheService {
     }
 
     @Override
-    public Optional<CacheService.CounterState> increment(String key, Duration window) {
+    public Optional<RedisCacheService.CounterState> increment(String key, Duration window) {
         try {
             Long currentCount = redisCounterTemplate.opsForValue().increment(key);
             if (currentCount == null) {
@@ -57,7 +56,7 @@ public class RedisCacheServiceImpl implements CacheService {
             Long ttl = redisCounterTemplate.getExpire(key, TimeUnit.SECONDS);
             long ttlSeconds = ttl != null && ttl >= 0 ? ttl : window.toSeconds();
 
-            return Optional.of(new CacheService.CounterState(currentCount, ttlSeconds));
+            return Optional.of(new RedisCacheService.CounterState(currentCount, ttlSeconds));
         } catch (Exception e) {
             log.warn(
                     "Redis increment-in-window failed for key='{}'. Error: {}",
