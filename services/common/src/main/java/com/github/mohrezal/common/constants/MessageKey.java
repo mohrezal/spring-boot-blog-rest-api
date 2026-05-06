@@ -17,7 +17,8 @@ public final class MessageKey {
             "shared.error.slug-generation-failed";
     public static final String SHARED_ERROR_RATE_LIMIT_EXCEEDED =
             "shared.error.rate-limit-exceeded";
-
+    public static final String SHARED_ERROR_INVALID_REDIRECT_URL =
+            "shared.error.invalid-redirect-url";
     public static final String USER_NOT_FOUND = "user.error.not-found";
     public static final String USER_EMAIL_ALREADY_EXISTS = "user.error.email-already-exists";
     public static final String USER_INVALID_CREDENTIALS = "user.error.invalid-credentials";

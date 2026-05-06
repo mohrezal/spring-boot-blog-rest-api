@@ -23,8 +23,11 @@ import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.domains.users.services.registration.RegistrationService;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
+import com.github.mohrezal.api.shared.services.hash.HashService;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
+import com.github.mohrezal.api.shared.utils.RedirectUrlUtils;
 import com.github.mohrezal.api.support.constants.UserAgents;
+import com.github.mohrezal.common.redis.RedisCacheService;
 import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +54,12 @@ class RegisterUserCommandTest {
 
     @Mock private ApplicationEventPublisher eventPublisher;
 
+    @Mock private RedisCacheService redisCacheService;
+
+    @Mock private HashService hashService;
+
+    @Mock private RedirectUrlUtils redirectUrlUtils;
+
     private final User user = aUser().build();
 
     private final RegisterUserRequest request =
@@ -63,7 +72,8 @@ class RegisterUserCommandTest {
                     "Hey, I'm John Deo.");
 
     private final RegisterUserCommandParams params =
-            new RegisterUserCommandParams(request, "127.0.0.1", UserAgents.MAC);
+            new RegisterUserCommandParams(
+                    request, "127.0.0.1", UserAgents.MAC, "http://localhost:3000");
 
     private RegisterUserCommand command;
 
@@ -79,7 +89,10 @@ class RegisterUserCommandTest {
                 userRepository,
                 applicationProperties,
                 notificationPreferenceRepository,
-                eventPublisher);
+                eventPublisher,
+                redisCacheService,
+                hashService,
+                redirectUrlUtils);
     }
 
     @BeforeEach

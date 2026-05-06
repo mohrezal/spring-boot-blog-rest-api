@@ -65,7 +65,8 @@ public class NotificationEventListener {
     public void handleUserRegisteredEvent(UserRegisteredEvent event) {
         log.debug("UserRegisteredEvent: queuing welcome email for {}", event.email());
 
-        Map<String, Object> variables = Map.of("userName", event.firstName());
+        Map<String, Object> variables =
+                Map.of("userName", event.firstName(), "verificationUrl", event.verificationUrl());
         var message =
                 new TransactionalEmailMessage(
                         event.email(), "Welcome to Our Blog!", Templates.Email.WELCOME, variables);

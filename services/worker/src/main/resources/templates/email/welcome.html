@@ -61,13 +61,30 @@
         .content-text {
             font-size: 16px;
             color: #3f3f46;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             line-height: 1.7;
         }
 
-        .cta-section {
+        .verification-section {
+            margin-top: 32px;
+            padding: 24px;
+            background-color: #fafafa;
+            border: 1px solid #e4e4e7;
+            border-radius: 0.5rem;
             text-align: center;
-            margin: 32px 0;
+        }
+
+        .verification-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #18181b;
+            margin-bottom: 12px;
+        }
+
+        .verification-text {
+            font-size: 14px;
+            color: #52525b;
+            margin-bottom: 24px;
         }
 
         .cta-button {
@@ -77,19 +94,32 @@
             text-decoration: none;
             font-size: 16px;
             font-weight: 500;
-            padding: 12px 24px;
+            padding: 12px 32px;
             border-radius: 0.5rem;
             transition: background-color 0.2s ease;
+            margin-bottom: 16px;
         }
 
         .cta-button:hover {
             background-color: #18181b;
         }
 
+        .fallback-link {
+            font-size: 13px;
+            color: #71717a;
+            word-break: break-all;
+            margin-top: 12px;
+        }
+
+        .fallback-link a {
+            color: #52525b;
+            text-decoration: underline;
+        }
+
         .secondary-text {
             font-size: 14px;
             color: #71717a;
-            margin-top: 20px;
+            margin-top: 24px;
             line-height: 1.6;
         }
 
@@ -148,6 +178,20 @@
         <div class="content-text">
             Thank you for joining our community! We're excited to have you here.
             Start exploring amazing articles, share your thoughts, and connect with other readers.
+        </div>
+
+        <div class="verification-section">
+            <div class="verification-title">Verify Your Email Address</div>
+            <div class="verification-text">
+                Please click the button below to confirm your email and activate your account.
+                This helps us ensure you're a real person.
+            </div>
+            <a th:href="${verificationUrl}" class="cta-button">Verify Email</a>
+            <div class="fallback-link">
+                If the button doesn't work, copy and paste this link into your browser:
+                <br>
+                <a th:href="${verificationUrl}" th:text="${verificationUrl}">verification link</a>
+            </div>
         </div>
 
         <div class="secondary-text">

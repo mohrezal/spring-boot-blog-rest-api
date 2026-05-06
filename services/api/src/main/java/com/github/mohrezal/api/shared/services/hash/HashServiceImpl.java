@@ -4,6 +4,7 @@ import com.github.mohrezal.api.shared.exceptions.types.UnexpectedException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +35,10 @@ public class HashServiceImpl implements HashService {
             log.error("Unexpected error happened on sha256: ", ex);
             throw new UnexpectedException();
         }
+    }
+
+    @Override
+    public String sha256(String input, Function<String, Boolean> existsChecker) {
+        return "";
     }
 }

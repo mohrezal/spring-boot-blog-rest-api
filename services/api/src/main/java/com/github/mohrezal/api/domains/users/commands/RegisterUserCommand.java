@@ -14,15 +14,23 @@ import com.github.mohrezal.api.domains.users.mappers.UserMapper;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.domains.users.services.registration.RegistrationService;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import com.github.mohrezal.api.shared.exceptions.types.InvalidRedirectUrlException;
 import com.github.mohrezal.api.shared.interfaces.Command;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
+import com.github.mohrezal.api.shared.services.hash.HashService;
 import com.github.mohrezal.api.shared.services.jwt.JwtService;
+import com.github.mohrezal.api.shared.utils.RedirectUrlUtils;
+import com.github.mohrezal.common.redis.RedisCacheService;
+import com.github.mohrezal.common.redis.constants.RedisKeyFactory;
 import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
+import java.time.Duration;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +45,17 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     private final ApplicationProperties applicationProperties;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RedisCacheService redisCacheService;
+    private final HashService hashService;
+    private final RedirectUrlUtils redirectUrlUtils;
 
     @Override
     public void validate(RegisterUserCommandParams params) {
-        String handle = params.registerUserRequest().handle().toLowerCase();
+        if (!redirectUrlUtils.isValid(params.redirectUrl())) {
+            throw new InvalidRedirectUrlException();
+        }
+
+        var handle = params.registerUserRequest().handle().toLowerCase();
         var request = params.registerUserRequest();
         var context = new UserRegisterExceptionContext(request.email(), request.handle());
 
@@ -71,14 +86,26 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
             jwtService.saveRefreshToken(
                     refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
+            var token = hashService.sha256(UUID.randomUUID().toString());
+
             eventPublisher.publishEvent(
                     new UserRegisteredEvent(
                             user.getId(),
                             user.getFirstName(),
                             user.getLastName(),
-                            user.getEmail()));
+                            user.getEmail(),
+                            UriComponentsBuilder.fromPath(params.redirectUrl())
+                                    .queryParam("token", token)
+                                    .build()
+                                    .toUriString()));
+
+            redisCacheService.set(
+                    RedisKeyFactory.Verification.token(token),
+                    user.getId(),
+                    Duration.ofSeconds(RedisKeyFactory.Verification.TTL_SECONDS));
 
             var authResponse = new AuthResponse(accessToken, refreshToken);
+
             log.info("User registration successful.");
             return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
         } catch (UserEmailAlreadyExistsException ex) {

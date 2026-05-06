@@ -177,7 +177,8 @@ class NotificationEventListenerTest {
     @Test
     void handleUserRegisteredEvent_whenCalled_shouldPublishWelcomeEmail() {
         UserRegisteredEvent event =
-                new UserRegisteredEvent(UUID.randomUUID(), "John", "Doe", "newuser@example.com");
+                new UserRegisteredEvent(
+                        UUID.randomUUID(), "John", "Doe", "newuser@example.com", "random-token");
 
         listener.handleUserRegisteredEvent(event);
 
