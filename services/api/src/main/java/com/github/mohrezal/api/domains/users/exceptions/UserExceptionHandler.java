@@ -1,17 +1,18 @@
 package com.github.mohrezal.api.domains.users.exceptions;
 
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidVerificationTokenException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserRefreshTokenNotFoundException;
 import com.github.mohrezal.api.shared.exceptions.AbstractExceptionHandler;
 import com.github.mohrezal.api.shared.exceptions.ErrorResponse;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
-import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,50 +27,62 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserNotFoundException(
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(
             UserNotFoundException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 
     @ExceptionHandler(UserEmailAlreadyExistsException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleEmailAlreadyExistsException(
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(
             UserEmailAlreadyExistsException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 
     @ExceptionHandler(UserInvalidCredentialsException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleInvalidCredentialsException(
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
             UserInvalidCredentialsException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 
     @ExceptionHandler(UserInvalidRefreshTokenException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserInvalidRefreshTokenException(
+    public ResponseEntity<ErrorResponse> handleUserInvalidRefreshTokenException(
             UserInvalidRefreshTokenException ex, WebRequest request) {
         return buildErrorResponseAndClearAuthCookies(ex);
     }
 
     @ExceptionHandler(UserRefreshTokenNotFoundException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserRefreshTokenNotFoundException(
+    public ResponseEntity<ErrorResponse> handleUserRefreshTokenNotFoundException(
             UserRefreshTokenNotFoundException ex, WebRequest request) {
         return buildErrorResponseAndClearAuthCookies(ex);
     }
 
     @ExceptionHandler(UserAlreadyFollowingException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserAlreadyFollowingException(
+    public ResponseEntity<ErrorResponse> handleUserAlreadyFollowingException(
             UserAlreadyFollowingException ex) {
         return buildErrorResponse(ex);
     }
 
     @ExceptionHandler(UserCannotFollowOrUnfollowSelfException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserCannotFollowSelfException(
+    public ResponseEntity<ErrorResponse> handleUserCannotFollowSelfException(
             UserCannotFollowOrUnfollowSelfException ex) {
         return buildErrorResponse(ex);
     }
 
     @ExceptionHandler(UserNotFollowingException.class)
-    public ResponseEntity<@NonNull ErrorResponse> handleUserNotFollowingException(
+    public ResponseEntity<ErrorResponse> handleUserNotFollowingException(
             UserNotFollowingException ex) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserInvalidVerificationTokenException.class)
+    public ResponseEntity<ErrorResponse> handleUserInvalidVerificationTokenException(
+            UserInvalidVerificationTokenException ex) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserAlreadyVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyVerifiedException(
+            UserAlreadyVerifiedException ex) {
         return buildErrorResponse(ex);
     }
 }

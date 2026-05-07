@@ -186,6 +186,11 @@ app:
         path: "/api/v1/users/*/unfollow"
         ipLimit: 60
         userLimit: 30
+      - key: verify-email
+        method: GET
+        path: "/api/v1/auth/verify-email"
+        ipLimit: 5
+        userLimit: 5
   storage:
     allowedMimeTypes: ${APPLICATION_STORAGE_ALLOWED_MIME_TYPES}
     maxFileSize: ${APPLICATION_STORAGE_MAX_FILE_SIZE}

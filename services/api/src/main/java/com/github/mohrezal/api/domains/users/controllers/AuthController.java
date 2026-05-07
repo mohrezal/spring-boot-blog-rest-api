@@ -5,10 +5,12 @@ import com.github.mohrezal.api.domains.users.commands.LoginUserCommand;
 import com.github.mohrezal.api.domains.users.commands.LogoutUserCommand;
 import com.github.mohrezal.api.domains.users.commands.RefreshTokenCommand;
 import com.github.mohrezal.api.domains.users.commands.RegisterUserCommand;
+import com.github.mohrezal.api.domains.users.commands.VerifyEmailCommand;
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.LogoutUserCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
+import com.github.mohrezal.api.domains.users.commands.params.VerifyEmailCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.CsrfTokenResponse;
 import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
@@ -45,6 +47,8 @@ public class AuthController {
     private final LoginUserCommand loginUserCommand;
     private final RefreshTokenCommand refreshTokenCommand;
     private final LogoutUserCommand logoutUserCommand;
+    private final VerifyEmailCommand verifyEmailCommand;
+
     private final CookieUtils cookieUtils;
     private final RequestInfoService requestInfoService;
 
@@ -146,5 +150,13 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .build();
+    }
+
+    @GetMapping(Routes.Auth.VERIFY_EMAIL)
+    public ResponseEntity<Void> verifyEmail(
+            @RequestParam("token") String token, @RequestParam("redirectUrl") String redirectUrl) {
+        var params = new VerifyEmailCommandParams(token, redirectUrl);
+        verifyEmailCommand.execute(params);
+        return ResponseEntity.ok().build();
     }
 }

@@ -31,6 +31,9 @@ public final class MessageKey {
     public static final String USER_NOT_FOLLOWING = "user.error.not-following";
     public static final String USER_HANDLE_ALREADY_EXISTS = "user.error.handle-already-exists";
     public static final String USER_HANDLE_RESERVED = "user.error.handle-reserved";
+    public static final String USER_INVALID_VERIFICATION_TOKEN =
+            "user.error.invalid-verification-token";
+    public static final String USER_ALREADY_VERIFIED = "user.error.already-verified";
 
     public static final String POST_NOT_FOUND = "post.error.not-found";
     public static final String POST_SLUG_ALREADY_EXISTS = "post.error.slug-already-exists";
