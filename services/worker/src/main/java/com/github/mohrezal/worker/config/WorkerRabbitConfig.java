@@ -26,98 +26,74 @@ public class WorkerRabbitConfig {
 
     @Bean
     public Queue emailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_EMAIL_QUEUE)
-                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_EMAIL_ROUTING_KEY)
-                .build();
-    }
-
-    @Bean
-    public Queue transactionalEmailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_QUEUE)
-                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_ROUTING_KEY)
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.EMAIL)
+                .maxPriority(RabbitMQConstants.Notification.MAX_PRIORITY)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
                 .build();
     }
 
     @Bean
     public Queue verificationReminderDelayQueue() {
         return QueueBuilder.durable(
-                        RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_DELAY_QUEUE)
+                        RabbitMQConstants.Notification.Queue.VERIFICATION_REMINDER_DELAY)
                 .ttl((int) workerProperties.reminder().ttl().toMillis())
-                .deadLetterExchange(RabbitMQConstants.NOTIFICATION_EXCHANGE)
+                .deadLetterExchange(RabbitMQConstants.Notification.EXCHANGE)
                 .deadLetterRoutingKey(
-                        RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_CONSUME_ROUTING_KEY)
-                .build();
-    }
-
-    @Bean
-    public Queue verificationReminderConsumeQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_QUEUE)
+                        RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_CONSUME)
+                .lazy()
                 .build();
     }
 
     @Bean
     public DirectExchange notificationExchange() {
-        return new DirectExchange(RabbitMQConstants.NOTIFICATION_EXCHANGE);
+        return new DirectExchange(RabbitMQConstants.Notification.EXCHANGE);
     }
 
     @Bean
     public Binding emailBinding() {
         return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.EMAIL);
     }
 
     @Bean
     public Binding transactionalEmailBinding() {
-        return BindingBuilder.bind(transactionalEmailQueue())
+        return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.TRANSACTIONAL_EMAIL);
     }
 
     @Bean
     public Binding verificationReminderDelayBinding() {
         return BindingBuilder.bind(verificationReminderDelayQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_DELAY_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_DELAY);
     }
 
     @Bean
     public Binding verificationReminderConsumeBinding() {
-        return BindingBuilder.bind(verificationReminderConsumeQueue())
+        return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_CONSUME_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_CONSUME);
     }
 
     @Bean
     public DirectExchange deadLetterExchange() {
-        return new DirectExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE);
+        return new DirectExchange(RabbitMQConstants.DeadLetter.EXCHANGE);
     }
 
     @Bean
     public Queue deadEmailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.DEAD_LETTER_EMAIL_QUEUE).build();
-    }
-
-    @Bean
-    public Queue deadTransactionalEmailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_QUEUE)
-                .build();
+        return QueueBuilder.durable(RabbitMQConstants.DeadLetter.Queue.EMAIL).lazy().build();
     }
 
     @Bean
     public Binding deadEmailBinding() {
         return BindingBuilder.bind(deadEmailQueue())
                 .to(deadLetterExchange())
-                .with(RabbitMQConstants.DEAD_LETTER_EMAIL_ROUTING_KEY);
-    }
-
-    @Bean
-    public Binding deadTransactionalEmailBinding() {
-        return BindingBuilder.bind(deadTransactionalEmailQueue())
-                .to(deadLetterExchange())
-                .with(RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL);
     }
 
     @Bean
@@ -133,7 +109,7 @@ public class WorkerRabbitConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         configurer.configure(factory, connectionFactory);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-
+        factory.setPrefetchCount(1);
         var retryBuilder =
                 RetryInterceptorBuilder.stateless()
                         .maxRetries(2)

@@ -19,7 +19,7 @@ public class TransactionalEmailConsumer {
     private final EmailProvider emailProvider;
 
     @RabbitListener(
-            queues = RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_QUEUE,
+            queues = RabbitMQConstants.Notification.Queue.EMAIL,
             containerFactory = "manualAckContainerFactory")
     public void consume(
             TransactionalEmailMessage message,

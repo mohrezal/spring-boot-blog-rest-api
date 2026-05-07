@@ -14,7 +14,6 @@ import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
 import com.github.mohrezal.common.worker.messaging.VerificationReminderMessage;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -61,6 +60,16 @@ public class NotificationEventListener {
             sseService.push(recipient.getId(), summary);
             log.debug("Pushed in-app notification to user {}", recipient.getId());
         }
+        //        if(event.preferences().emailEnabled()){
+        //            rabbitTemplate.convertAndSend(
+        //                    RabbitMQConstants.NOTIFICATION_EXCHANGE,
+        //                    RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY,
+        //                    event,
+        //                    msg -> {
+        //                        msg.getMessageProperties().setPriority(0);
+        //                        return msg;
+        //                    });
+        //        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -82,24 +91,25 @@ public class NotificationEventListener {
         var reminder =
                 new VerificationReminderMessage(
                         event.email(), event.verificationToken(), reminderVariables);
-        publishTransactionalEmail(message);
         rabbitTemplate.convertAndSend(
-                RabbitMQConstants.NOTIFICATION_EXCHANGE,
-                RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_DELAY_ROUTING_KEY,
-                reminder);
-    }
-
-    private void publishTransactionalEmail(TransactionalEmailMessage message) {
-        rabbitTemplate.convertAndSend(
-                RabbitMQConstants.NOTIFICATION_EXCHANGE,
-                RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY,
-                message);
+                RabbitMQConstants.Notification.EXCHANGE,
+                RabbitMQConstants.Notification.RoutingKey.TRANSACTIONAL_EMAIL,
+                message,
+                msg -> {
+                    msg.getMessageProperties()
+                            .setPriority(RabbitMQConstants.Notification.MAX_PRIORITY);
+                    return msg;
+                });
         log.debug("Published transactional email to queue for: {}", message.to());
-    }
 
-    private void publishToQueue(String routingKey, UUID notificationId) {
         rabbitTemplate.convertAndSend(
-                RabbitMQConstants.NOTIFICATION_EXCHANGE, routingKey, notificationId);
-        log.debug("Published notification {} to queue: {}", notificationId, routingKey);
+                RabbitMQConstants.Notification.EXCHANGE,
+                RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_DELAY,
+                reminder,
+                msg -> {
+                    msg.getMessageProperties()
+                            .setPriority(RabbitMQConstants.Notification.MAX_PRIORITY);
+                    return msg;
+                });
     }
 }

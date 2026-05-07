@@ -139,8 +139,8 @@ class NotificationEventListenerTest {
 
         verify(rabbitTemplate, never())
                 .convertAndSend(
-                        eq(RabbitMQConstants.NOTIFICATION_EXCHANGE),
-                        eq(RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY),
+                        eq(RabbitMQConstants.Notification.EXCHANGE),
+                        eq(RabbitMQConstants.Notification.RoutingKey.EMAIL),
                         any(Object.class));
     }
 
@@ -190,8 +190,8 @@ class NotificationEventListenerTest {
         var captor = ArgumentCaptor.forClass(TransactionalEmailMessage.class);
         verify(rabbitTemplate)
                 .convertAndSend(
-                        eq(RabbitMQConstants.NOTIFICATION_EXCHANGE),
-                        eq(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY),
+                        eq(RabbitMQConstants.Notification.EXCHANGE),
+                        eq(RabbitMQConstants.Notification.RoutingKey.TRANSACTIONAL_EMAIL),
                         captor.capture());
 
         var message = captor.getValue();

@@ -17,37 +17,38 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue emailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_EMAIL_QUEUE)
-                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_EMAIL_ROUTING_KEY)
-                .build();
-    }
-
-    @Bean
-    public Queue transactionalEmailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_QUEUE)
-                .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_ROUTING_KEY)
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.EMAIL)
+                .maxPriority(10)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
                 .build();
     }
 
     @Bean
     public DirectExchange notificationExchange() {
-        return new DirectExchange(RabbitMQConstants.NOTIFICATION_EXCHANGE);
+        return new DirectExchange(RabbitMQConstants.Notification.EXCHANGE);
     }
 
     @Bean
     public Binding emailBinding() {
         return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.EMAIL);
     }
 
     @Bean
     public Binding transactionalEmailBinding() {
-        return BindingBuilder.bind(transactionalEmailQueue())
+        return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.Notification.RoutingKey.TRANSACTIONAL_EMAIL);
+    }
+
+    @Bean
+    public Binding verificationReminderConsumeBinding() {
+        return BindingBuilder.bind(emailQueue())
+                .to(notificationExchange())
+                .with(RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_CONSUME);
     }
 
     @Bean
