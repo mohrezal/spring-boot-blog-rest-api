@@ -12,6 +12,7 @@ import com.github.mohrezal.common.constants.Templates;
 import com.github.mohrezal.common.worker.events.UserFollowedEvent;
 import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
+import com.github.mohrezal.common.worker.messaging.VerificationReminderMessage;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
@@ -64,20 +66,33 @@ public class NotificationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserRegisteredEvent(UserRegisteredEvent event) {
         log.debug("UserRegisteredEvent: queuing welcome email for {}", event.email());
-
-        Map<String, Object> variables =
-                Map.of("userName", event.firstName(), "verificationUrl", event.verificationUrl());
+        var verificationUrl =
+                UriComponentsBuilder.fromPath(event.redirectUrl())
+                        .queryParam("token", event.verificationToken())
+                        .toUriString();
+        var variables =
+                Map.<String, Object>of(
+                        "userName", event.firstName(), "verificationUrl", verificationUrl);
         var message =
                 new TransactionalEmailMessage(
                         event.email(), "Welcome to Our Blog!", Templates.Email.WELCOME, variables);
-
+        var reminderVariables =
+                Map.<String, Object>of(
+                        "userName", event.firstName(), "verificationUrl", verificationUrl);
+        var reminder =
+                new VerificationReminderMessage(
+                        event.email(), event.verificationToken(), reminderVariables);
         publishTransactionalEmail(message);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConstants.NOTIFICATION_EXCHANGE,
+                RabbitMQConstants.NOTIFICATION_VERIFICATION_REMINDER_DELAY_ROUTING_KEY,
+                reminder);
     }
 
     private void publishTransactionalEmail(TransactionalEmailMessage message) {
         rabbitTemplate.convertAndSend(
                 RabbitMQConstants.NOTIFICATION_EXCHANGE,
-                RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY,
+                RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY,
                 message);
         log.debug("Published transactional email to queue for: {}", message.to());
     }

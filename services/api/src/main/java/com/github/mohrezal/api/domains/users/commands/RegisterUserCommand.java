@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -94,10 +93,8 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
                             user.getFirstName(),
                             user.getLastName(),
                             user.getEmail(),
-                            UriComponentsBuilder.fromPath(params.redirectUrl())
-                                    .queryParam("token", token)
-                                    .build()
-                                    .toUriString()));
+                            token,
+                            params.redirectUrl()));
 
             redisCacheService.set(
                     RedisKeyFactory.Verification.token(token),

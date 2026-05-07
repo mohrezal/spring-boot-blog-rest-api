@@ -140,7 +140,7 @@ class NotificationEventListenerTest {
         verify(rabbitTemplate, never())
                 .convertAndSend(
                         eq(RabbitMQConstants.NOTIFICATION_EXCHANGE),
-                        eq(RabbitMQConstants.EMAIL_ROUTING_KEY),
+                        eq(RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY),
                         any(Object.class));
     }
 
@@ -178,7 +178,12 @@ class NotificationEventListenerTest {
     void handleUserRegisteredEvent_whenCalled_shouldPublishWelcomeEmail() {
         UserRegisteredEvent event =
                 new UserRegisteredEvent(
-                        UUID.randomUUID(), "John", "Doe", "newuser@example.com", "random-token");
+                        UUID.randomUUID(),
+                        "John",
+                        "Doe",
+                        "newuser@example.com",
+                        "random-token",
+                        "http://localhost:3000");
 
         listener.handleUserRegisteredEvent(event);
 
@@ -186,7 +191,7 @@ class NotificationEventListenerTest {
         verify(rabbitTemplate)
                 .convertAndSend(
                         eq(RabbitMQConstants.NOTIFICATION_EXCHANGE),
-                        eq(RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY),
+                        eq(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY),
                         captor.capture());
 
         var message = captor.getValue();

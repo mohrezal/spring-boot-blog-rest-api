@@ -22,7 +22,18 @@ spring:
   threads:
     virtual:
       enabled: true
-
+  data:
+    redis:
+      host: ${APPLICATION_REDIS_HOST}
+      port: ${APPLICATION_REDIS_PORT}
+      password: ${APPLICATION_REDIS_PASSWORD}
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
 app:
   mail:
     from: ${APPLICATION_MAIL_FROM}
+  reminder:
+    ttl: ${APPLICATION_VERIFICATION_REMINDER_TTL}

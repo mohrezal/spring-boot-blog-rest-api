@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class DeadLetterInspector {
-    @RabbitListener(queues = RabbitMQConstants.DEAD_TRANSACTIONAL_EMAIL_QUEUE)
+    @RabbitListener(queues = RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_QUEUE)
     public void handleDeadTransactionalEmail(Message failedMessage) {
         String body = new String(failedMessage.getBody());
         log.error("Dead‑lettered transactional email: {}", body);

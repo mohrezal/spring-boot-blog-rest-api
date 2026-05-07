@@ -17,17 +17,17 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue emailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.EMAIL_QUEUE)
+        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_EMAIL_QUEUE)
                 .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_EMAIL_ROUTING_KEY)
+                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_EMAIL_ROUTING_KEY)
                 .build();
     }
 
     @Bean
     public Queue transactionalEmailQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.TRANSACTIONAL_EMAIL_QUEUE)
+        return QueueBuilder.durable(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_QUEUE)
                 .deadLetterExchange(RabbitMQConstants.DEAD_LETTER_EXCHANGE)
-                .deadLetterRoutingKey(RabbitMQConstants.DEAD_TRANSACTIONAL_EMAIL_ROUTING_KEY)
+                .deadLetterRoutingKey(RabbitMQConstants.DEAD_LETTER_TRANSACTIONAL_EMAIL_ROUTING_KEY)
                 .build();
     }
 
@@ -40,14 +40,14 @@ public class RabbitMQConfig {
     public Binding emailBinding() {
         return BindingBuilder.bind(emailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.NOTIFICATION_EMAIL_ROUTING_KEY);
     }
 
     @Bean
     public Binding transactionalEmailBinding() {
         return BindingBuilder.bind(transactionalEmailQueue())
                 .to(notificationExchange())
-                .with(RabbitMQConstants.TRANSACTIONAL_EMAIL_ROUTING_KEY);
+                .with(RabbitMQConstants.NOTIFICATION_TRANSACTIONAL_EMAIL_ROUTING_KEY);
     }
 
     @Bean
