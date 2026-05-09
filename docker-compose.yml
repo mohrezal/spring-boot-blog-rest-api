@@ -74,9 +74,12 @@ services:
     ports:
       - "${APPLICATION_RABBIT_MQ_PORT}:5672"
       - "${APPLICATION_RABBIT_MQ_CLIENT_PORT}:15672"
+      - "${APPLICATION_RABBIT_MQ_PROMETHEUS_PORT}:15692"
     environment:
       RABBITMQ_DEFAULT_USER: ${APPLICATION_RABBIT_MQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${APPLICATION_RABBIT_MQ_PASSWORD}
+    volumes:
+      - ./configs/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
       - blog-network
     restart: unless-stopped
@@ -127,6 +130,34 @@ services:
     depends_on:
       rabbitmq:
         condition: service_started
+  prometheus:
+    image: prom/prometheus:v3.11.3
+    container_name: prometheus
+    ports:
+      - "${MONITORING_PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - blog-network
+    restart: unless-stopped
+  grafana:
+    image: grafana/grafana:13.0.1
+    container_name: grafana
+    ports:
+      - "${MONITORING_GRAFANA_CLIENT_PORT}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${MONITORING_GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${MONITORING_GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning
+      - ./configs/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - blog-network
+    restart: unless-stopped
 
 networks:
   blog-network:
@@ -136,3 +167,4 @@ volumes:
   database:
   static-data:
   redis-data:
+  grafana-data:
