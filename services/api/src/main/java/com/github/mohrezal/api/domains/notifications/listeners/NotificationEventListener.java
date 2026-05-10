@@ -14,8 +14,10 @@ import com.github.mohrezal.common.worker.events.UserRegisteredEvent;
 import com.github.mohrezal.common.worker.messaging.TransactionalEmailMessage;
 import com.github.mohrezal.common.worker.messaging.VerificationReminderMessage;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -34,6 +36,14 @@ public class NotificationEventListener {
     private final UserRepository userRepository;
     private final NotificationSseService sseService;
     private final NotificationMapper notificationMapper;
+
+    private MessagePostProcessor withMessageId() {
+        return msg -> {
+            msg.getMessageProperties()
+                    .setHeader(RabbitMQConstants.Header.MESSAGE_ID, UUID.randomUUID().toString());
+            return msg;
+        };
+    }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -98,6 +108,7 @@ public class NotificationEventListener {
                 msg -> {
                     msg.getMessageProperties()
                             .setPriority(RabbitMQConstants.Notification.MAX_PRIORITY);
+                    withMessageId().postProcessMessage(msg);
                     return msg;
                 });
         log.debug("Published transactional email to queue for: {}", message.to());
@@ -109,6 +120,7 @@ public class NotificationEventListener {
                 msg -> {
                     msg.getMessageProperties()
                             .setPriority(RabbitMQConstants.Notification.MAX_PRIORITY);
+                    withMessageId().postProcessMessage(msg);
                     return msg;
                 });
     }

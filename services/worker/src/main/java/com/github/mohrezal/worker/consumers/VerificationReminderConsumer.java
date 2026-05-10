@@ -7,6 +7,7 @@ import com.github.mohrezal.common.redis.constants.RedisKeyFactory;
 import com.github.mohrezal.common.worker.messaging.VerificationReminderMessage;
 import com.github.mohrezal.worker.services.email.EmailProvider;
 import com.rabbitmq.client.Channel;
+import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,18 @@ class VerificationReminderConsumer {
     public void consume(
             VerificationReminderMessage message,
             Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
+            @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+            @Header(name = RabbitMQConstants.Header.MESSAGE_ID, required = false)
+                    String messageId) {
         try {
+            if (messageId != null
+                    && redisCacheService
+                            .get(RedisKeyFactory.Notification.delivered(messageId), String.class)
+                            .isPresent()) {
+                log.info("Duplicate transactional email {} – skipping", messageId);
+                channel.basicAck(tag, false);
+                return;
+            }
             Optional<String> token =
                     redisCacheService.get(
                             RedisKeyFactory.Verification.token(message.token()), String.class);
@@ -43,6 +54,12 @@ class VerificationReminderConsumer {
                     "Please verify your account",
                     Templates.Email.VERIFICATION_REMINDER,
                     message.variables());
+            if (messageId != null) {
+                redisCacheService.set(
+                        RedisKeyFactory.Notification.delivered(messageId),
+                        "1",
+                        Duration.ofSeconds(RedisKeyFactory.Notification.TTL_SECONDS));
+            }
 
             channel.basicAck(tag, false);
 

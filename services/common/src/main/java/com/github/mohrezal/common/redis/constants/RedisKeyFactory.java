@@ -16,4 +16,15 @@ public final class RedisKeyFactory {
 
         public static final long TTL_SECONDS = 86_400;
     }
+
+    public static final class Notification {
+        private static final String PREFIX = "notification";
+        private static final String DELIVERED = "delivered";
+
+        public static String delivered(String token) {
+            return build(PREFIX, DELIVERED, token);
+        }
+
+        public static final long TTL_SECONDS = 86_400;
+    }
 }

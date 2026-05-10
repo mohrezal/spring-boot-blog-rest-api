@@ -3,6 +3,10 @@ package com.github.mohrezal.common.constants;
 public final class RabbitMQConstants {
     private RabbitMQConstants() {}
 
+    public static final class Header {
+        public static final String MESSAGE_ID = "x-message-id";
+    }
+
     public static final class Notification {
         public static final String EXCHANGE = "notification.exchange";
         public static final int MAX_PRIORITY = 10;
