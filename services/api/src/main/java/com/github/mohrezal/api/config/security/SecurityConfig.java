@@ -44,7 +44,9 @@ public class SecurityConfig {
         "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
     };
 
-    private static final String[] PUBLIC_ACTUATOR_PATHS = {"/actuator/health", "/actuator/info"};
+    private static final String[] PUBLIC_ACTUATOR_PATHS = {
+        "/actuator/health", "/actuator/info", "/actuator/*"
+    };
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
         Routes.build(Routes.Auth.BASE, Routes.Auth.REGISTER),

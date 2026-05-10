@@ -1,5 +1,5 @@
 services:
-  app:
+  api:
     build:
       context: .
       dockerfile: services/api/Dockerfile
@@ -43,7 +43,7 @@ services:
       - POSTGRES_USER=${APPLICATION_DATABASE_USERNAME}
       - POSTGRES_PASSWORD=${APPLICATION_DATABASE_PASSWORD}
     volumes:
-      - database:/var/lib/postgresql/data
+      - database:/var/lib/postgresql
     networks:
       - blog-network
     healthcheck:
@@ -127,9 +127,16 @@ services:
       context: .
       dockerfile: services/worker/Dockerfile
     env_file: .env
+    environment:
+      - APPLICATION_RABBIT_MQ_HOST=rabbitmq
+      - APPLICATION_RABBIT_MQ_PORT=5672
+      - APPLICATION_RABBIT_MQ_USERNAME=${APPLICATION_RABBIT_MQ_USERNAME}
+      - APPLICATION_RABBIT_MQ_PASSWORD=${APPLICATION_RABBIT_MQ_PASSWORD}
     depends_on:
       rabbitmq:
         condition: service_started
+    networks:
+      - blog-network
   prometheus:
     image: prom/prometheus:v3.11.3
     container_name: prometheus
@@ -158,7 +165,28 @@ services:
     networks:
       - blog-network
     restart: unless-stopped
-
+  loki:
+    image: grafana/loki:3.6.8
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./configs/loki/loki-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - blog-network
+    restart: unless-stopped
+  alloy:
+    image: grafana/alloy:v1.2.0
+    container_name: alloy
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./configs/alloy/config.alloy:/etc/alloy/config.alloy
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    networks:
+      - blog-network
+    restart: unless-stopped
 networks:
   blog-network:
     driver: bridge
