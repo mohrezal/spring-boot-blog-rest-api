@@ -110,6 +110,7 @@ public class WorkerRabbitConfig {
         configurer.configure(factory, connectionFactory);
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setPrefetchCount(1);
+        factory.setConcurrentConsumers(5);
         var retryBuilder =
                 RetryInterceptorBuilder.stateless()
                         .maxRetries(2)
