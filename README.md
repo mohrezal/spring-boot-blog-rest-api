@@ -1,81 +1,191 @@
 # Spring Boot Blog REST API
 
-A personal project to explore Spring Boot and modern Java patterns. It provides a complete blog backend with users, posts, categories, file uploads, and notifications. Built for learning purposes, but designed as a real-world application, not just a portfolio project.
+This is a personal project I built to learn Spring Boot, RabbitMQ, and
+event-driven architecture. It's a multi-module backend with a REST API and a
+separate worker service that handles emails and notifications in the background.
+
+The project has three modules:
+
+- **api** – REST API, handles HTTP requests and talks to the database
+- **worker** – background service that listens to RabbitMQ and sends emails
+- **common** – shared classes and constants used by both modules
+
+## How It Works
+
+The project has two runnable services:
+
+- **api** – REST API that handles HTTP requests, stores data in PostgreSQL, and
+  publishes events to RabbitMQ.
+- **worker** – background service that listens to RabbitMQ and processes tasks
+  like sending emails. It does not have its own database.
+
+Both services share common code through the **common** module (event classes,
+RabbitMQ constants, Redis cache).
 
 ## Built With
 
-Java 21, Spring Boot 4, Spring Security, PostgreSQL, RabbitMQ, AWS S3
+- Java 21
+- Spring Boot 4
+- Spring Security, Spring Data JPA, Spring AMQP
+- PostgreSQL
+- RabbitMQ
+- Redis
+- Docker and Docker Compose
+- Prometheus and Grafana (for monitoring)
+- Mailpit (for testing emails locally)
 
-## Features
+## What It Can Do
 
-**Users:** Users can register, login, and follow other users.
+### API (REST endpoints)
 
-**Posts:** Users can create, edit, publish, and search blog posts.
+**Auth**
+- Register, login, logout
+- Refresh access tokens
+- Verify email address
+- CSRF token endpoint
 
-**Categories:** Users can organize posts by categories.
+**Users**
+- Get current user profile
+- Follow / unfollow other users
+- List followers and following
 
-**Storage:** Users can upload and manage images and files.
+**Posts**
+- Create, update, publish, archive, unarchive, delete posts
+- Get all posts (with filtering by category or author)
+- Get single post by slug
+- Search posts
+- Check if a post slug is available
+- View counting with unique visitor cookies
 
-**Notifications:** Users receive real-time and email notifications.
+**Categories**
+- Get all categories
+- Create a new category (admin only)
 
-## Structure
+**Storage**
+- Upload files (images, etc.)
+- Download files by filename
+- Delete your own files
+- Upload profile picture
 
+**Notifications**
+- Get notifications (paginated)
+- Get count of unread notifications
+- Mark single notification as read
+- Mark all notifications as read
+- Get and update notification preferences
+- Stream notifications in real-time (SSE)
+
+### Worker (background service)
+
+- Sends welcome email when user registers
+- Sends a reminder after 12 hours if user didn't verify email
+- Does not send duplicate emails (checks Redis before sending)
+- Failed emails go to dead letter queue and are retried automatically
+
+## Project Structure
+
+```text
+spring-boot-blog-rest-api/
+├── services/
+│   ├── api/
+│   ├── worker/
+│   └── common/
+├── configs/
+├── scripts/
+├── docker-compose.yml
+├── pom.xml
+└── .env.example
 ```
-src/main/java/.../api/
-├── config/             # App configuration (security, rate limiting, logging)
-├── domains/            # Feature modules (users, posts, categories, storage, notifications)
-└── shared/             # Shared code (models, exceptions, services, utilities)
+
+### API Service Structure
+
+```text
+services/api/
+├── src/main/java/
+│   ├── config/
+│   ├── domains/
+│   │   ├── users/
+│   │   ├── posts/
+│   │   ├── categories/
+│   │   ├── notifications/
+│   │   └── storage/
+│   └── shared/
+├── src/main/resources/
+│   ├── db/changelog/
+│   ├── messages/
+│   └── application.yml
+└── src/test/
 ```
+
+### Worker Service Structure
+
+```text
+services/worker/
+├── consumers/
+├── services/email/
+├── config/
+└── resources/templates/
+```
+
+Each service is an independent Maven module with its own `pom.xml`.
+The project follows a modular monolith architecture with shared components extracted into the `common` module.
 
 ## How to Run
 
-### What you need
+### Prerequisites
 
-To run this application, you need Docker installed on your machine. Check the official guide: https://docs.docker.com/engine/install/
+- Docker
+- Docker Compose
+- Git
 
 ### Steps
 
-1. Clone the project:
+1. Clone the repository:
+
 ```bash
 git clone https://github.com/mohrezal/spring-boot-blog-rest-api.git
 cd spring-boot-blog-rest-api
 ```
 
-2. Copy `.env.example` to `.env` and fill in the values:
+2. Copy the environment file:
+
 ```bash
 cp .env.example .env
 ```
 
-3. Build and start all services:
+3. Start all services:
+
 ```bash
 ./scripts/up.sh
 ```
 
-4. Open in your browser:
-- API: `http://localhost:8080/api/v1`
-- API Documentation: `http://localhost:8080/swagger-ui/index.html`
-- Email Testing: `http://localhost:8025`
-- RabbitMQ Dashboard: `http://localhost:15672`
+This will start:
 
-## Future Plans
+- API service
+- Worker service
+- PostgreSQL
+- Redis
+- RabbitMQ
+- Mailpit
+- Prometheus
+- Grafana
 
-Things I want to add later:
+## Accessing the Services
 
-### Users
-- [ ] Reset password by email
-- [ ] Change password
-- [ ] OAuth2 authentication
-- [ ] Update profile information
-- [ ] Save posts to bookmarks
-- [ ] User settings page
+| Service                  | URL                                            |
+| ------------------------ | ---------------------------------------------- |
+| Swagger UI               | http://localhost:8080/swagger-ui/index.html    |
+| RabbitMQ Management      | http://localhost:15672                         |
+| Mailpit                  | http://localhost:8025                          |
+| Prometheus               | http://localhost:9090                          |
+| Grafana                  | http://localhost:3000                          |
 
-### Posts
-- [ ] Home feed with personalized posts
-- [ ] Comments on posts
-- [ ] Like posts
-- [ ] Share posts
-- [ ] Show reading time
-- [ ] Show related posts
+### Default Credentials
 
-### Categories
-- [ ] This module needs more work (CRUD operations, images, etc.)
+| Service   | Username | Password |
+| ----------| -------- | -------- |
+| RabbitMQ  | guest    | guest    |
+| Grafana   | admin    | admin    |
+
+> Note: Swagger UI is disabled when you start the application with `APPLICATION_SWAGGER_ENABLED=false`
+(the default in `.env.example`). To enable it, set `APPLICATION_SWAGGER_ENABLED=true` in your `.env`.

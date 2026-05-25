@@ -1,13 +1,13 @@
 springdoc:
   api-docs:
-    enabled: false
+    enabled: ${APPLICATION_SWAGGER_ENABLED}
   swagger-ui:
-    enabled: false
+    enabled: ${APPLICATION_SWAGGER_ENABLED}
 
 app:
   security:
     swagger:
-      public-enabled: false
+      public-enabled: ${APPLICATION_SWAGGER_ENABLED}
     csrf:
       cookie:
         path: /api/v1
