@@ -57,6 +57,16 @@ app:
     reservedHandles: admin,root,system
   mail:
     from: test@example.com
+  owner:
+    email: owner@example.com
+  privilege:
+    role:
+      owner:
+        key: owner
+        name: Owner
+      user:
+        key: user
+        name: User
 
 logging:
   level:

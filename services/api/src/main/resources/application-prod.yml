@@ -13,3 +13,13 @@ app:
         path: /api/v1
         secure: true
         sameSite: Strict
+  owner:
+    email: ${APPLICATION_OWNER_EMAIL}
+  privilege:
+    role:
+      owner:
+        key: owner
+        name: Owner
+      user:
+        key: user
+        name: User

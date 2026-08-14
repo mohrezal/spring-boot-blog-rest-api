@@ -33,6 +33,8 @@ class CookieUtilsTest {
                     null,
                     null,
                     null,
+                    null,
+                    null,
                     null);
 
     private final CookieUtils cookieUtils = new CookieUtils(APPLICATION_PROPERTIES);

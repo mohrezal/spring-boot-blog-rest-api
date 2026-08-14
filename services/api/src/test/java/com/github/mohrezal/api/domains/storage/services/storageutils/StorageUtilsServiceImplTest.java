@@ -49,7 +49,7 @@ class StorageUtilsServiceImplTest {
                         "bucket",
                         "region");
         ApplicationProperties applicationProperties =
-                new ApplicationProperties(null, null, storageProperties, null, null);
+                new ApplicationProperties(null, null, storageProperties, null, null, null, null);
         return new StorageUtilsServiceImpl(applicationProperties);
     }
 

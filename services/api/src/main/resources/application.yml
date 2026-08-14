@@ -200,3 +200,13 @@ app:
     reservedHandles: ${APPLICATION_HANDLE_RESERVED_HANDLES}
   mail:
     from: ${APPLICATION_MAIL_FROM}
+  owner:
+    email: ${APPLICATION_OWNER_EMAIL}
+  privilege:
+    role:
+      owner:
+        key: owner
+        name: Owner
+      user:
+        key: user
+        name: User

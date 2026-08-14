@@ -79,7 +79,13 @@ class RegisterUserCommandTest {
     private RegisterUserCommand createCommand(List<String> reservedHandles) {
         ApplicationProperties applicationProperties =
                 new ApplicationProperties(
-                        null, null, null, new ApplicationProperties.Handle(reservedHandles), null);
+                        null,
+                        null,
+                        null,
+                        new ApplicationProperties.Handle(reservedHandles),
+                        null,
+                        null,
+                        null);
         return new RegisterUserCommand(
                 registrationService,
                 jwtService,

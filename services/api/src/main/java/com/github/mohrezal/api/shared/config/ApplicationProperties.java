@@ -20,7 +20,9 @@ public record ApplicationProperties(
         @Valid RateLimit rateLimit,
         @Valid Storage storage,
         @Valid Handle handle,
-        @Valid Mail mail) {
+        @Valid Mail mail,
+        @Valid Owner owner,
+        @Valid Privilege privilege) {
 
     @Validated
     public record Security(
@@ -75,4 +77,17 @@ public record ApplicationProperties(
 
     @Validated
     public record Mail(@NotBlank String from) {}
+
+    @Validated
+    public record Owner(@NotBlank String email) {}
+
+    @Validated
+    public record Privilege(@NotNull @Valid Role role) {
+
+        @Validated
+        public record Role(@NotNull @Valid Properties owner, @NotNull @Valid Properties user) {}
+
+        @Validated
+        public record Properties(@NotBlank String key, @NotBlank String name) {}
+    }
 }
