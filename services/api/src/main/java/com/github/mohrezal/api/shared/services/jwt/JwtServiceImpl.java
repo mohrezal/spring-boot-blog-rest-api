@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.shared.services.jwt;
 
 import com.github.mohrezal.api.config.security.JwtTokenProvider;
+import com.github.mohrezal.api.domains.privilege.service.UserPermissionService;
 import com.github.mohrezal.api.domains.users.models.RefreshToken;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.RefreshTokenRepository;
@@ -8,7 +9,6 @@ import com.github.mohrezal.api.shared.services.hash.HashService;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +22,13 @@ public class JwtServiceImpl implements JwtService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final HashService hashService;
+    private final UserPermissionService userPermissionService;
 
     @Override
     public String generateAccessToken(User user) {
+        var permissions = userPermissionService.getPermissionKeys(user.getId());
         return jwtTokenProvider.createAccessToken(
-                user.getId(), List.of(), user.getPrivilegeVersion());
+                user.getId(), permissions, user.getPrivilegeVersion());
     }
 
     @Override
