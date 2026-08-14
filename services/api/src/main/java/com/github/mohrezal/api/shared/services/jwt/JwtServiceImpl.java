@@ -1,9 +1,9 @@
 package com.github.mohrezal.api.shared.services.jwt;
 
+import com.github.mohrezal.api.config.security.JwtTokenProvider;
 import com.github.mohrezal.api.domains.users.models.RefreshToken;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.RefreshTokenRepository;
-import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.services.hash.HashService;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -12,12 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,80 +19,39 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    private final ApplicationProperties applicationProperties;
-    private final JwtEncoder jwtEncoder;
-    private final JwtDecoder jwtDecoder;
+    private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final HashService hashService;
 
     @Override
     public String generateAccessToken(User user) {
-        Instant now = Instant.now();
-        Instant expiration = now.plus(applicationProperties.security().accessTokenLifeTime());
-
-        List<String> roles =
-                user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-
-        JwtClaimsSet claims =
-                JwtClaimsSet.builder()
-                        .issuer("self")
-                        .issuedAt(now)
-                        .expiresAt(expiration)
-                        .subject(user.getId().toString())
-                        .claim("username", user.getUsername())
-                        .claim("scope", roles)
-                        .id(UUID.randomUUID().toString())
-                        .build();
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return jwtTokenProvider.createAccessToken(
+                user.getId(), List.of(), user.getPrivilegeVersion());
     }
 
     @Override
     public String generateRefreshToken(UUID userId) {
-        Instant now = Instant.now();
-        Instant expiration = now.plus(applicationProperties.security().refreshTokenLifeTime());
-
-        JwtClaimsSet claims =
-                JwtClaimsSet.builder()
-                        .issuer("self")
-                        .issuedAt(now)
-                        .expiresAt(expiration)
-                        .subject(userId.toString())
-                        .id(UUID.randomUUID().toString())
-                        .build();
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-    }
-
-    public Jwt decodeToken(String token) {
-        return jwtDecoder.decode(token);
+        return jwtTokenProvider.createRefreshToken(userId);
     }
 
     public boolean validateToken(String token) {
-        try {
-            Jwt jwt = decodeToken(token);
-            return jwt.getExpiresAt() != null && jwt.getExpiresAt().isAfter(Instant.now());
-        } catch (Exception e) {
-            return false;
-        }
+        return jwtTokenProvider
+                .extractExpiration(token)
+                .map(expiration -> expiration.toInstant().isAfter(Instant.now()))
+                .orElse(false);
     }
 
     public UUID getUserIdFromToken(String token) {
-        String subject = decodeToken(token).getSubject();
-        return UUID.fromString(subject);
-    }
-
-    public String getUsernameFromToken(String token) {
-        return decodeToken(token).getClaimAsString("username");
-    }
-
-    public List<String> getRolesFromToken(String token) {
-        Jwt jwt = decodeToken(token);
-        return jwt.getClaimAsStringList("scope");
+        return jwtTokenProvider
+                .extractUserId(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
     }
 
     public Instant getExpirationFromToken(String token) {
-        return decodeToken(token).getExpiresAt();
+        return jwtTokenProvider
+                .extractExpiration(token)
+                .map(OffsetDateTime::toInstant)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
     }
 
     public boolean isTokenExpired(String token) {

@@ -1,0 +1,150 @@
+package com.github.mohrezal.api.config.security;
+
+import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+@Slf4j
+@Component
+public class JwtTokenProvider {
+
+    private static final long ALLOWED_CLOCK_SKEW_SECONDS = 30L;
+
+    private final JwtParser jwtParser;
+
+    private final SecretKey signingKey;
+
+    private final ApplicationProperties applicationProperties;
+
+    public JwtTokenProvider(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
+        this.signingKey = buildSigningKey(applicationProperties.security().secret());
+        this.jwtParser =
+                Jwts.parser()
+                        .verifyWith(signingKey)
+                        .clockSkewSeconds(ALLOWED_CLOCK_SKEW_SECONDS)
+                        .build();
+    }
+
+    public String createAccessToken(UUID userId, List<String> permissions, long privilegeVersion) {
+        var now = Instant.now();
+        var token =
+                Jwts.builder()
+                        .subject(userId.toString())
+                        .claim(JwtClaim.PERMISSIONS, permissions)
+                        .claim(JwtClaim.PRIVILEGE_VERSION, privilegeVersion)
+                        .issuedAt(Date.from(now))
+                        .expiration(
+                                Date.from(
+                                        now.plus(
+                                                applicationProperties
+                                                        .security()
+                                                        .accessTokenLifeTime())))
+                        .signWith(signingKey)
+                        .compact();
+        log.debug(
+                "Created access token for userId={}, privilegeVersion={}",
+                userId,
+                privilegeVersion);
+        return token;
+    }
+
+    public String createRefreshToken(UUID userId) {
+        var now = Instant.now();
+        var token =
+                Jwts.builder()
+                        .id(UUID.randomUUID().toString())
+                        .subject(userId.toString())
+                        .issuedAt(Date.from(now))
+                        .expiration(
+                                Date.from(
+                                        now.plus(
+                                                applicationProperties
+                                                        .security()
+                                                        .refreshTokenLifeTime())))
+                        .signWith(signingKey)
+                        .compact();
+        log.debug("Created refresh token for userId={}", userId);
+        return token;
+    }
+
+    public Optional<UUID> extractUserId(String token) {
+        try {
+            Claims claims = jwtParser.parseSignedClaims(token).getPayload();
+            return Optional.ofNullable(claims.getSubject())
+                    .filter(StringUtils::hasText)
+                    .map(UUID::fromString);
+        } catch (JwtException | IllegalArgumentException exception) {
+            log.warn("Failed to parse token: {}", exception.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public List<String> extractPermissionKeys(String token) {
+        try {
+            var claims = jwtParser.parseSignedClaims(token).getPayload();
+            var permissions = claims.get(JwtClaim.PERMISSIONS);
+            if (!(permissions instanceof List<?> values)) {
+                return List.of();
+            }
+
+            return values.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .filter(StringUtils::hasText)
+                    .toList();
+        } catch (JwtException | IllegalArgumentException exception) {
+            return List.of();
+        }
+    }
+
+    public long extractPrivilegeVersion(String token) {
+        try {
+            var claims = jwtParser.parseSignedClaims(token).getPayload();
+            var privilegeVersion = claims.get(JwtClaim.PRIVILEGE_VERSION);
+            if (privilegeVersion == null) {
+                return 0L;
+            }
+            if (privilegeVersion instanceof Number number) {
+                return number.longValue();
+            }
+            return Long.parseLong(privilegeVersion.toString());
+        } catch (JwtException | IllegalArgumentException exception) {
+            return 0L;
+        }
+    }
+
+    public Optional<OffsetDateTime> extractExpiration(String token) {
+        try {
+            Claims claims = jwtParser.parseSignedClaims(token).getPayload();
+
+            return Optional.ofNullable(claims.getExpiration())
+                    .map(Date::toInstant)
+                    .map(expiration -> OffsetDateTime.ofInstant(expiration, ZoneOffset.UTC));
+        } catch (JwtException | IllegalArgumentException exception) {
+            return Optional.empty();
+        }
+    }
+
+    private static SecretKey buildSigningKey(String secret) {
+        byte[] keyBytes = Base64.getDecoder().decode(secret);
+        SecretKey hmacSha512Key = new SecretKeySpec(keyBytes, "HmacSHA512");
+        return Keys.hmacShaKeyFor(hmacSha512Key.getEncoded());
+    }
+}

@@ -77,11 +77,6 @@ spring:
           max-idle: 8
           min-idle: 2
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jws-algorithms: HS512
   web:
     error:
       whitelabel:

@@ -5,9 +5,8 @@ import com.github.mohrezal.api.config.ratelimit.RateLimitFilter;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +21,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -67,10 +61,8 @@ public class SecurityConfig {
     };
 
     private final ApplicationProperties applicationProperties;
-    private final CookieBearerTokenResolver cookieBearerTokenResolver;
     private final UserRepository userRepository;
-    private final UserJwtAuthenticationConverter userJwtAuthenticationConverter;
-    private final SkipJwtValidationFilter skipJwtValidationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
 
     @Bean
@@ -79,6 +71,18 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(
+                        exception ->
+                                exception
+                                        .authenticationEntryPoint(
+                                                (request, response, authException) ->
+                                                        response.sendError(
+                                                                HttpServletResponse
+                                                                        .SC_UNAUTHORIZED))
+                                        .accessDeniedHandler(
+                                                (request, response, accessDeniedException) ->
+                                                        response.sendError(
+                                                                HttpServletResponse.SC_FORBIDDEN)))
                 .authorizeHttpRequests(
                         auth -> {
                             if (applicationProperties.security().swagger().publicEnabled()) {
@@ -100,14 +104,8 @@ public class SecurityConfig {
                                     .anyRequest()
                                     .authenticated();
                         })
-                .addFilterBefore(skipJwtValidationFilter, BearerTokenAuthenticationFilter.class)
-                .oauth2ResourceServer(
-                        oauth2 ->
-                                oauth2.bearerTokenResolver(cookieBearerTokenResolver)
-                                        .jwt(
-                                                jwt ->
-                                                        jwt.jwtAuthenticationConverter(
-                                                                userJwtAuthenticationConverter)))
+                .addFilterBefore(
+                        jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -139,22 +137,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        byte[] keyBytes =
-                java.util.Base64.getDecoder().decode(applicationProperties.security().secret());
-        SecretKey secretKey = new SecretKeySpec(keyBytes, "HmacSHA512");
-        return NimbusJwtDecoder.withSecretKey(secretKey).build();
-    }
-
-    @Bean
-    public JwtEncoder jwtEncoder() {
-        byte[] keyBytes =
-                java.util.Base64.getDecoder().decode(applicationProperties.security().secret());
-        SecretKey secretKey = new SecretKeySpec(keyBytes, "HmacSHA512");
-        return NimbusJwtEncoder.withSecretKey(secretKey).build();
     }
 
     @Bean
