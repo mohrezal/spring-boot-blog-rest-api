@@ -5,7 +5,6 @@ import com.github.mohrezal.api.domains.categories.repositories.CategoryRepositor
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.models.UserCredentials;
 import com.github.mohrezal.api.domains.users.repositories.UserCredentialsRepository;
@@ -136,7 +135,6 @@ public class Seeder implements CommandLineRunner {
                                     uniqueHandle.length() > 30
                                             ? uniqueHandle.substring(0, 30)
                                             : uniqueHandle)
-                            .role(UserRole.USER)
                             .isVerified(faker.options().option(Boolean.FALSE, Boolean.TRUE))
                             .lastName(faker.name().lastName())
                             .firstName(faker.name().firstName())

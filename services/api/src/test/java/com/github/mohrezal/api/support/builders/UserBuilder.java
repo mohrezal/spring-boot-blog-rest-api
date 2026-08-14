@@ -1,6 +1,5 @@
 package com.github.mohrezal.api.support.builders;
 
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.models.User;
 import java.util.UUID;
 
@@ -12,7 +11,7 @@ public class UserBuilder {
     private String firstName = "Test";
     private String lastName = "User";
     private String bio;
-    private UserRole role = UserRole.USER;
+    private Long privilegeVersion = 0L;
     private Boolean isVerified = true;
 
     public static UserBuilder aUser() {
@@ -49,8 +48,8 @@ public class UserBuilder {
         return this;
     }
 
-    public UserBuilder withRole(UserRole role) {
-        this.role = role;
+    public UserBuilder withPrivilegeVersion(Long privilegeVersion) {
+        this.privilegeVersion = privilegeVersion;
         return this;
     }
 
@@ -67,7 +66,7 @@ public class UserBuilder {
                         .firstName(firstName)
                         .lastName(lastName)
                         .bio(bio)
-                        .role(role)
+                        .privilegeVersion(privilegeVersion)
                         .isVerified(isVerified)
                         .build();
         if (id != null) {

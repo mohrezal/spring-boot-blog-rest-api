@@ -5,7 +5,6 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.api.domains.users.dtos.RegisterResponse;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserRegisterExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleAlreadyExistsException;
@@ -72,7 +71,7 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
     public RegisterResponse execute(RegisterUserCommandParams params) {
         validate(params);
         try {
-            var user = registrationService.register(params.registerUserRequest(), UserRole.USER);
+            var user = registrationService.register(params.registerUserRequest());
 
             var notificationPreference = NotificationPreference.builder().user(user).build();
             notificationPreferenceRepository.save(notificationPreference);

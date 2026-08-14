@@ -7,7 +7,6 @@ import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusT
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
-import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,6 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
 
     private final PostRepository postRepository;
     private final PostUtilsService postUtilsService;
-    private final UserUtilsService userUtilsService;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -35,8 +33,7 @@ public class UnarchivePostCommand extends AuthenticatedCommand<UnarchivePostComm
                         .findBySlug(params.slug())
                         .orElseThrow(() -> new PostNotFoundException(context));
 
-        if (!postUtilsService.isOwner(post, currentUser)
-                && !userUtilsService.isAdmin(currentUser)) {
+        if (!postUtilsService.isOwner(post, currentUser)) {
             throw new AccessDeniedException(context);
         }
         if (!post.getStatus().equals(PostStatus.ARCHIVED)) {

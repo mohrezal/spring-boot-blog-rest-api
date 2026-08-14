@@ -5,9 +5,7 @@ import com.github.mohrezal.api.domains.categories.dtos.CategorySummary;
 import com.github.mohrezal.api.domains.categories.exceptions.types.CategoryParentNotfoundException;
 import com.github.mohrezal.api.domains.categories.mappers.CategoryMapper;
 import com.github.mohrezal.api.domains.categories.repositories.CategoryRepository;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
-import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.services.sluggenerator.SlugGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +22,7 @@ public class CreateCategoryCommand
 
     @Override
     public CategorySummary execute(CreateCategoryCommandParams params) {
-        var user = getCurrentUser(params);
-        if (!user.getRole().equals(UserRole.ADMIN)) {
-            throw new AccessDeniedException();
-        }
+        getCurrentUser(params);
         var slug =
                 slugGeneratorService.getSlug(
                         params.createCategoryRequest().slug(), categoryRepository::existsBySlug);

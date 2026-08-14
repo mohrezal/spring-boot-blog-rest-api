@@ -9,7 +9,6 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryPa
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final PostUtilsService postUtilsService;
-    private final UserUtilsService userUtilsService;
 
     @Transactional(readOnly = true)
     @Override
@@ -46,10 +44,9 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
             return this.postMapper.toPostDetail(post);
         }
 
-        var isAdmin = currentUser != null && userUtilsService.isAdmin(currentUser);
         var isOwner = currentUser != null && postUtilsService.isOwner(post, currentUser);
 
-        if (isAdmin || isOwner) {
+        if (isOwner) {
             log.info("Get post by slug query successful.");
             return this.postMapper.toPostDetail(post);
         }

@@ -1,13 +1,10 @@
 package com.github.mohrezal.api.domains.users.models;
 
 import com.github.mohrezal.api.domains.storage.models.Storage;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.shared.models.BaseModel;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -22,7 +19,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
@@ -58,10 +54,9 @@ public class User extends BaseModel implements UserDetails {
     @JoinColumn(name = "avatar_id")
     private Storage avatar;
 
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Column(name = "privilege_version", nullable = false)
     @Builder.Default
-    private UserRole role = UserRole.USER;
+    private Long privilegeVersion = 0L;
 
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
@@ -76,7 +71,11 @@ public class User extends BaseModel implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.name()));
+        return List.of();
+    }
+
+    public void incrementPrivilegeVersion() {
+        this.privilegeVersion = this.privilegeVersion + 1L;
     }
 
     @Override

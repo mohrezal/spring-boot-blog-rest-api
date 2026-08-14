@@ -22,7 +22,6 @@ import com.github.mohrezal.api.domains.storage.enums.StorageType;
 import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.s3.S3StorageService;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.services.ratelimit.RateLimitService;
@@ -85,7 +84,6 @@ class StorageControllerTest {
                         UserBuilder.aUser()
                                 .withEmail("test@example.com")
                                 .withHandle("testuser")
-                                .withRole(UserRole.USER)
                                 .build());
 
         adminUser =
@@ -93,7 +91,6 @@ class StorageControllerTest {
                         UserBuilder.aUser()
                                 .withEmail("admin@example.com")
                                 .withHandle("adminuser")
-                                .withRole(UserRole.ADMIN)
                                 .build());
 
         otherUser =
@@ -101,7 +98,6 @@ class StorageControllerTest {
                         UserBuilder.aUser()
                                 .withEmail("other@example.com")
                                 .withHandle("otheruser")
-                                .withRole(UserRole.USER)
                                 .build());
 
         validImageFile = new MockMultipartFile("file", "image.jpg", "image/jpeg", JPEG_BYTES);

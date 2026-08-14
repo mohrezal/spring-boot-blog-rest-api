@@ -14,7 +14,6 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryPa
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
 import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,8 +29,6 @@ class GetPostBySlugQueryTest {
     @Mock private PostMapper postMapper;
 
     @Mock private PostUtilsService postUtilsService;
-
-    @Mock private UserUtilsService userUtilsService;
 
     @InjectMocks private GetPostBySlugQuery query;
 
@@ -59,20 +56,15 @@ class GetPostBySlugQueryTest {
     }
 
     @Test
-    void execute_whenPostIsDraftAndUserIsAdmin_shouldReturnPostDetail() {
+    void execute_whenPostIsDraftAndUserIsNotOwner_shouldThrowPostNotFoundException() {
         var params = new GetPostBySlugQueryParams(mockedUser, "draft-post");
 
         var post = aPost().withStatus(PostStatus.DRAFT).build();
 
-        var postDetail = aPostDetail().build();
-
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(userUtilsService.isAdmin(mockedUser)).thenReturn(true);
-        when(postMapper.toPostDetail(post)).thenReturn(postDetail);
+        when(postUtilsService.isOwner(post, mockedUser)).thenReturn(false);
 
-        var result = query.execute(params);
-
-        assertEquals(postDetail, result);
+        assertThrows(PostNotFoundException.class, () -> query.execute(params));
     }
 
     @Test
@@ -84,7 +76,6 @@ class GetPostBySlugQueryTest {
         var postDetail = aPostDetail().build();
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
-        when(userUtilsService.isAdmin(mockedUser)).thenReturn(false);
         when(postUtilsService.isOwner(post, mockedUser)).thenReturn(true);
         when(postMapper.toPostDetail(post)).thenReturn(postDetail);
 

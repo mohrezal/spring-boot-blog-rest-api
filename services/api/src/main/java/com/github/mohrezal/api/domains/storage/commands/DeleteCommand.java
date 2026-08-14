@@ -5,7 +5,6 @@ import com.github.mohrezal.api.domains.storage.exceptions.context.StorageDeleteE
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
-import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Void> {
 
     private final StorageRepository storageRepository;
-    private final UserUtilsService userUtilsService;
     private final StorageUtilsService storageUtilsService;
     private final StorageService storageService;
 
@@ -41,8 +39,7 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
                                                 MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
                                                 context));
 
-        if (!storageUtilsService.isOwner(currentUser, storage)
-                && !userUtilsService.isAdmin(currentUser)) {
+        if (!storageUtilsService.isOwner(currentUser, storage)) {
             throw new AccessDeniedException(context);
         }
 

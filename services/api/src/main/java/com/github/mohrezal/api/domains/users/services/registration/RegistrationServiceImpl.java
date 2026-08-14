@@ -1,7 +1,6 @@
 package com.github.mohrezal.api.domains.users.services.registration;
 
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
 import com.github.mohrezal.api.domains.users.models.User;
@@ -20,11 +19,11 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final UserRepository userRepository;
 
     @Override
-    public User register(RegisterUserRequest registerUser, UserRole role) {
+    public User register(RegisterUserRequest registerUser) {
         if (userRepository.existsByEmail(registerUser.email())) {
             throw new UserEmailAlreadyExistsException();
         }
-        User newUser = this.userMapper.toUser(registerUser, role);
+        User newUser = this.userMapper.toUser(registerUser);
         String hashedPassword = passwordEncoder.encode(registerUser.password().trim());
         UserCredentials credentials =
                 UserCredentials.builder().hashedPassword(hashedPassword).build();

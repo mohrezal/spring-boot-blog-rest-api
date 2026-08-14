@@ -15,7 +15,6 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleReservedException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
 import com.github.mohrezal.api.domains.users.models.User;
@@ -98,6 +97,7 @@ class RegisterUserCommandTest {
     @BeforeEach
     void setUp() {
         command = createCommand(List.of("admin", "owner"));
+        when(redirectUrlUtils.isValid(any())).thenReturn(true);
     }
 
     @Test
@@ -111,15 +111,13 @@ class RegisterUserCommandTest {
                         "Doe",
                         "Hey, I'm John Deo.",
                         null,
-                        UserRole.USER,
                         false,
                         null,
                         null);
 
         when(userRepository.existsByHandle(eq(params.registerUserRequest().handle())))
                 .thenReturn(false);
-        when(registrationService.register(eq(params.registerUserRequest()), eq(UserRole.USER)))
-                .thenReturn(user);
+        when(registrationService.register(eq(params.registerUserRequest()))).thenReturn(user);
         when(jwtService.generateAccessToken(eq(user))).thenReturn("access-token");
         when(jwtService.generateRefreshToken(eq(user.getId()))).thenReturn("refresh-token");
         when(deviceInfoService.parseDeviceName(eq(UserAgents.MAC))).thenReturn("Mac OS");
@@ -162,7 +160,7 @@ class RegisterUserCommandTest {
 
         when(userRepository.existsByHandle("john_doe")).thenReturn(false);
 
-        when(registrationService.register(any(), any())).thenThrow(RuntimeException.class);
+        when(registrationService.register(any())).thenThrow(RuntimeException.class);
 
         assertThrows(RuntimeException.class, () -> command.execute(params));
     }

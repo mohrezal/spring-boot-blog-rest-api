@@ -16,7 +16,6 @@ import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
 import com.github.mohrezal.api.domains.storage.services.storage.StorageService;
 import com.github.mohrezal.api.domains.storage.services.storageutils.StorageUtilsService;
 import com.github.mohrezal.api.domains.users.models.User;
-import com.github.mohrezal.api.domains.users.services.userutils.UserUtilsService;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import com.github.mohrezal.api.shared.exceptions.types.ResourceNotFoundException;
 import java.util.Optional;
@@ -30,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeleteCommandTest {
 
     @Mock private StorageRepository storageRepository;
-
-    @Mock private UserUtilsService userUtilsService;
 
     @Mock private StorageUtilsService storageUtilsService;
 
@@ -53,15 +50,13 @@ class DeleteCommandTest {
     }
 
     @Test
-    void execute_whenUserIsNotOwnerAndNotAdmin_shouldThrowAccessDenied() {
+    void execute_whenUserIsNotOwner_shouldThrowAccessDenied() {
         var params = new DeleteCommandParams(user, storage.getFilename());
 
         when(storageRepository.findByFilename(storage.getFilename()))
                 .thenReturn(Optional.of(storage));
 
         when(storageUtilsService.isOwner(user, storage)).thenReturn(false);
-
-        when(userUtilsService.isAdmin(user)).thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> command.execute(params));
 
@@ -76,22 +71,6 @@ class DeleteCommandTest {
                 .thenReturn(Optional.of(storage));
 
         when(storageUtilsService.isOwner(user, storage)).thenReturn(true);
-
-        command.execute(params);
-
-        verify(storageService).delete(storage);
-    }
-
-    @Test
-    void execute_whenUserIsAdmin_shouldDeleteStorage() {
-        var params = new DeleteCommandParams(user, storage.getFilename());
-
-        when(storageRepository.findByFilename(storage.getFilename()))
-                .thenReturn(Optional.of(storage));
-
-        when(storageUtilsService.isOwner(user, storage)).thenReturn(false);
-
-        when(userUtilsService.isAdmin(user)).thenReturn(true);
 
         command.execute(params);
 

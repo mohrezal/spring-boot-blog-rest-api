@@ -52,7 +52,6 @@ import com.github.mohrezal.api.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
-import com.github.mohrezal.api.domains.users.enums.UserRole;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
@@ -149,9 +148,7 @@ class PostControllerTest {
 
     @Test
     void getPostBySlug_whenAuthenticatedAndPostExists_shouldReturn200() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         var postDetail = aPostDetail().build();
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenReturn(postDetail);
@@ -174,9 +171,7 @@ class PostControllerTest {
 
     @Test
     void getPostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(getPostBySlugQuery.execute(any(GetPostBySlugQueryParams.class)))
                 .thenThrow(new PostNotFoundException());
 
@@ -225,9 +220,7 @@ class PostControllerTest {
 
     @Test
     void createPost_whenAuthenticatedAndValidRequest_shouldReturn201() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         var category = categoryRepository.save(aCategory().build());
 
         var postDetail = aPostDetail().build();
@@ -271,12 +264,7 @@ class PostControllerTest {
 
     @Test
     void createPost_whenInvalidRequest_shouldReturn400() throws Exception {
-        var user =
-                userRepository.save(
-                        UserBuilder.aUser()
-                                .withEmail("user2@test.com")
-                                .withRole(UserRole.USER)
-                                .build());
+        var user = userRepository.save(UserBuilder.aUser().withEmail("user2@test.com").build());
 
         var body = new CreatePostRequest(null, null, null, null, null, null);
 
@@ -291,9 +279,7 @@ class PostControllerTest {
 
     @Test
     void createPost_whenCategoryNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(createPostCommand.execute(any(CreatePostCommandParams.class)))
                 .thenThrow(CategoryNotFoundException.class);
 
@@ -317,9 +303,7 @@ class PostControllerTest {
 
     @Test
     void createPost_whenSlugConflict_shouldReturn409() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(createPostCommand.execute(any(CreatePostCommandParams.class)))
                 .thenThrow(new PostSlugAlreadyExistsException());
 
@@ -343,9 +327,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenAuthenticatedAndValidRequest_shouldReturn200() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         var postDetail = aPostDetail().build();
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class))).thenReturn(postDetail);
 
@@ -388,9 +370,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenInvalidRequest_shouldReturn400() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
 
         var body = new UpdatePostRequest(null, null, null, null, null, null);
 
@@ -405,9 +385,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new PostNotFoundException());
 
@@ -431,9 +409,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenCategoryNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new CategoryNotFoundException());
 
@@ -457,9 +433,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenSlugConflict_shouldReturn409() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new PostSlugAlreadyExistsException());
 
@@ -483,9 +457,7 @@ class PostControllerTest {
 
     @Test
     void updatePostBySlug_whenNotOwner_shouldReturn403() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(updatePostCommand.execute(any(UpdatePostCommandParams.class)))
                 .thenThrow(new AccessDeniedException());
 
@@ -509,9 +481,7 @@ class PostControllerTest {
 
     @Test
     void publishPost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doNothing()
                 .when(publishPostCommand)
                 .execute(
@@ -536,9 +506,7 @@ class PostControllerTest {
 
     @Test
     void publishPost_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostNotFoundException())
                 .when(publishPostCommand)
                 .execute(
@@ -555,9 +523,7 @@ class PostControllerTest {
 
     @Test
     void publishPost_whenInvalidStatus_shouldReturn400() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostInvalidStatusTransitionException())
                 .when(publishPostCommand)
                 .execute(
@@ -574,9 +540,7 @@ class PostControllerTest {
 
     @Test
     void publishPost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(publishPostCommand)
                 .execute(
@@ -593,9 +557,7 @@ class PostControllerTest {
 
     @Test
     void archivePost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doNothing()
                 .when(archivePostCommand)
                 .execute(
@@ -620,9 +582,7 @@ class PostControllerTest {
 
     @Test
     void archivePost_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostNotFoundException())
                 .when(archivePostCommand)
                 .execute(
@@ -639,9 +599,7 @@ class PostControllerTest {
 
     @Test
     void archivePost_whenInvalidStatus_shouldReturn400() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostInvalidStatusTransitionException())
                 .when(archivePostCommand)
                 .execute(
@@ -658,9 +616,7 @@ class PostControllerTest {
 
     @Test
     void archivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(archivePostCommand)
                 .execute(
@@ -677,9 +633,7 @@ class PostControllerTest {
 
     @Test
     void unarchivePost_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doNothing()
                 .when(unarchivePostCommand)
                 .execute(
@@ -704,9 +658,7 @@ class PostControllerTest {
 
     @Test
     void unarchivePost_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostNotFoundException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -723,9 +675,7 @@ class PostControllerTest {
 
     @Test
     void unarchivePost_whenInvalidStatus_shouldReturn400() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostInvalidStatusTransitionException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -742,9 +692,7 @@ class PostControllerTest {
 
     @Test
     void unarchivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(unarchivePostCommand)
                 .execute(
@@ -761,9 +709,7 @@ class PostControllerTest {
 
     @Test
     void deletePostBySlug_whenAuthenticatedAndValid_shouldReturn204() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doNothing()
                 .when(deletePostCommand)
                 .execute(
@@ -786,9 +732,7 @@ class PostControllerTest {
 
     @Test
     void deletePostBySlug_whenPostNotFound_shouldReturn404() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new PostNotFoundException())
                 .when(deletePostCommand)
                 .execute(
@@ -805,9 +749,7 @@ class PostControllerTest {
 
     @Test
     void deletePostBySlug_whenNotOwner_shouldReturn403() throws Exception {
-        var user =
-                userRepository.save(
-                        aUser().withEmail("user@test.com").withRole(UserRole.USER).build());
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(deletePostCommand)
                 .execute(
