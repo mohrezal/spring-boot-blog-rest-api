@@ -53,6 +53,22 @@ public final class MessageKey {
     public static final String NOTIFICATION_PREFERENCE_NOT_FOUND =
             "notification.error.preference-not-found";
 
+    public static final String PRIVILEGE_PERMISSION_NOT_FOUND =
+            "privilege.error.permission-not-found";
+    public static final String PRIVILEGE_PROTECTED_PERMISSION_CANNOT_BE_DISABLED =
+            "privilege.error.protected-permission-cannot-be-disabled";
+    public static final String PRIVILEGE_ROLE_NOT_FOUND = "privilege.error.role-not-found";
+    public static final String PRIVILEGE_ROLE_KEY_ALREADY_EXISTS =
+            "privilege.error.role-key-already-exists";
+    public static final String PRIVILEGE_CONFIGURED_ROLE_CANNOT_BE_DELETED =
+            "privilege.error.configured-role-cannot-be-deleted";
+    public static final String PRIVILEGE_OWNER_ROLE_CANNOT_BE_UPDATED =
+            "privilege.error.owner-role-cannot-be-updated";
+    public static final String PRIVILEGE_LAST_OWNER_ROLE_CANNOT_BE_REMOVED =
+            "privilege.error.last-owner-role-cannot-be-removed";
+    public static final String PRIVILEGE_ROLE_ASSIGNED_TO_USERS =
+            "privilege.error.role-assigned-to-users";
+
     public static final String SHARED_VALIDATION_FAILED = "shared.validation.failed";
 
     public static final String SHARED_NOT_BLANK = "{shared.validation.not-blank}";
