@@ -46,3 +46,7 @@ configs/s3.json
 
 ### Logs ###
 logs/
+
+### Agent worktrees / SDD scratch ###
+.worktrees/
+.superpowers/
