@@ -58,4 +58,12 @@ public final class Routes {
         public static final String MARK_READ = "{id}/read";
         public static final String MARK_ALL_READ = "read-all";
     }
+
+    public static final class Privilege {
+        public static final String PERMISSIONS = API_BASE + "permissions";
+        public static final String PERMISSION = "{id}";
+        public static final String ROLES = API_BASE + "roles";
+        public static final String ROLE = "{id}";
+        public static final String ROLE_ASSIGNMENTS = "assignments/{userId}";
+    }
 }

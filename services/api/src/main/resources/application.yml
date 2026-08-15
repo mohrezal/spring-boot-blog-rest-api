@@ -188,6 +188,56 @@ app:
         path: "/api/v1/auth/verify-email"
         ipLimit: 5
         userLimit: 5
+      - key: privilege-permissions-list
+        method: GET
+        path: /api/v1/permissions
+        ipLimit: 30
+        userLimit: 15
+      - key: privilege-permissions-read
+        method: GET
+        path: "/api/v1/permissions/*"
+        ipLimit: 30
+        userLimit: 15
+      - key: privilege-permissions-update
+        method: PUT
+        path: "/api/v1/permissions/*"
+        ipLimit: 10
+        userLimit: 5
+      - key: privilege-roles-list
+        method: GET
+        path: /api/v1/roles
+        ipLimit: 30
+        userLimit: 15
+      - key: privilege-roles-read
+        method: GET
+        path: "/api/v1/roles/*"
+        ipLimit: 30
+        userLimit: 15
+      - key: privilege-roles-create
+        method: POST
+        path: /api/v1/roles
+        ipLimit: 10
+        userLimit: 5
+      - key: privilege-roles-update
+        method: PUT
+        path: "/api/v1/roles/*"
+        ipLimit: 10
+        userLimit: 5
+      - key: privilege-roles-delete
+        method: DELETE
+        path: "/api/v1/roles/*"
+        ipLimit: 10
+        userLimit: 5
+      - key: privilege-role-assignments-read
+        method: GET
+        path: "/api/v1/roles/assignments/*"
+        ipLimit: 30
+        userLimit: 15
+      - key: privilege-role-assignments-update
+        method: PUT
+        path: "/api/v1/roles/assignments/*"
+        ipLimit: 10
+        userLimit: 5
   storage:
     allowedMimeTypes: ${APPLICATION_STORAGE_ALLOWED_MIME_TYPES}
     maxFileSize: ${APPLICATION_STORAGE_MAX_FILE_SIZE}

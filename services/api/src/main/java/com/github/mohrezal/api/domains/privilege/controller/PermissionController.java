@@ -1,0 +1,31 @@
+package com.github.mohrezal.api.domains.privilege.controller;
+
+import com.github.mohrezal.api.config.Routes;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.dto.PermissionSummary;
+import com.github.mohrezal.api.domains.privilege.query.GetPermissionsQuery;
+import com.github.mohrezal.api.domains.privilege.query.param.GetPermissionsQueryParams;
+import com.github.mohrezal.api.shared.annotations.RequiresPermission;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(Routes.Privilege.PERMISSIONS)
+@RequiredArgsConstructor
+@Tag(name = "Privilege")
+public class PermissionController {
+
+    private final GetPermissionsQuery getPermissionsQuery;
+
+    @RequiresPermission(Permissions.BLOG_PRIVILEGE_PERMISSIONS_READ)
+    @GetMapping
+    public ResponseEntity<List<PermissionSummary>> getPermissions() {
+        var response = getPermissionsQuery.execute(new GetPermissionsQueryParams());
+        return ResponseEntity.ok(response);
+    }
+}
