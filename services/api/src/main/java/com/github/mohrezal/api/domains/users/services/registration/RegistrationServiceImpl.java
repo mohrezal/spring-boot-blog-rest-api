@@ -1,5 +1,6 @@
 package com.github.mohrezal.api.domains.users.services.registration;
 
+import com.github.mohrezal.api.domains.privilege.service.UserRoleAssignmentService;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
@@ -17,6 +18,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final UserRoleAssignmentService userRoleAssignmentService;
 
     @Override
     public User register(RegisterUserRequest registerUser) {
@@ -31,6 +33,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         credentials.setUser(newUser);
         newUser.setCredentials(credentials);
 
-        return userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
+        userRoleAssignmentService.assignConfiguredUserRole(savedUser);
+        return savedUser;
     }
 }

@@ -5,6 +5,7 @@ import com.github.mohrezal.api.domains.categories.repositories.CategoryRepositor
 import com.github.mohrezal.api.domains.posts.enums.PostStatus;
 import com.github.mohrezal.api.domains.posts.models.Post;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
+import com.github.mohrezal.api.domains.privilege.service.UserRoleAssignmentService;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.models.UserCredentials;
 import com.github.mohrezal.api.domains.users.repositories.UserCredentialsRepository;
@@ -42,6 +43,7 @@ public class Seeder implements CommandLineRunner {
     private final PlatformTransactionManager transactionManager;
     private final PasswordEncoder passwordEncoder;
     private final ConfigurableApplicationContext applicationContext;
+    private final UserRoleAssignmentService userRoleAssignmentService;
 
     private final Faker faker = new Faker();
 
@@ -146,6 +148,7 @@ public class Seeder implements CommandLineRunner {
                             .hashedPassword(passwordEncoder.encode(password))
                             .build();
             userCredentialsRepository.save(userCredentials);
+            userRoleAssignmentService.assignConfiguredUserRole(savedUser);
             userList.add(savedUser);
         }
         return userList;
