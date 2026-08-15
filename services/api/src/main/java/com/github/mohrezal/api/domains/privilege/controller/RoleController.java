@@ -5,8 +5,10 @@ import com.github.mohrezal.api.domains.privilege.constant.Permissions;
 import com.github.mohrezal.api.domains.privilege.dto.RoleSummary;
 import com.github.mohrezal.api.domains.privilege.query.GetRoleQuery;
 import com.github.mohrezal.api.domains.privilege.query.GetRolesQuery;
+import com.github.mohrezal.api.domains.privilege.query.GetUserRolesQuery;
 import com.github.mohrezal.api.domains.privilege.query.param.GetRoleQueryParams;
 import com.github.mohrezal.api.domains.privilege.query.param.GetRolesQueryParams;
+import com.github.mohrezal.api.domains.privilege.query.param.GetUserRolesQueryParams;
 import com.github.mohrezal.api.shared.annotations.RequiresPermission;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -26,6 +28,7 @@ public class RoleController {
 
     private final GetRolesQuery getRolesQuery;
     private final GetRoleQuery getRoleQuery;
+    private final GetUserRolesQuery getUserRolesQuery;
 
     @RequiresPermission(Permissions.BLOG_PRIVILEGE_ROLES_READ)
     @GetMapping
@@ -38,6 +41,13 @@ public class RoleController {
     @GetMapping(Routes.Privilege.ROLE)
     public ResponseEntity<RoleSummary> getRole(@PathVariable UUID id) {
         var response = getRoleQuery.execute(new GetRoleQueryParams(id));
+        return ResponseEntity.ok(response);
+    }
+
+    @RequiresPermission(Permissions.BLOG_PRIVILEGE_ROLES_READ)
+    @GetMapping(Routes.Privilege.ROLE_ASSIGNMENTS)
+    public ResponseEntity<List<RoleSummary>> getUserRoles(@PathVariable UUID userId) {
+        var response = getUserRolesQuery.execute(new GetUserRolesQueryParams(userId));
         return ResponseEntity.ok(response);
     }
 }
