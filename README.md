@@ -59,13 +59,19 @@ RabbitMQ constants, Redis cache).
 
 **Categories**
 - Get all categories
-- Create a new category (admin only)
+- Create a new category (requires `blog.categories.create` permission)
 
 **Storage**
 - Upload files (images, etc.)
 - Download files by filename
-- Delete your own files
+- Delete your own files (or moderate with permission)
 - Upload profile picture
+
+**Roles and permissions (privilege RBAC)**
+- List and read permissions; update permission metadata (enable/disable, labels)
+- Create, update, delete custom roles and attach permissions
+- Get and update a user's role assignments
+- Seeded roles are `owner` and `user` only; create any custom `admin` role via the API
 
 **Notifications**
 - Get notifications (paginated)
@@ -108,6 +114,7 @@ services/api/
 │   │   ├── posts/
 │   │   ├── categories/
 │   │   ├── notifications/
+│   │   ├── privilege/
 │   │   └── storage/
 │   └── shared/
 ├── src/main/resources/
@@ -170,6 +177,22 @@ This will start:
 - Prometheus
 - Grafana
 
+4. Seed the privilege catalog and owner (after first deploy or schema change):
+
+```bash
+# Seeds permissions and the configured owner/user roles.
+# Existing users without user_roles rows get the user role.
+./scripts/seed-privilege.sh
+
+# Assigns the owner role to APPLICATION_OWNER_EMAIL (set in .env).
+./scripts/seed-owner.sh
+```
+
+Set `APPLICATION_OWNER_EMAIL` in `.env` before running the owner seeder. Former
+hardcoded `ADMIN` users are not auto-promoted; grant elevated roles through the
+API. To create a custom admin-like role, call `POST /api/v1/roles` and assign
+the moderate / category permissions you need. Do not hardcode an admin role.
+
 ## Accessing the Services
 
 | Service                  | URL                                            |
@@ -189,3 +212,21 @@ This will start:
 
 > Note: Swagger UI is disabled when you start the application with `APPLICATION_SWAGGER_ENABLED=false`
 (the default in `.env.example`). To enable it, set `APPLICATION_SWAGGER_ENABLED=true` in your `.env`.
+
+## Breaking Changes (privilege RBAC)
+
+These changes apply when moving from the previous role-scope model
+(`ADMIN` / `USER` enums and JWT `scope` claims) to permission-based RBAC.
+
+- **Access tokens change shape.** Claims use `permissions` and
+  `privilegeVersion` instead of `scope`. Existing access tokens are invalid;
+  clients must refresh or log in again.
+- **`UserSummary.role` is gone.** Fetch roles with
+  `GET /api/v1/roles/assignments/{userId}`.
+- **Deploy / seed order.** Run `scripts/seed-privilege.sh`, then
+  `scripts/seed-owner.sh` with `APPLICATION_OWNER_EMAIL` set. Existing users
+  without `user_roles` get the `user` role from the privilege seeder. Former
+  `ADMIN` rows are not auto-promoted.
+- **No hardcoded admin role.** Seeded roles are `owner` and `user` only.
+  Create a custom `admin` role via `POST /api/v1/roles` and assign moderate /
+  category permissions there.
