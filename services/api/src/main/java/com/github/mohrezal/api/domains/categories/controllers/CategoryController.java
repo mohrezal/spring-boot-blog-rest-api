@@ -8,7 +8,8 @@ import com.github.mohrezal.api.domains.categories.dtos.CategorySummary;
 import com.github.mohrezal.api.domains.categories.dtos.CreateCategoryRequest;
 import com.github.mohrezal.api.domains.categories.queries.GetCategoriesQuery;
 import com.github.mohrezal.api.domains.categories.queries.params.GetCategoriesQueryParams;
-import com.github.mohrezal.api.shared.annotations.IsAdmin;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.shared.annotations.RequiresPermission;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    @IsAdmin
+    @RequiresPermission(Permissions.BLOG_CATEGORIES_CREATE)
     public ResponseEntity<CategorySummary> createCategory(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid CreateCategoryRequest createCategoryRequest) {
