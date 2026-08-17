@@ -18,7 +18,7 @@ import com.github.mohrezal.api.domains.notifications.queries.params.GetNotificat
 import com.github.mohrezal.api.domains.notifications.queries.params.GetNotificationsQueryParams;
 import com.github.mohrezal.api.domains.notifications.queries.params.GetUserUnreadNotificationCountQueryParams;
 import com.github.mohrezal.api.domains.notifications.queries.params.SubscribeNotificationStreamQueryParams;
-import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.Authenticated;
 import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,14 +54,14 @@ public class NotificationController {
     private final MarkAllNotificationsReadCommand markAllNotificationsReadCommand;
     private final UpdateNotificationPreferencesCommand updateNotificationPreferencesCommand;
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(value = Routes.Notification.STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@AuthenticationPrincipal UserDetails userDetails) {
         var params = new SubscribeNotificationStreamQueryParams(userDetails);
         return subscribeNotificationStreamQuery.execute(params);
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping
     public ResponseEntity<@NonNull PageResponse<NotificationSummary>> getNotification(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -71,7 +71,7 @@ public class NotificationController {
         return ResponseEntity.ok().body(getNotificationsQuery.execute(params));
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(Routes.Notification.UN_READ)
     public ResponseEntity<@NonNull Integer> getUnReadNotifications(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -79,7 +79,7 @@ public class NotificationController {
         return ResponseEntity.ok().body(getUserUnreadNotificationCountQuery.execute(params));
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(Routes.Notification.PREFERENCES)
     public ResponseEntity<NotificationPreferenceSummary> getNotificationPreference(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -87,7 +87,7 @@ public class NotificationController {
         return ResponseEntity.ok().body(getNotificationPreferencesQuery.execute(params));
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PatchMapping(Routes.Notification.MARK_READ)
     public ResponseEntity<Void> markNotificationAsRead(
             @PathVariable UUID id, @AuthenticationPrincipal UserDetails userDetails) {
@@ -96,7 +96,7 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PatchMapping(Routes.Notification.MARK_ALL_READ)
     public ResponseEntity<Void> markAllNotificationsAsRead(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -105,7 +105,7 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PutMapping(Routes.Notification.PREFERENCES)
     public ResponseEntity<NotificationPreferenceSummary> updateNotificationPreferences(
             @RequestBody UpdateNotificationPreferenceRequest request,

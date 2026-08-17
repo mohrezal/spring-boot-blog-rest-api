@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.service.SecurityPermissionChecker;
 import com.github.mohrezal.api.domains.storage.commands.params.DeleteCommandParams;
 import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
@@ -34,6 +36,8 @@ class DeleteCommandTest {
 
     @Mock private StorageService storageService;
 
+    @Mock private SecurityPermissionChecker securityPermissionChecker;
+
     @InjectMocks private DeleteCommand command;
 
     private final User user = aUser().build();
@@ -57,10 +61,28 @@ class DeleteCommandTest {
                 .thenReturn(Optional.of(storage));
 
         when(storageUtilsService.isOwner(user, storage)).thenReturn(false);
+        when(securityPermissionChecker.hasPermission(Permissions.BLOG_STORAGE_MODERATE))
+                .thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> command.execute(params));
 
         verify(storageService, never()).delete(any());
+    }
+
+    @Test
+    void execute_whenUserIsNotOwnerButHasModeratePermission_shouldDeleteStorage() {
+        var params = new DeleteCommandParams(user, storage.getFilename());
+
+        when(storageRepository.findByFilename(storage.getFilename()))
+                .thenReturn(Optional.of(storage));
+
+        when(storageUtilsService.isOwner(user, storage)).thenReturn(false);
+        when(securityPermissionChecker.hasPermission(Permissions.BLOG_STORAGE_MODERATE))
+                .thenReturn(true);
+
+        command.execute(params);
+
+        verify(storageService).delete(storage);
     }
 
     @Test

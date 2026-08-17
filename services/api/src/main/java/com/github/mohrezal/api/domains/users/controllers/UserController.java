@@ -14,7 +14,7 @@ import com.github.mohrezal.api.domains.users.queries.GetUserFollowingQuery;
 import com.github.mohrezal.api.domains.users.queries.params.CurrentUserQueryParams;
 import com.github.mohrezal.api.domains.users.queries.params.GetUserFollowersQueryParams;
 import com.github.mohrezal.api.domains.users.queries.params.GetUserFollowingQueryParams;
-import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.Authenticated;
 import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,7 +45,7 @@ public class UserController {
     private final GetUserFollowersQuery getUserFollowersQueries;
     private final GetUserFollowingQuery getUserFollowingQueries;
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(Routes.User.ME)
     public ResponseEntity<@NonNull UserSummary> getCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -54,7 +54,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PostMapping(Routes.User.FOLLOW_USER)
     public ResponseEntity<Void> followUser(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
@@ -64,7 +64,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PostMapping(Routes.User.UNFOLLOW_USER)
     public ResponseEntity<Void> unFollowUser(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String handle) {
@@ -73,7 +73,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(Routes.User.FOLLOWERS)
     public ResponseEntity<@NonNull PageResponse<FollowerSummary>> getFollowers(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -87,7 +87,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @GetMapping(Routes.User.FOLLOWING)
     public ResponseEntity<@NonNull PageResponse<FollowerSummary>> getFollowing(
             @AuthenticationPrincipal UserDetails userDetails,

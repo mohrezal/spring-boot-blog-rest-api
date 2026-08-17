@@ -7,6 +7,8 @@ import com.github.mohrezal.api.domains.posts.exceptions.types.PostInvalidStatusT
 import com.github.mohrezal.api.domains.posts.exceptions.types.PostNotFoundException;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.service.SecurityPermissionChecker;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedCommand;
 import com.github.mohrezal.api.shared.exceptions.types.AccessDeniedException;
 import java.time.OffsetDateTime;
@@ -22,6 +24,7 @@ public class PublishPostCommand extends AuthenticatedCommand<PublishPostCommandP
 
     private final PostRepository postRepository;
     private final PostUtilsService postUtilsService;
+    private final SecurityPermissionChecker securityPermissionChecker;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -34,7 +37,8 @@ public class PublishPostCommand extends AuthenticatedCommand<PublishPostCommandP
                         .findBySlug(params.slug())
                         .orElseThrow(() -> new PostNotFoundException(context));
 
-        if (!postUtilsService.isOwner(post, currentUser)) {
+        if (!postUtilsService.isOwner(post, currentUser)
+                && !securityPermissionChecker.hasPermission(Permissions.BLOG_POSTS_MODERATE)) {
             throw new AccessDeniedException(context);
         }
         if (!post.getStatus().equals(PostStatus.DRAFT)) {

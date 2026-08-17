@@ -15,7 +15,7 @@ import com.github.mohrezal.api.domains.users.dtos.CsrfTokenResponse;
 import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
-import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.Authenticated;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
 import com.github.mohrezal.common.constants.CookieConstants;
@@ -132,7 +132,7 @@ public class AuthController {
                 .build();
     }
 
-    @IsAdminOrUser
+    @Authenticated
     @PostMapping(Routes.Auth.LOGOUT)
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request) {

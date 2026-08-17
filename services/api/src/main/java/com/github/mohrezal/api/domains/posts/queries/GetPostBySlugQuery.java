@@ -8,6 +8,8 @@ import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.service.SecurityPermissionChecker;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.shared.abstracts.AuthenticatedQuery;
 import java.util.UUID;
@@ -23,6 +25,7 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final PostUtilsService postUtilsService;
+    private final SecurityPermissionChecker securityPermissionChecker;
 
     @Transactional(readOnly = true)
     @Override
@@ -46,7 +49,7 @@ public class GetPostBySlugQuery extends AuthenticatedQuery<GetPostBySlugQueryPar
 
         var isOwner = currentUser != null && postUtilsService.isOwner(post, currentUser);
 
-        if (isOwner) {
+        if (isOwner || securityPermissionChecker.hasPermission(Permissions.BLOG_POSTS_MODERATE)) {
             log.info("Get post by slug query successful.");
             return this.postMapper.toPostDetail(post);
         }

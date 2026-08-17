@@ -13,6 +13,8 @@ import com.github.mohrezal.api.domains.posts.mappers.PostMapper;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.repositories.PostRepository;
 import com.github.mohrezal.api.domains.posts.services.postutils.PostUtilsService;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.service.SecurityPermissionChecker;
 import com.github.mohrezal.api.domains.users.models.User;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,8 @@ class GetPostBySlugQueryTest {
     @Mock private PostMapper postMapper;
 
     @Mock private PostUtilsService postUtilsService;
+
+    @Mock private SecurityPermissionChecker securityPermissionChecker;
 
     @InjectMocks private GetPostBySlugQuery query;
 
@@ -63,8 +67,28 @@ class GetPostBySlugQueryTest {
 
         when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
         when(postUtilsService.isOwner(post, mockedUser)).thenReturn(false);
+        when(securityPermissionChecker.hasPermission(Permissions.BLOG_POSTS_MODERATE))
+                .thenReturn(false);
 
         assertThrows(PostNotFoundException.class, () -> query.execute(params));
+    }
+
+    @Test
+    void execute_whenPostIsDraftAndUserHasModeratePermission_shouldReturnPostDetail() {
+        var params = new GetPostBySlugQueryParams(mockedUser, "draft-post");
+
+        var post = aPost().withStatus(PostStatus.DRAFT).build();
+        var postDetail = aPostDetail().build();
+
+        when(postRepository.findBySlug(params.slug())).thenReturn(Optional.of(post));
+        when(postUtilsService.isOwner(post, mockedUser)).thenReturn(false);
+        when(securityPermissionChecker.hasPermission(Permissions.BLOG_POSTS_MODERATE))
+                .thenReturn(true);
+        when(postMapper.toPostDetail(post)).thenReturn(postDetail);
+
+        var result = query.execute(params);
+
+        assertEquals(postDetail, result);
     }
 
     @Test

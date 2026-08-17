@@ -1,5 +1,7 @@
 package com.github.mohrezal.api.domains.storage.commands;
 
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.domains.privilege.service.SecurityPermissionChecker;
 import com.github.mohrezal.api.domains.storage.commands.params.DeleteCommandParams;
 import com.github.mohrezal.api.domains.storage.exceptions.context.StorageDeleteExceptionContext;
 import com.github.mohrezal.api.domains.storage.repositories.StorageRepository;
@@ -22,6 +24,7 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
     private final StorageRepository storageRepository;
     private final StorageUtilsService storageUtilsService;
     private final StorageService storageService;
+    private final SecurityPermissionChecker securityPermissionChecker;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -39,7 +42,8 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
                                                 MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
                                                 context));
 
-        if (!storageUtilsService.isOwner(currentUser, storage)) {
+        if (!storageUtilsService.isOwner(currentUser, storage)
+                && !securityPermissionChecker.hasPermission(Permissions.BLOG_STORAGE_MODERATE)) {
             throw new AccessDeniedException(context);
         }
 
