@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.domains.storage.controllers;
 
 import com.github.mohrezal.api.config.Routes;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
 import com.github.mohrezal.api.domains.storage.commands.DeleteCommand;
 import com.github.mohrezal.api.domains.storage.commands.UploadCommand;
 import com.github.mohrezal.api.domains.storage.commands.UploadProfileCommand;
@@ -15,7 +16,7 @@ import com.github.mohrezal.api.domains.storage.queries.GetStorageByFilenameQuery
 import com.github.mohrezal.api.domains.storage.queries.GetUserStorageListQuery;
 import com.github.mohrezal.api.domains.storage.queries.params.GetStorageByFilenameQueryParams;
 import com.github.mohrezal.api.domains.storage.queries.params.GetUserStorageListQueryParams;
-import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.shared.annotations.RequiresPermission;
 import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,7 +50,7 @@ public class StorageController {
     private final GetStorageByFilenameQuery getStorageByFilenameQueries;
     private final GetUserStorageListQuery getUserStorageListQueries;
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_STORAGE_UPLOAD)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<@NonNull StorageSummary> upload(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -69,7 +70,7 @@ public class StorageController {
                 .body(response.data());
     }
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_STORAGE_DELETE)
     @DeleteMapping(Routes.Storage.BY_FILENAME)
     public ResponseEntity<Void> deleteByFilename(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String filename) {
@@ -78,7 +79,7 @@ public class StorageController {
         return ResponseEntity.noContent().build();
     }
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_STORAGE_LIST)
     @GetMapping(Routes.Storage.LIST)
     public ResponseEntity<@NonNull PageResponse<StorageSummary>> list(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -88,7 +89,7 @@ public class StorageController {
         return ResponseEntity.ok().body(getUserStorageListQueries.execute(params));
     }
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_STORAGE_PROFILE)
     @PostMapping(value = Routes.Storage.PROFILE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<@NonNull StorageSummary> profile(
             @AuthenticationPrincipal UserDetails userDetails,
