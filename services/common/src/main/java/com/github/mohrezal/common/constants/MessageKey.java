@@ -34,6 +34,7 @@ public final class MessageKey {
     public static final String USER_INVALID_VERIFICATION_TOKEN =
             "user.error.invalid-verification-token";
     public static final String USER_ALREADY_VERIFIED = "user.error.already-verified";
+    public static final String USER_EMAIL_NOT_VERIFIED = "user.error.email-not-verified";
 
     public static final String POST_NOT_FOUND = "post.error.not-found";
     public static final String POST_SLUG_ALREADY_EXISTS = "post.error.slug-already-exists";

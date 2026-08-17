@@ -3,8 +3,7 @@ package com.github.mohrezal.api.domains.users.commands;
 import com.github.mohrezal.api.domains.notifications.models.NotificationPreference;
 import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
-import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
-import com.github.mohrezal.api.domains.users.dtos.RegisterResponse;
+import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserRegisterExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleAlreadyExistsException;
@@ -15,9 +14,7 @@ import com.github.mohrezal.api.domains.users.services.registration.RegistrationS
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.exceptions.types.InvalidRedirectUrlException;
 import com.github.mohrezal.api.shared.interfaces.Command;
-import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.services.hash.HashService;
-import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.api.shared.utils.RedirectUrlUtils;
 import com.github.mohrezal.common.redis.RedisCacheService;
 import com.github.mohrezal.common.redis.constants.RedisKeyFactory;
@@ -33,12 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class RegisterUserCommand implements Command<RegisterUserCommandParams, RegisterResponse> {
+public class RegisterUserCommand implements Command<RegisterUserCommandParams, UserSummary> {
 
     private final RegistrationService registrationService;
-    private final JwtService jwtService;
     private final UserMapper userMapper;
-    private final RequestInfoService deviceInfoService;
     private final UserRepository userRepository;
     private final ApplicationProperties applicationProperties;
     private final NotificationPreferenceRepository notificationPreferenceRepository;
@@ -68,21 +63,13 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public RegisterResponse execute(RegisterUserCommandParams params) {
+    public UserSummary execute(RegisterUserCommandParams params) {
         validate(params);
         try {
             var user = registrationService.register(params.registerUserRequest());
 
             var notificationPreference = NotificationPreference.builder().user(user).build();
             notificationPreferenceRepository.save(notificationPreference);
-
-            var accessToken = jwtService.generateAccessToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user.getId());
-
-            var deviceName = deviceInfoService.parseDeviceName(params.userAgent());
-
-            jwtService.saveRefreshToken(
-                    refreshToken, user, params.ipAddress(), params.userAgent(), deviceName);
 
             var token = hashService.sha256(UUID.randomUUID().toString());
 
@@ -100,10 +87,8 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, R
                     user.getId(),
                     Duration.ofSeconds(RedisKeyFactory.Verification.TTL_SECONDS));
 
-            var authResponse = new AuthResponse(accessToken, refreshToken);
-
             log.info("User registration successful.");
-            return new RegisterResponse(userMapper.toUserSummary(user), authResponse);
+            return userMapper.toUserSummary(user);
         } catch (UserEmailAlreadyExistsException ex) {
             var request = params.registerUserRequest();
             var context = new UserRegisterExceptionContext(request.email(), request.handle());

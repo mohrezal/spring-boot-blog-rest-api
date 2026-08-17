@@ -3,6 +3,7 @@ package com.github.mohrezal.api.domains.users.commands;
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserRefreshTokenExceptionContext;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailNotVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserRefreshTokenNotFoundException;
@@ -66,6 +67,10 @@ public class RefreshTokenCommand implements Command<RefreshTokenCommandParams, A
                 userRepository
                         .findById(refreshTokenEntity.getUser().getId())
                         .orElseThrow(UserNotFoundException::new);
+
+        if (!user.hasVerifiedEmail()) {
+            throw new UserEmailNotVerifiedException();
+        }
 
         var newAccessToken = jwtService.generateAccessToken(user);
         var newRefreshToken = jwtService.generateRefreshToken(user.getId());

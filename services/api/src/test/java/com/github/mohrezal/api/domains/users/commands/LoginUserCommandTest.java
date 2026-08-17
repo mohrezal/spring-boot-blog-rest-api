@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.github.mohrezal.api.domains.posts.repositories.PostViewRepository;
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailNotVerifiedException;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.services.authentication.AuthenticationService;
 import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
@@ -73,6 +74,18 @@ class LoginUserCommandTest {
         verify(hashService).sha256("vid-1");
         verify(postViewRepository)
                 .linkAnonymousViewsToUserByVidHash("vid-hash", mockedUser.getId());
+    }
+
+    @Test
+    void execute_whenEmailIsNotVerified_shouldRejectWithoutIssuingTokens() {
+        var unverifiedUser = aUser().withIsVerified(false).build();
+        when(authenticationService.authenticate(any(LoginRequest.class)))
+                .thenReturn(unverifiedUser);
+
+        assertThrows(UserEmailNotVerifiedException.class, () -> command.execute(params));
+
+        verify(authenticationService).authenticate(any(LoginRequest.class));
+        verifyNoInteractions(jwtService, hashService, postViewRepository);
     }
 
     @Test

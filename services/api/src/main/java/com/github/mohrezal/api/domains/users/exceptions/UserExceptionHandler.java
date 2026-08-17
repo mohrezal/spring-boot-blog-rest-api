@@ -4,6 +4,7 @@ import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowi
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailNotVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidVerificationTokenException;
@@ -41,6 +42,12 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
     @ExceptionHandler(UserInvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
             UserInvalidCredentialsException ex, WebRequest request) {
+        return buildErrorResponse(ex);
+    }
+
+    @ExceptionHandler(UserEmailNotVerifiedException.class)
+    public ResponseEntity<ErrorResponse> handleUserEmailNotVerifiedException(
+            UserEmailNotVerifiedException ex, WebRequest request) {
         return buildErrorResponse(ex);
     }
 

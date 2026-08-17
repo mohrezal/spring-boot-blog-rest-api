@@ -4,6 +4,7 @@ import com.github.mohrezal.api.domains.posts.repositories.PostViewRepository;
 import com.github.mohrezal.api.domains.users.commands.params.LoginUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.AuthResponse;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserLoginExceptionContext;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailNotVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidCredentialsException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.services.authentication.AuthenticationService;
@@ -36,6 +37,12 @@ public class LoginUserCommand implements Command<LoginUserCommandParams, AuthRes
         try {
             var user = authenticationService.authenticate(params.loginRequest());
             deviceName = deviceInfoService.parseDeviceName(params.userAgent());
+
+            if (!user.hasVerifiedEmail()) {
+                var context =
+                        new UserLoginExceptionContext(params.loginRequest().email(), deviceName);
+                throw new UserEmailNotVerifiedException(context);
+            }
 
             var accessToken = jwtService.generateAccessToken(user);
             var refreshToken = jwtService.generateRefreshToken(user.getId());

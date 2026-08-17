@@ -69,7 +69,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (!(validUser.isEnabled()
                     && validUser.isAccountNonExpired()
                     && validUser.isAccountNonLocked()
-                    && validUser.isCredentialsNonExpired())) {
+                    && validUser.isCredentialsNonExpired()
+                    && validUser.hasVerifiedEmail())) {
                 log.warn("User account not active userId={}", userId.get());
                 filterChain.doFilter(request, response);
                 return;

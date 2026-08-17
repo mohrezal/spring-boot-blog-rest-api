@@ -71,18 +71,9 @@ public class AuthController {
                         request.getHeader(HttpHeaders.USER_AGENT),
                         redirectUrl);
 
-        var registerResponse = registerUserCommand.execute(params);
+        var user = registerUserCommand.execute(params);
 
-        var accessTokenCookie =
-                cookieUtils.createAccessTokenCookie(registerResponse.authResponse().accessToken());
-        var refreshTokenCookie =
-                cookieUtils.createRefreshTokenCookie(
-                        registerResponse.authResponse().refreshToken());
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(registerResponse.user());
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PostMapping(Routes.Auth.LOGIN)

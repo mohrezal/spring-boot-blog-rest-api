@@ -4,6 +4,7 @@ import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.github.mohrezal.api.domains.users.commands.params.RefreshTokenCommandParams;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailNotVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidRefreshTokenException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserRefreshTokenNotFoundException;
@@ -103,6 +105,29 @@ class RefreshTokenCommandTest {
 
         verify(jwtService).getRefreshTokenEntity("refresh-token");
         verify(jwtService, never()).revokeRefreshTokenIfActive(anyString());
+    }
+
+    @Test
+    void execute_whenUserEmailIsNotVerified_shouldRejectWithoutIssuingTokens() {
+        var unverifiedUser = aUser().withIsVerified(false).build();
+        var refreshTokenEntity = mock(RefreshToken.class);
+
+        when(jwtService.validateToken("refresh-token")).thenReturn(true);
+        when(refreshTokenEntity.getUser()).thenReturn(unverifiedUser);
+        when(refreshTokenEntity.isRevoked()).thenReturn(false);
+        when(refreshTokenEntity.isExpired()).thenReturn(false);
+        when(jwtService.getRefreshTokenEntity("refresh-token"))
+                .thenReturn(Optional.of(refreshTokenEntity));
+        when(jwtService.revokeRefreshTokenIfActive("refresh-token")).thenReturn(true);
+        when(userRepository.findById(unverifiedUser.getId()))
+                .thenReturn(Optional.of(unverifiedUser));
+
+        assertThrows(UserEmailNotVerifiedException.class, () -> command.execute(params));
+
+        verify(jwtService, never()).generateAccessToken(unverifiedUser);
+        verify(jwtService, never()).generateRefreshToken(unverifiedUser.getId());
+        verify(jwtService, never())
+                .saveRefreshToken(anyString(), eq(unverifiedUser), anyString(), anyString(), any());
     }
 
     @Test

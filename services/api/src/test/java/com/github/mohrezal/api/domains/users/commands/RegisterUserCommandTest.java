@@ -21,9 +21,7 @@ import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.domains.users.services.registration.RegistrationService;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
-import com.github.mohrezal.api.shared.services.deviceinfo.RequestInfoService;
 import com.github.mohrezal.api.shared.services.hash.HashService;
-import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.api.shared.utils.RedirectUrlUtils;
 import com.github.mohrezal.api.support.constants.UserAgents;
 import com.github.mohrezal.common.redis.RedisCacheService;
@@ -41,11 +39,7 @@ import org.springframework.context.ApplicationEventPublisher;
 class RegisterUserCommandTest {
     @Mock private RegistrationService registrationService;
 
-    @Mock private JwtService jwtService;
-
     @Mock private UserMapper userMapper;
-
-    @Mock private RequestInfoService deviceInfoService;
 
     @Mock private UserRepository userRepository;
 
@@ -88,9 +82,7 @@ class RegisterUserCommandTest {
                         null);
         return new RegisterUserCommand(
                 registrationService,
-                jwtService,
                 userMapper,
-                deviceInfoService,
                 userRepository,
                 applicationProperties,
                 notificationPreferenceRepository,
@@ -124,30 +116,15 @@ class RegisterUserCommandTest {
         when(userRepository.existsByHandle(eq(params.registerUserRequest().handle())))
                 .thenReturn(false);
         when(registrationService.register(eq(params.registerUserRequest()))).thenReturn(user);
-        when(jwtService.generateAccessToken(eq(user))).thenReturn("access-token");
-        when(jwtService.generateRefreshToken(eq(user.getId()))).thenReturn("refresh-token");
-        when(deviceInfoService.parseDeviceName(eq(UserAgents.MAC))).thenReturn("Mac OS");
         when(userMapper.toUserSummary(user)).thenReturn(userSummary);
 
         var result = command.execute(params);
 
         assertNotNull(result);
-        assertNotNull(result.user());
-        assertNotNull(result.authResponse());
-
-        assertEquals("access-token", result.authResponse().accessToken());
-        assertEquals("refresh-token", result.authResponse().refreshToken());
+        assertEquals(userSummary, result);
+        assertEquals(false, result.isVerified());
 
         verify(notificationPreferenceRepository).save(any(NotificationPreference.class));
-
-        verify(jwtService)
-                .saveRefreshToken(
-                        eq("refresh-token"),
-                        eq(user),
-                        eq("127.0.0.1"),
-                        eq(UserAgents.MAC),
-                        eq("Mac OS"));
-
         verify(eventPublisher).publishEvent(any(UserRegisteredEvent.class));
     }
 
@@ -157,7 +134,7 @@ class RegisterUserCommandTest {
 
         assertThrows(UserHandleReservedException.class, () -> command.execute(params));
 
-        verifyNoInteractions(registrationService, jwtService, eventPublisher);
+        verifyNoInteractions(registrationService, eventPublisher);
     }
 
     @Test

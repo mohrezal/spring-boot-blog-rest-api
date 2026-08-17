@@ -78,6 +78,10 @@ public class User extends BaseModel implements UserDetails {
         this.privilegeVersion = this.privilegeVersion + 1L;
     }
 
+    public boolean hasVerifiedEmail() {
+        return Boolean.TRUE.equals(isVerified);
+    }
+
     @Override
     public String getPassword() {
         return credentials.getHashedPassword();
