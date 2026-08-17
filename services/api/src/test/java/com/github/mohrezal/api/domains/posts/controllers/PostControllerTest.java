@@ -52,6 +52,7 @@ import com.github.mohrezal.api.domains.posts.queries.GetPostsQuery;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.exceptions.SharedExceptionHandler;
@@ -238,7 +239,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isCreated());
@@ -271,7 +274,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest());
@@ -295,7 +300,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isNotFound());
@@ -319,7 +326,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict());
@@ -343,7 +352,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk());
@@ -377,7 +388,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest());
@@ -401,7 +414,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "missing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isNotFound());
@@ -425,7 +440,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isNotFound());
@@ -449,7 +466,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isConflict());
@@ -473,7 +492,9 @@ class PostControllerTest {
         mockMvc.perform(
                         put(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isForbidden());
@@ -492,7 +513,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_PUBLISH)))
                 .andExpect(status().isNoContent());
     }
 
@@ -517,7 +540,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "missing-slug", "publish"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_PUBLISH)))
                 .andExpect(status().isNotFound());
     }
 
@@ -534,7 +559,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_PUBLISH)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -551,7 +578,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "publish"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_PUBLISH)))
                 .andExpect(status().isForbidden());
     }
 
@@ -568,7 +597,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_ARCHIVE)))
                 .andExpect(status().isNoContent());
     }
 
@@ -593,7 +624,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "missing-slug", "archive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_ARCHIVE)))
                 .andExpect(status().isNotFound());
     }
 
@@ -610,7 +643,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_ARCHIVE)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -627,7 +662,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "archive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_ARCHIVE)))
                 .andExpect(status().isForbidden());
     }
 
@@ -644,7 +681,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UNARCHIVE)))
                 .andExpect(status().isNoContent());
     }
 
@@ -669,7 +708,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "missing-slug", "unarchive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UNARCHIVE)))
                 .andExpect(status().isNotFound());
     }
 
@@ -686,7 +727,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UNARCHIVE)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -703,7 +746,9 @@ class PostControllerTest {
         mockMvc.perform(
                         post(Routes.build(Routes.Post.BASE, "existing-slug", "unarchive"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UNARCHIVE)))
                 .andExpect(status().isForbidden());
     }
 
@@ -720,7 +765,9 @@ class PostControllerTest {
         mockMvc.perform(
                         delete(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_DELETE)))
                 .andExpect(status().isNoContent());
     }
 
@@ -743,7 +790,9 @@ class PostControllerTest {
         mockMvc.perform(
                         delete(Routes.build(Routes.Post.BASE, "missing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_DELETE)))
                 .andExpect(status().isNotFound());
     }
 
@@ -760,7 +809,9 @@ class PostControllerTest {
         mockMvc.perform(
                         delete(Routes.build(Routes.Post.BASE, "existing-slug"))
                                 .with(csrf())
-                                .with(AuthenticationUtils.authenticate(user)))
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_DELETE)))
                 .andExpect(status().isForbidden());
     }
 

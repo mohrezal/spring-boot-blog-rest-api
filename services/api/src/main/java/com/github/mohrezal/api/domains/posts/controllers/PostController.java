@@ -28,7 +28,8 @@ import com.github.mohrezal.api.domains.posts.queries.params.GetPostBySlugQueryPa
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostSlugAvailabilityQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsBySearchQueryParams;
 import com.github.mohrezal.api.domains.posts.queries.params.GetPostsQueryParams;
-import com.github.mohrezal.api.shared.annotations.IsAdminOrUser;
+import com.github.mohrezal.api.domains.privilege.constant.Permissions;
+import com.github.mohrezal.api.shared.annotations.RequiresPermission;
 import com.github.mohrezal.api.shared.annotations.range.Range;
 import com.github.mohrezal.api.shared.dtos.PageResponse;
 import com.github.mohrezal.api.shared.utils.CookieUtils;
@@ -88,7 +89,7 @@ public class PostController {
         return ResponseEntity.ok(getPostsQueries.execute(params));
     }
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_CREATE)
     @PostMapping
     public ResponseEntity<@NonNull PostDetail> createPost(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -97,7 +98,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createPostCommands.execute(params));
     }
 
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_UPDATE)
     @PutMapping(Routes.Post.BY_SLUG)
     public ResponseEntity<@NonNull PostDetail> updatePostBySlug(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -125,7 +126,7 @@ public class PostController {
     }
 
     @PostMapping(Routes.Post.PUBLISH_POST)
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_PUBLISH)
     public ResponseEntity<@NonNull Void> publishPost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new PublishPostCommandParams(userDetails, slug);
@@ -134,7 +135,7 @@ public class PostController {
     }
 
     @PostMapping(Routes.Post.ARCHIVE_POST)
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_ARCHIVE)
     public ResponseEntity<@NonNull Void> archivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new ArchivePostCommandParams(userDetails, slug);
@@ -143,7 +144,7 @@ public class PostController {
     }
 
     @PostMapping(Routes.Post.UNARCHIVE_POST)
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_UNARCHIVE)
     public ResponseEntity<@NonNull Void> unarchivePost(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
         var params = new UnarchivePostCommandParams(userDetails, slug);
@@ -152,7 +153,7 @@ public class PostController {
     }
 
     @DeleteMapping(Routes.Post.BY_SLUG)
-    @IsAdminOrUser
+    @RequiresPermission(Permissions.BLOG_POSTS_DELETE)
     public ResponseEntity<Void> deletePostBySlug(
             @AuthenticationPrincipal UserDetails userDetails, @PathVariable String slug) {
 
