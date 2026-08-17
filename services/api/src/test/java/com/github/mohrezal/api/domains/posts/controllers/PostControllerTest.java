@@ -566,7 +566,7 @@ class PostControllerTest {
     }
 
     @Test
-    void publishPost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+    void publishPost_whenNotOwner_shouldReturn403() throws Exception {
         var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(publishPostCommand)
@@ -650,7 +650,7 @@ class PostControllerTest {
     }
 
     @Test
-    void archivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+    void archivePost_whenNotOwner_shouldReturn403() throws Exception {
         var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(archivePostCommand)
@@ -734,7 +734,7 @@ class PostControllerTest {
     }
 
     @Test
-    void unarchivePost_whenNotOwnerOrAdmin_shouldReturn403() throws Exception {
+    void unarchivePost_whenNotOwner_shouldReturn403() throws Exception {
         var user = userRepository.save(aUser().withEmail("user@test.com").build());
         doThrow(new AccessDeniedException())
                 .when(unarchivePostCommand)

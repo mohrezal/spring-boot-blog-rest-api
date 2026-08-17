@@ -31,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -192,7 +193,8 @@ class NotificationEventListenerTest {
                 .convertAndSend(
                         eq(RabbitMQConstants.Notification.EXCHANGE),
                         eq(RabbitMQConstants.Notification.RoutingKey.TRANSACTIONAL_EMAIL),
-                        captor.capture());
+                        captor.capture(),
+                        any(MessagePostProcessor.class));
 
         var message = captor.getValue();
         assertEquals("newuser@example.com", message.to());

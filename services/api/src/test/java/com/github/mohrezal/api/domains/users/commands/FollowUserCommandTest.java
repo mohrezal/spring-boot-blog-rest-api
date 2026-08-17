@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.github.mohrezal.api.domains.notifications.repositories.NotificationPreferenceRepository;
 import com.github.mohrezal.api.domains.users.commands.params.FollowUserCommandParams;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyFollowingException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserCannotFollowOrUnfollowSelfException;
@@ -35,6 +36,8 @@ class FollowUserCommandTest {
 
     @Mock private ApplicationEventPublisher eventPublisher;
 
+    @Mock private NotificationPreferenceRepository notificationPreferenceRepository;
+
     @InjectMocks private FollowUserCommand command;
 
     private final User follower = aUser().withId(UUID.randomUUID()).withHandle("follower").build();
@@ -49,6 +52,8 @@ class FollowUserCommandTest {
                 .thenReturn(Optional.of(targetUser));
         when(userFollowRepository.isAlreadyFollowing(eq(follower.getId()), eq(targetUser.getId())))
                 .thenReturn(false);
+        when(notificationPreferenceRepository.findByUserId(eq(targetUser.getId())))
+                .thenReturn(Optional.empty());
 
         command.execute(params);
 

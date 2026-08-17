@@ -71,7 +71,7 @@ class StorageControllerTest {
     @MockitoBean RateLimitService rateLimitService;
 
     User testUser;
-    User adminUser;
+    User moderatorUser;
     User otherUser;
 
     MockMultipartFile validImageFile;
@@ -87,11 +87,11 @@ class StorageControllerTest {
                                 .withHandle("testuser")
                                 .build());
 
-        adminUser =
+        moderatorUser =
                 userRepository.save(
                         UserBuilder.aUser()
-                                .withEmail("admin@example.com")
-                                .withHandle("adminuser")
+                                .withEmail("moderator@example.com")
+                                .withHandle("moderator")
                                 .build());
 
         otherUser =
@@ -275,7 +275,7 @@ class StorageControllerTest {
     }
 
     @Test
-    void delete_whenAdmin_shouldSucceedRegardlessOfOwner() throws Exception {
+    void delete_whenHasModeratePermission_shouldSucceedRegardlessOfOwner() throws Exception {
         Storage storage = createStorageRecord("test-file.jpg", testUser);
 
         mockMvc.perform(
@@ -283,7 +283,7 @@ class StorageControllerTest {
                                 .with(csrf())
                                 .with(
                                         AuthenticationUtils.authenticate(
-                                                adminUser,
+                                                moderatorUser,
                                                 Permissions.BLOG_STORAGE_DELETE,
                                                 Permissions.BLOG_STORAGE_MODERATE)))
                 .andExpect(status().isNoContent());
