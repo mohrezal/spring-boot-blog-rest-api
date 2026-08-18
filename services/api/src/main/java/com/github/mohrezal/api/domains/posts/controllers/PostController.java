@@ -118,6 +118,7 @@ public class PostController {
     }
 
     @GetMapping(Routes.Post.SLUG_AVAILABILITY)
+    @RequiresPermission({Permissions.BLOG_POSTS_CREATE, Permissions.BLOG_POSTS_UPDATE})
     public ResponseEntity<@NonNull SlugAvailability> getSlugAvailability(
             @RequestParam(name = "slug") String slug) {
         var params = new GetPostSlugAvailabilityQueryParams(slug);

@@ -183,26 +183,69 @@ class PostControllerTest {
     }
 
     @Test
+    void getSlugAvailability_whenNotAuthenticated_shouldReturn401() throws Exception {
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "unique-slug"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getSlugAvailability_whenAuthenticatedWithoutPermission_shouldReturn403() throws Exception {
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "unique-slug")
+                                .with(AuthenticationUtils.authenticate(user)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void getSlugAvailability_whenSlugAvailable_shouldReturn200() throws Exception {
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenReturn(new SlugAvailability(true, null));
 
         mockMvc.perform(
                         get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
-                                .param("slug", "unique-slug"))
+                                .param("slug", "unique-slug")
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.available").value(true))
                 .andExpect(jsonPath("$.suggestion").value(nullValue()));
     }
 
     @Test
+    void getSlugAvailability_whenCallerHasUpdatePermission_shouldReturn200() throws Exception {
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
+        when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
+                .thenReturn(new SlugAvailability(true, null));
+
+        mockMvc.perform(
+                        get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
+                                .param("slug", "unique-slug")
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_UPDATE)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true));
+    }
+
+    @Test
     void getSlugAvailability_whenSlugTaken_shouldReturn200WithSuggestion() throws Exception {
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenReturn(new SlugAvailability(false, "unique-slug-1"));
 
         mockMvc.perform(
                         get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
-                                .param("slug", "taken-slug"))
+                                .param("slug", "taken-slug")
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.available").value(false))
                 .andExpect(jsonPath("$.suggestion").value("unique-slug-1"));
@@ -210,12 +253,16 @@ class PostControllerTest {
 
     @Test
     void getSlugAvailability_whenInvalidSlug_shouldReturn400() throws Exception {
+        var user = userRepository.save(aUser().withEmail("user@test.com").build());
         when(getPostSlugAvailabilityQuery.execute(any(GetPostSlugAvailabilityQueryParams.class)))
                 .thenThrow(new PostSlugFormatException());
 
         mockMvc.perform(
                         get(Routes.build(Routes.Post.BASE, Routes.Post.SLUG_AVAILABILITY))
-                                .param("slug", "Invalid Slug"))
+                                .param("slug", "Invalid Slug")
+                                .with(
+                                        AuthenticationUtils.authenticate(
+                                                user, Permissions.BLOG_POSTS_CREATE)))
                 .andExpect(status().isBadRequest());
     }
 
