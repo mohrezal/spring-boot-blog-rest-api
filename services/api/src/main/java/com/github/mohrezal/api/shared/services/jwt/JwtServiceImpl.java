@@ -6,6 +6,9 @@ import com.github.mohrezal.api.domains.users.models.RefreshToken;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.RefreshTokenRepository;
 import com.github.mohrezal.api.shared.services.hash.HashService;
+import com.github.mohrezal.common.redis.RedisCacheService;
+import com.github.mohrezal.common.redis.constants.RedisKeyFactory;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -23,6 +26,7 @@ public class JwtServiceImpl implements JwtService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final HashService hashService;
     private final UserPermissionService userPermissionService;
+    private final RedisCacheService redisCacheService;
 
     @Override
     public String generateAccessToken(User user) {
@@ -134,6 +138,35 @@ public class JwtServiceImpl implements JwtService {
                             refreshToken.revoke();
                             refreshTokenRepository.save(refreshToken);
                         });
+    }
+
+    @Override
+    public void revokeAccessToken(String token) {
+        if (token == null || token.isBlank()) {
+            return;
+        }
+        Instant expiration;
+        try {
+            expiration = getExpirationFromToken(token);
+        } catch (RuntimeException ex) {
+            return;
+        }
+        var ttl = Duration.between(Instant.now(), expiration);
+        if (ttl.isZero() || ttl.isNegative()) {
+            return;
+        }
+        redisCacheService.set(
+                RedisKeyFactory.AccessToken.revoked(hashService.sha256(token)), "1", ttl);
+    }
+
+    @Override
+    public boolean isAccessTokenRevoked(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        return redisCacheService
+                .get(RedisKeyFactory.AccessToken.revoked(hashService.sha256(token)), String.class)
+                .isPresent();
     }
 
     @Override

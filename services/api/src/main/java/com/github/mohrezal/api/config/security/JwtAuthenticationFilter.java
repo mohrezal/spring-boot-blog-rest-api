@@ -1,6 +1,7 @@
 package com.github.mohrezal.api.config.security;
 
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.common.constants.CookieConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,6 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
 
+    private final JwtService jwtService;
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,6 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (!jwtTokenProvider.isAccessToken(accessToken.get())) {
                 log.warn("Rejected non-access token for {}", request.getRequestURI());
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (jwtService.isAccessTokenRevoked(accessToken.get())) {
+                log.warn("Rejected revoked access token for {}", request.getRequestURI());
                 filterChain.doFilter(request, response);
                 return;
             }

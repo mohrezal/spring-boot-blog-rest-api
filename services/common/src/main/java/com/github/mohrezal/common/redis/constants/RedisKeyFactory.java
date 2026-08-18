@@ -7,6 +7,15 @@ public final class RedisKeyFactory {
         return String.join(":", segments);
     }
 
+    public static final class AccessToken {
+        private static final String PREFIX = "auth:access";
+        private static final String REVOKED = "revoked";
+
+        public static String revoked(String tokenHash) {
+            return build(PREFIX, REVOKED, tokenHash);
+        }
+    }
+
     public static final class Verification {
         private static final String PREFIX = "verify:email";
 

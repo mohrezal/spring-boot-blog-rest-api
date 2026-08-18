@@ -36,7 +36,7 @@ class LogoutUserCommandTest {
 
     @Test
     void execute_whenRefreshTokenIsNull_shouldThrowUserInvalidRefreshTokenException() {
-        var params = new LogoutUserCommandParams(mockedUser, null);
+        var params = new LogoutUserCommandParams(mockedUser, null, "access-token");
         assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
 
         verifyNoInteractions(jwtService);
@@ -44,7 +44,7 @@ class LogoutUserCommandTest {
 
     @Test
     void execute_whenRefreshTokenIsBlank_shouldThrowUserInvalidRefreshTokenException() {
-        var params = new LogoutUserCommandParams(mockedUser, "  ");
+        var params = new LogoutUserCommandParams(mockedUser, "  ", "access-token");
         assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
 
         verifyNoInteractions(jwtService);
@@ -52,7 +52,7 @@ class LogoutUserCommandTest {
 
     @Test
     void execute_whenRefreshTokenIsNotFound_shouldThrowUserInvalidRefreshTokenException() {
-        var params = new LogoutUserCommandParams(mockedUser, "refresh-token");
+        var params = new LogoutUserCommandParams(mockedUser, "refresh-token", "access-token");
 
         when(jwtService.getRefreshTokenEntity(eq(params.refreshToken())))
                 .thenReturn(Optional.empty());
@@ -60,11 +60,12 @@ class LogoutUserCommandTest {
         assertThrows(UserInvalidRefreshTokenException.class, () -> command.execute(params));
         verify(jwtService).getRefreshTokenEntity(eq(params.refreshToken()));
         verify(jwtService, never()).revokeRefreshToken(anyString());
+        verify(jwtService, never()).revokeAccessToken(anyString());
     }
 
     @Test
     void execute_whenTokenBelongsToAnotherUser_shouldThrowForbiddenException() {
-        var params = new LogoutUserCommandParams(mockedUser, "refresh-token");
+        var params = new LogoutUserCommandParams(mockedUser, "refresh-token", "access-token");
 
         var otherUser = aUser().withId(UUID.randomUUID()).build();
 
@@ -78,11 +79,12 @@ class LogoutUserCommandTest {
 
         verify(jwtService).getRefreshTokenEntity(eq(params.refreshToken()));
         verify(jwtService, never()).revokeRefreshToken(anyString());
+        verify(jwtService, never()).revokeAccessToken(anyString());
     }
 
     @Test
     void execute_whenValidTokenAndSameUser_shouldRevokeTokenAndReturnNull() {
-        var params = new LogoutUserCommandParams(mockedUser, "refresh-token");
+        var params = new LogoutUserCommandParams(mockedUser, "refresh-token", "access-token");
 
         var refreshToken = mock(RefreshToken.class);
 
@@ -96,11 +98,12 @@ class LogoutUserCommandTest {
 
         verify(jwtService).getRefreshTokenEntity(eq(params.refreshToken()));
         verify(jwtService).revokeRefreshToken(eq(params.refreshToken()));
+        verify(jwtService).revokeAccessToken(eq(params.accessToken()));
     }
 
     @Test
     void execute_whenUnexpectedExceptionOccurs_shouldRethrowException() {
-        var params = new LogoutUserCommandParams(mockedUser, "refresh-token");
+        var params = new LogoutUserCommandParams(mockedUser, "refresh-token", "access-token");
         when(jwtService.getRefreshTokenEntity(eq(params.refreshToken())))
                 .thenThrow(RuntimeException.class);
         assertThrows(RuntimeException.class, () -> command.execute(params));

@@ -4,8 +4,11 @@ import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +18,8 @@ import com.github.mohrezal.api.domains.privilege.service.UserPermissionService;
 import com.github.mohrezal.api.domains.users.repositories.RefreshTokenRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
 import com.github.mohrezal.api.shared.services.hash.HashService;
+import com.github.mohrezal.common.redis.RedisCacheService;
+import com.github.mohrezal.common.redis.constants.RedisKeyFactory;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +44,8 @@ class JwtServiceImplTest {
 
     @Mock private HashService hashService;
 
+    @Mock private RedisCacheService redisCacheService;
+
     private JwtServiceImpl jwtService;
 
     @BeforeEach
@@ -56,7 +63,8 @@ class JwtServiceImplTest {
                         jwtTokenProvider,
                         refreshTokenRepository,
                         hashService,
-                        userPermissionService);
+                        userPermissionService,
+                        redisCacheService);
     }
 
     @Test
@@ -93,5 +101,49 @@ class JwtServiceImplTest {
         var refreshToken = jwtService.generateRefreshToken(UUID.randomUUID());
 
         assertTrue(jwtService.validateToken(refreshToken));
+    }
+
+    @Test
+    void revokeAccessToken_whenTokenIsValid_shouldStoreHashUntilExpiry() {
+        var userId = UUID.randomUUID();
+        var user = aUser().withId(userId).build();
+        when(userPermissionService.getPermissionKeys(userId)).thenReturn(List.of());
+        when(hashService.sha256(any())).thenReturn("access-hash");
+
+        var accessToken = jwtService.generateAccessToken(user);
+        jwtService.revokeAccessToken(accessToken);
+
+        verify(redisCacheService)
+                .set(
+                        eq(RedisKeyFactory.AccessToken.revoked("access-hash")),
+                        eq("1"),
+                        any(Duration.class));
+    }
+
+    @Test
+    void revokeAccessToken_whenTokenIsBlank_shouldSkip() {
+        jwtService.revokeAccessToken("  ");
+
+        verify(redisCacheService, never()).set(any(), any(), any());
+    }
+
+    @Test
+    void isAccessTokenRevoked_whenHashIsPresent_shouldReturnTrue() {
+        when(hashService.sha256("access-token")).thenReturn("access-hash");
+        when(redisCacheService.get(
+                        RedisKeyFactory.AccessToken.revoked("access-hash"), String.class))
+                .thenReturn(Optional.of("1"));
+
+        assertTrue(jwtService.isAccessTokenRevoked("access-token"));
+    }
+
+    @Test
+    void isAccessTokenRevoked_whenHashIsMissing_shouldReturnFalse() {
+        when(hashService.sha256("access-token")).thenReturn("access-hash");
+        when(redisCacheService.get(
+                        RedisKeyFactory.AccessToken.revoked("access-hash"), String.class))
+                .thenReturn(Optional.empty());
+
+        assertFalse(jwtService.isAccessTokenRevoked("access-token"));
     }
 }

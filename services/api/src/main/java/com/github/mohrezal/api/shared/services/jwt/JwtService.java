@@ -24,6 +24,10 @@ public interface JwtService {
 
     void revokeRefreshToken(String token);
 
+    void revokeAccessToken(String token);
+
+    boolean isAccessTokenRevoked(String token);
+
     void revokeAllUserRefreshTokens(UUID userId);
 
     UUID getUserIdFromToken(String token);

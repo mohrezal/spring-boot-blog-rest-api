@@ -41,6 +41,7 @@ public class LogoutUserCommand extends AuthenticatedCommand<LogoutUserCommandPar
         }
 
         jwtService.revokeRefreshToken(params.refreshToken());
+        jwtService.revokeAccessToken(params.accessToken());
         log.info("Logout successful for user session");
 
         return null;

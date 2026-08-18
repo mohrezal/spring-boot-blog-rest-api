@@ -130,8 +130,11 @@ public class AuthController {
         var refreshToken =
                 cookieUtils.getCookieValue(
                         request.getCookies(), CookieConstants.REFRESH_TOKEN_COOKIE_NAME);
+        var accessToken =
+                cookieUtils.getCookieValue(
+                        request.getCookies(), CookieConstants.ACCESS_TOKEN_COOKIE_NAME);
 
-        var params = new LogoutUserCommandParams(userDetails, refreshToken);
+        var params = new LogoutUserCommandParams(userDetails, refreshToken, accessToken);
 
         logoutUserCommand.execute(params);
 

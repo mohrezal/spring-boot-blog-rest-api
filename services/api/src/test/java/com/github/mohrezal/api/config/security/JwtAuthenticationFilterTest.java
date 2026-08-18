@@ -4,9 +4,11 @@ import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.api.shared.services.jwt.JwtService;
 import com.github.mohrezal.common.constants.CookieConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
@@ -29,6 +31,8 @@ class JwtAuthenticationFilterTest {
     @Mock private JwtTokenProvider jwtTokenProvider;
 
     @Mock private UserRepository userRepository;
+
+    @Mock private JwtService jwtService;
 
     @Mock private FilterChain filterChain;
 
@@ -64,6 +68,7 @@ class JwtAuthenticationFilterTest {
         var response = new MockHttpServletResponse();
 
         when(jwtTokenProvider.isAccessToken("access-token")).thenReturn(true);
+        when(jwtService.isAccessTokenRevoked("access-token")).thenReturn(false);
         when(jwtTokenProvider.extractUserId("access-token")).thenReturn(Optional.of(userId));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(jwtTokenProvider.extractPrivilegeVersion("access-token")).thenReturn(0L);
@@ -88,6 +93,21 @@ class JwtAuthenticationFilterTest {
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);
         verify(jwtTokenProvider).isAccessToken("refresh-token");
+    }
+
+    @Test
+    void doFilterInternal_whenAccessTokenIsRevoked_shouldNotAuthenticate() throws Exception {
+        var request = requestWithAccessToken("access-token");
+        var response = new MockHttpServletResponse();
+
+        when(jwtTokenProvider.isAccessToken("access-token")).thenReturn(true);
+        when(jwtService.isAccessTokenRevoked("access-token")).thenReturn(true);
+
+        filter.doFilter(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+        verifyNoInteractions(userRepository);
     }
 
     private static MockHttpServletRequest requestWithAccessToken(String token) {
