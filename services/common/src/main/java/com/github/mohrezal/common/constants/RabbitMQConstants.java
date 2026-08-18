@@ -13,6 +13,9 @@ public final class RabbitMQConstants {
 
         public static final class Queue {
             public static final String EMAIL = "notification.email.queue";
+            public static final String EMAIL_LOW = "notification.email.low.queue";
+            public static final String VERIFICATION_REMINDER =
+                    "notification.verification.reminder.queue";
             public static final String VERIFICATION_REMINDER_DELAY =
                     "notification.verification.reminder.delay.queue";
         }

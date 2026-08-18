@@ -35,6 +35,16 @@ public class WorkerRabbitConfig {
     }
 
     @Bean
+    public Queue verificationReminderQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.VERIFICATION_REMINDER)
+                .maxPriority(RabbitMQConstants.Notification.MAX_PRIORITY)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
+                .build();
+    }
+
+    @Bean
     public Queue verificationReminderDelayQueue() {
         return QueueBuilder.durable(
                         RabbitMQConstants.Notification.Queue.VERIFICATION_REMINDER_DELAY)
@@ -52,8 +62,17 @@ public class WorkerRabbitConfig {
     }
 
     @Bean
+    public Queue emailLowQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.EMAIL_LOW)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
+                .build();
+    }
+
+    @Bean
     public Binding emailBinding() {
-        return BindingBuilder.bind(emailQueue())
+        return BindingBuilder.bind(emailLowQueue())
                 .to(notificationExchange())
                 .with(RabbitMQConstants.Notification.RoutingKey.EMAIL);
     }
@@ -74,7 +93,7 @@ public class WorkerRabbitConfig {
 
     @Bean
     public Binding verificationReminderConsumeBinding() {
-        return BindingBuilder.bind(emailQueue())
+        return BindingBuilder.bind(verificationReminderQueue())
                 .to(notificationExchange())
                 .with(RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_CONSUME);
     }
@@ -111,13 +130,31 @@ public class WorkerRabbitConfig {
         factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setPrefetchCount(1);
         factory.setConcurrentConsumers(5);
-        var retryBuilder =
+        var highPriorityRetry =
                 RetryInterceptorBuilder.stateless()
                         .maxRetries(2)
                         .backOffOptions(5000L, 2.0, 30000L)
                         .recoverer(new RejectAndDontRequeueRecoverer());
+        factory.setAdviceChain(highPriorityRetry.build());
+        return factory;
+    }
 
-        factory.setAdviceChain(retryBuilder.build());
+    @Bean
+    public SimpleRabbitListenerContainerFactory lowPriorityEmailContainerFactory(
+            ConnectionFactory connectionFactory,
+            SimpleRabbitListenerContainerFactoryConfigurer configurer) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setPrefetchCount(1);
+        factory.setConcurrentConsumers(2);
+        var lowPriorityRetry =
+                RetryInterceptorBuilder.stateless()
+                        .maxRetries(2)
+                        .backOffOptions(5000L, 2.0, 30000L)
+                        .recoverer(new RejectAndDontRequeueRecoverer());
+        factory.setAdviceChain(lowPriorityRetry.build());
         return factory;
     }
 }

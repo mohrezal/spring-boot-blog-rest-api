@@ -24,7 +24,7 @@ class VerificationReminderConsumer {
     private final RedisCacheService redisCacheService;
 
     @RabbitListener(
-            queues = RabbitMQConstants.Notification.Queue.EMAIL,
+            queues = RabbitMQConstants.Notification.Queue.VERIFICATION_REMINDER,
             containerFactory = "manualAckContainerFactory")
     public void consume(
             VerificationReminderMessage message,

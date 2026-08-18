@@ -31,6 +31,23 @@ public class TransactionalEmailConsumer {
             @Header(AmqpHeaders.DELIVERY_TAG) long tag,
             @Header(name = RabbitMQConstants.Header.MESSAGE_ID, required = false)
                     String messageId) {
+        deliver(message, channel, tag, messageId);
+    }
+
+    @RabbitListener(
+            queues = RabbitMQConstants.Notification.Queue.EMAIL_LOW,
+            containerFactory = "lowPriorityEmailContainerFactory")
+    public void consumeLowPriority(
+            TransactionalEmailMessage message,
+            Channel channel,
+            @Header(AmqpHeaders.DELIVERY_TAG) long tag,
+            @Header(name = RabbitMQConstants.Header.MESSAGE_ID, required = false)
+                    String messageId) {
+        deliver(message, channel, tag, messageId);
+    }
+
+    private void deliver(
+            TransactionalEmailMessage message, Channel channel, long tag, String messageId) {
         try {
             if (messageId != null
                     && redisCacheService

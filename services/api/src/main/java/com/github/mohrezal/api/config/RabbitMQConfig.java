@@ -31,8 +31,17 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue emailLowQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.EMAIL_LOW)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
+                .build();
+    }
+
+    @Bean
     public Binding emailBinding() {
-        return BindingBuilder.bind(emailQueue())
+        return BindingBuilder.bind(emailLowQueue())
                 .to(notificationExchange())
                 .with(RabbitMQConstants.Notification.RoutingKey.EMAIL);
     }
@@ -45,8 +54,18 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue verificationReminderQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.Notification.Queue.VERIFICATION_REMINDER)
+                .maxPriority(10)
+                .deadLetterExchange(RabbitMQConstants.DeadLetter.EXCHANGE)
+                .deadLetterRoutingKey(RabbitMQConstants.DeadLetter.RoutingKey.EMAIL)
+                .lazy()
+                .build();
+    }
+
+    @Bean
     public Binding verificationReminderConsumeBinding() {
-        return BindingBuilder.bind(emailQueue())
+        return BindingBuilder.bind(verificationReminderQueue())
                 .to(notificationExchange())
                 .with(RabbitMQConstants.Notification.RoutingKey.VERIFICATION_REMINDER_CONSUME);
     }
