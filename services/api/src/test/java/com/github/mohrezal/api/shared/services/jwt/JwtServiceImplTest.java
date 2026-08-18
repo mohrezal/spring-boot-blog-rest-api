@@ -2,6 +2,9 @@ package com.github.mohrezal.api.shared.services.jwt;
 
 import static com.github.mohrezal.api.support.builders.UserBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +47,8 @@ class JwtServiceImplTest {
         ApplicationProperties.Security security = mock(ApplicationProperties.Security.class);
         when(applicationProperties.security()).thenReturn(security);
         when(security.secret()).thenReturn(SECRET);
-        when(security.accessTokenLifeTime()).thenReturn(Duration.ofHours(1));
+        lenient().when(security.accessTokenLifeTime()).thenReturn(Duration.ofHours(1));
+        lenient().when(security.refreshTokenLifeTime()).thenReturn(Duration.ofDays(7));
 
         jwtTokenProvider = new JwtTokenProvider(applicationProperties);
         jwtService =
@@ -69,6 +73,25 @@ class JwtServiceImplTest {
         assertEquals(Optional.of(userId), jwtTokenProvider.extractUserId(token));
         assertEquals(permissions, jwtTokenProvider.extractPermissionKeys(token));
         assertEquals(privilegeVersion, jwtTokenProvider.extractPrivilegeVersion(token));
+        assertTrue(jwtTokenProvider.isAccessToken(token));
         verify(userPermissionService).getPermissionKeys(userId);
+    }
+
+    @Test
+    void validateToken_whenTokenIsAccessType_shouldReturnFalse() {
+        var userId = UUID.randomUUID();
+        var user = aUser().withId(userId).build();
+        when(userPermissionService.getPermissionKeys(userId)).thenReturn(List.of());
+
+        var accessToken = jwtService.generateAccessToken(user);
+
+        assertFalse(jwtService.validateToken(accessToken));
+    }
+
+    @Test
+    void validateToken_whenTokenIsRefreshType_shouldReturnTrue() {
+        var refreshToken = jwtService.generateRefreshToken(UUID.randomUUID());
+
+        assertTrue(jwtService.validateToken(refreshToken));
     }
 }

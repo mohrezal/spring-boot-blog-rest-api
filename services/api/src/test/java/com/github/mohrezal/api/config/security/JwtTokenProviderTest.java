@@ -45,6 +45,9 @@ class JwtTokenProviderTest {
         assertEquals(Optional.of(userId), jwtTokenProvider.extractUserId(token));
         assertEquals(permissions, jwtTokenProvider.extractPermissionKeys(token));
         assertEquals(privilegeVersion, jwtTokenProvider.extractPrivilegeVersion(token));
+        assertEquals(Optional.of(JwtClaim.TYPE_ACCESS), jwtTokenProvider.extractTokenType(token));
+        assertTrue(jwtTokenProvider.isAccessToken(token));
+        assertFalse(jwtTokenProvider.isRefreshToken(token));
     }
 
     @Test
@@ -68,6 +71,16 @@ class JwtTokenProviderTest {
         assertEquals(Optional.of(userId), jwtTokenProvider.extractUserId(token));
         assertEquals(List.of(), jwtTokenProvider.extractPermissionKeys(token));
         assertEquals(0L, jwtTokenProvider.extractPrivilegeVersion(token));
+        assertEquals(Optional.of(JwtClaim.TYPE_REFRESH), jwtTokenProvider.extractTokenType(token));
+        assertTrue(jwtTokenProvider.isRefreshToken(token));
+        assertFalse(jwtTokenProvider.isAccessToken(token));
+    }
+
+    @Test
+    void extractTokenType_whenTokenHasNoType_shouldReturnEmpty() {
+        assertEquals(Optional.empty(), jwtTokenProvider.extractTokenType("not-a-jwt"));
+        assertFalse(jwtTokenProvider.isAccessToken("not-a-jwt"));
+        assertFalse(jwtTokenProvider.isRefreshToken("not-a-jwt"));
     }
 
     @Test

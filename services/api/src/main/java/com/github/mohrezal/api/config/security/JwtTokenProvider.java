@@ -47,6 +47,7 @@ public class JwtTokenProvider {
         var token =
                 Jwts.builder()
                         .subject(userId.toString())
+                        .claim(JwtClaim.TYPE, JwtClaim.TYPE_ACCESS)
                         .claim(JwtClaim.PERMISSIONS, permissions)
                         .claim(JwtClaim.PRIVILEGE_VERSION, privilegeVersion)
                         .issuedAt(Date.from(now))
@@ -71,6 +72,7 @@ public class JwtTokenProvider {
                 Jwts.builder()
                         .id(UUID.randomUUID().toString())
                         .subject(userId.toString())
+                        .claim(JwtClaim.TYPE, JwtClaim.TYPE_REFRESH)
                         .issuedAt(Date.from(now))
                         .expiration(
                                 Date.from(
@@ -82,6 +84,24 @@ public class JwtTokenProvider {
                         .compact();
         log.debug("Created refresh token for userId={}", userId);
         return token;
+    }
+
+    public Optional<String> extractTokenType(String token) {
+        try {
+            Claims claims = jwtParser.parseSignedClaims(token).getPayload();
+            return Optional.ofNullable(claims.get(JwtClaim.TYPE, String.class))
+                    .filter(StringUtils::hasText);
+        } catch (JwtException | IllegalArgumentException exception) {
+            return Optional.empty();
+        }
+    }
+
+    public boolean isAccessToken(String token) {
+        return extractTokenType(token).filter(JwtClaim.TYPE_ACCESS::equals).isPresent();
+    }
+
+    public boolean isRefreshToken(String token) {
+        return extractTokenType(token).filter(JwtClaim.TYPE_REFRESH::equals).isPresent();
     }
 
     public Optional<UUID> extractUserId(String token) {

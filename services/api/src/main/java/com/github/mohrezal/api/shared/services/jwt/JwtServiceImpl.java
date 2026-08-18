@@ -37,6 +37,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     public boolean validateToken(String token) {
+        if (!jwtTokenProvider.isRefreshToken(token)) {
+            return false;
+        }
         return jwtTokenProvider
                 .extractExpiration(token)
                 .map(expiration -> expiration.toInstant().isAfter(Instant.now()))

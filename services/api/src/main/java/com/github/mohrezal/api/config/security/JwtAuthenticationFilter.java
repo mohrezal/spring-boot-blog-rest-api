@@ -51,6 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            if (!jwtTokenProvider.isAccessToken(accessToken.get())) {
+                log.warn("Rejected non-access token for {}", request.getRequestURI());
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             var userId = jwtTokenProvider.extractUserId(accessToken.get());
             if (userId.isEmpty()) {
                 log.warn("Failed to parse access token for {}", request.getRequestURI());

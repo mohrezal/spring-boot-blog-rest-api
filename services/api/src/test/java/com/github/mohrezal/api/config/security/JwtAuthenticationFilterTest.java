@@ -46,6 +46,7 @@ class JwtAuthenticationFilterTest {
         var request = requestWithAccessToken("access-token");
         var response = new MockHttpServletResponse();
 
+        when(jwtTokenProvider.isAccessToken("access-token")).thenReturn(true);
         when(jwtTokenProvider.extractUserId("access-token")).thenReturn(Optional.of(userId));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
@@ -62,6 +63,7 @@ class JwtAuthenticationFilterTest {
         var request = requestWithAccessToken("access-token");
         var response = new MockHttpServletResponse();
 
+        when(jwtTokenProvider.isAccessToken("access-token")).thenReturn(true);
         when(jwtTokenProvider.extractUserId("access-token")).thenReturn(Optional.of(userId));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(jwtTokenProvider.extractPrivilegeVersion("access-token")).thenReturn(0L);
@@ -72,6 +74,20 @@ class JwtAuthenticationFilterTest {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         assertTrue(authentication.isAuthenticated());
         verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void doFilterInternal_whenTokenIsRefreshType_shouldNotAuthenticate() throws Exception {
+        var request = requestWithAccessToken("refresh-token");
+        var response = new MockHttpServletResponse();
+
+        when(jwtTokenProvider.isAccessToken("refresh-token")).thenReturn(false);
+
+        filter.doFilter(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+        verify(jwtTokenProvider).isAccessToken("refresh-token");
     }
 
     private static MockHttpServletRequest requestWithAccessToken(String token) {
