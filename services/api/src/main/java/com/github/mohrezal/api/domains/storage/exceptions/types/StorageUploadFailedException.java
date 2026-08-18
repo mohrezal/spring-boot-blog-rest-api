@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class StorageUploadFailedException extends InternalException {
     public StorageUploadFailedException() {
-        super(MessageKey.STORAGE_UPLOAD_FAILED);
+        super(MessageKey.Storage.Error.UPLOAD_FAILED);
     }
 
     public StorageUploadFailedException(ExceptionContext context) {
-        super(MessageKey.STORAGE_UPLOAD_FAILED, context);
+        super(MessageKey.Storage.Error.UPLOAD_FAILED, context);
     }
 
     public StorageUploadFailedException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.STORAGE_UPLOAD_FAILED, context, cause);
+        super(MessageKey.Storage.Error.UPLOAD_FAILED, context, cause);
     }
 }

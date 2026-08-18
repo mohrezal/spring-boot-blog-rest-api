@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class PostNotFoundException extends ResourceNotFoundException {
     public PostNotFoundException() {
-        super(MessageKey.POST_NOT_FOUND);
+        super(MessageKey.Post.Error.NOT_FOUND);
     }
 
     public PostNotFoundException(ExceptionContext context) {
-        super(MessageKey.POST_NOT_FOUND, context);
+        super(MessageKey.Post.Error.NOT_FOUND, context);
     }
 
     public PostNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.POST_NOT_FOUND, context, cause);
+        super(MessageKey.Post.Error.NOT_FOUND, context, cause);
     }
 }

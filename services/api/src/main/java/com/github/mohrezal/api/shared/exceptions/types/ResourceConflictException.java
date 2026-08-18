@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class ResourceConflictException extends BaseException {
     public ResourceConflictException() {
-        super(MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, HttpStatus.CONFLICT);
+        super(MessageKey.Shared.Error.RESOURCE_CONFLICT, HttpStatus.CONFLICT);
     }
 
     public ResourceConflictException(String messageKey) {

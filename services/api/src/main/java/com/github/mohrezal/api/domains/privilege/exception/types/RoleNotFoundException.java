@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class RoleNotFoundException extends ResourceNotFoundException {
     public RoleNotFoundException() {
-        super(MessageKey.PRIVILEGE_ROLE_NOT_FOUND);
+        super(MessageKey.Privilege.Error.ROLE_NOT_FOUND);
     }
 
     public RoleNotFoundException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_ROLE_NOT_FOUND, context);
+        super(MessageKey.Privilege.Error.ROLE_NOT_FOUND, context);
     }
 
     public RoleNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_ROLE_NOT_FOUND, context, cause);
+        super(MessageKey.Privilege.Error.ROLE_NOT_FOUND, context, cause);
     }
 }

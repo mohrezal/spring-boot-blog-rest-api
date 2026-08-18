@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 public class InvalidRequestException extends BaseException {
     public InvalidRequestException() {
-        super(MessageKey.SHARED_ERROR_INVALID_REQUEST, HttpStatus.BAD_REQUEST);
+        super(MessageKey.Shared.Error.INVALID_REQUEST, HttpStatus.BAD_REQUEST);
     }
 
     public InvalidRequestException(String messageKey) {
@@ -14,7 +14,7 @@ public class InvalidRequestException extends BaseException {
     }
 
     public InvalidRequestException(ExceptionContext context) {
-        super(MessageKey.SHARED_ERROR_INVALID_REQUEST, HttpStatus.BAD_REQUEST, context);
+        super(MessageKey.Shared.Error.INVALID_REQUEST, HttpStatus.BAD_REQUEST, context);
     }
 
     public InvalidRequestException(String messageKey, ExceptionContext context) {

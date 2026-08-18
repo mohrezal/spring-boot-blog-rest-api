@@ -5,14 +5,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class AccessDeniedException extends ForbiddenException {
     public AccessDeniedException() {
-        super(MessageKey.SHARED_ERROR_ACCESS_DENIED);
+        super(MessageKey.Shared.Error.ACCESS_DENIED);
     }
 
     public AccessDeniedException(ExceptionContext context) {
-        super(MessageKey.SHARED_ERROR_ACCESS_DENIED, context);
+        super(MessageKey.Shared.Error.ACCESS_DENIED, context);
     }
 
     public AccessDeniedException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.SHARED_ERROR_ACCESS_DENIED, context, cause);
+        super(MessageKey.Shared.Error.ACCESS_DENIED, context, cause);
     }
 }

@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserHandleUnavailableException extends ResourceConflictException {
     public UserHandleUnavailableException() {
-        super(MessageKey.USER_HANDLE_UNAVAILABLE);
+        super(MessageKey.User.Error.HANDLE_UNAVAILABLE);
     }
 
     public UserHandleUnavailableException(ExceptionContext context) {
-        super(MessageKey.USER_HANDLE_UNAVAILABLE, context);
+        super(MessageKey.User.Error.HANDLE_UNAVAILABLE, context);
     }
 
     public UserHandleUnavailableException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_HANDLE_UNAVAILABLE, context, cause);
+        super(MessageKey.User.Error.HANDLE_UNAVAILABLE, context, cause);
     }
 }

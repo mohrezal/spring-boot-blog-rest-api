@@ -88,7 +88,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
             BadCredentialsException ex, WebRequest request) {
         var errorResponse =
                 ErrorResponse.builder()
-                        .message(resolveMessage(MessageKey.SHARED_ERROR_BAD_CREDENTIALS))
+                        .message(resolveMessage(MessageKey.Shared.Error.BAD_CREDENTIALS))
                         .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
@@ -102,14 +102,14 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                 || auth instanceof AnonymousAuthenticationToken) {
             var errorResponse =
                     ErrorResponse.builder()
-                            .message(resolveMessage(MessageKey.SHARED_ERROR_UNAUTHORIZED))
+                            .message(resolveMessage(MessageKey.Shared.Error.UNAUTHORIZED))
                             .build();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
 
         var errorResponse =
                 ErrorResponse.builder()
-                        .message(resolveMessage(MessageKey.SHARED_ERROR_FORBIDDEN))
+                        .message(resolveMessage(MessageKey.Shared.Error.FORBIDDEN))
                         .build();
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
@@ -123,7 +123,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
                 .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         var errorResponse =
                 ErrorResponse.builder()
-                        .message(resolveMessage(MessageKey.SHARED_VALIDATION_FAILED))
+                        .message(resolveMessage(MessageKey.Shared.Validation.FAILED))
                         .errors(errors)
                         .build();
         return ResponseEntity.status(ex.getStatusCode()).body(errorResponse);
@@ -148,7 +148,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
 
         var errorResponse =
                 ErrorResponse.builder()
-                        .message(resolveMessage(MessageKey.SHARED_VALIDATION_FAILED))
+                        .message(resolveMessage(MessageKey.Shared.Validation.FAILED))
                         .errors(errors)
                         .build();
 
@@ -168,7 +168,7 @@ public class SharedExceptionHandler extends AbstractExceptionHandler {
         log.error("Unhandled exception", ex);
         var errorResponse =
                 ErrorResponse.builder()
-                        .message(resolveMessage(MessageKey.SHARED_ERROR_UNEXPECTED))
+                        .message(resolveMessage(MessageKey.Shared.Error.UNEXPECTED))
                         .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

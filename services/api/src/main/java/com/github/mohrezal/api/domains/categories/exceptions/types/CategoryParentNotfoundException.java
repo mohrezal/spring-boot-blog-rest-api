@@ -5,6 +5,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class CategoryParentNotfoundException extends ResourceNotFoundException {
     public CategoryParentNotfoundException() {
-        super(MessageKey.CATEGORIES_PARENT_NOT_FOUND);
+        super(MessageKey.Category.Error.PARENT_NOT_FOUND);
     }
 }

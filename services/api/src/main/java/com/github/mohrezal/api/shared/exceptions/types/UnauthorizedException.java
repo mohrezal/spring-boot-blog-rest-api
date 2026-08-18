@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 public class UnauthorizedException extends BaseException {
     public UnauthorizedException() {
-        super(MessageKey.SHARED_ERROR_UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
+        super(MessageKey.Shared.Error.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
     }
 
     public UnauthorizedException(String messageKey) {

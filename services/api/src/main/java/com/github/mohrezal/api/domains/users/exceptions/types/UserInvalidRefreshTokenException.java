@@ -6,7 +6,7 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserInvalidRefreshTokenException extends UnauthorizedException {
     public UserInvalidRefreshTokenException() {
-        super(MessageKey.USER_INVALID_REFRESH_TOKEN);
+        super(MessageKey.User.Error.INVALID_REFRESH_TOKEN);
     }
 
     public UserInvalidRefreshTokenException(String messageKey) {
@@ -14,10 +14,10 @@ public class UserInvalidRefreshTokenException extends UnauthorizedException {
     }
 
     public UserInvalidRefreshTokenException(ExceptionContext context) {
-        super(MessageKey.USER_INVALID_REFRESH_TOKEN, context);
+        super(MessageKey.User.Error.INVALID_REFRESH_TOKEN, context);
     }
 
     public UserInvalidRefreshTokenException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_INVALID_REFRESH_TOKEN, context, cause);
+        super(MessageKey.User.Error.INVALID_REFRESH_TOKEN, context, cause);
     }
 }

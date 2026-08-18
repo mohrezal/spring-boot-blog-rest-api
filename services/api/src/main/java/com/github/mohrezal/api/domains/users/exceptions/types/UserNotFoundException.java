@@ -6,7 +6,7 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserNotFoundException extends ResourceNotFoundException {
     public UserNotFoundException() {
-        super(MessageKey.USER_NOT_FOUND);
+        super(MessageKey.User.Error.NOT_FOUND);
     }
 
     public UserNotFoundException(String messageKey) {
@@ -14,10 +14,10 @@ public class UserNotFoundException extends ResourceNotFoundException {
     }
 
     public UserNotFoundException(ExceptionContext context) {
-        super(MessageKey.USER_NOT_FOUND, context);
+        super(MessageKey.User.Error.NOT_FOUND, context);
     }
 
     public UserNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_NOT_FOUND, context, cause);
+        super(MessageKey.User.Error.NOT_FOUND, context, cause);
     }
 }

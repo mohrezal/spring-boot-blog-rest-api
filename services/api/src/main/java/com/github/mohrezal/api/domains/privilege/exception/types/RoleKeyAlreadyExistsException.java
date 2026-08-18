@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class RoleKeyAlreadyExistsException extends ResourceConflictException {
     public RoleKeyAlreadyExistsException() {
-        super(MessageKey.PRIVILEGE_ROLE_KEY_ALREADY_EXISTS);
+        super(MessageKey.Privilege.Error.ROLE_KEY_ALREADY_EXISTS);
     }
 
     public RoleKeyAlreadyExistsException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_ROLE_KEY_ALREADY_EXISTS, context);
+        super(MessageKey.Privilege.Error.ROLE_KEY_ALREADY_EXISTS, context);
     }
 
     public RoleKeyAlreadyExistsException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_ROLE_KEY_ALREADY_EXISTS, context, cause);
+        super(MessageKey.Privilege.Error.ROLE_KEY_ALREADY_EXISTS, context, cause);
     }
 }

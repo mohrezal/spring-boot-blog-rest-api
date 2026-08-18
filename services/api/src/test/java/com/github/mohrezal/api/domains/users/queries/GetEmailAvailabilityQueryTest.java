@@ -32,7 +32,7 @@ class GetEmailAvailabilityQueryTest {
                         UserEmailFormatException.class,
                         () -> query.execute(new EmailAvailabilityRequest("not-an-email")));
 
-        assertEquals(MessageKey.SHARED_VALIDATION_EMAIL, exception.getMessageKey());
+        assertEquals(MessageKey.Shared.Validation.EMAIL, exception.getMessageKey());
         verifyNoInteractions(userRepository);
     }
 

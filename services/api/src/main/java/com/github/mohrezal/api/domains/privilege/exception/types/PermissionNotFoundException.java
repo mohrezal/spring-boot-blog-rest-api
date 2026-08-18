@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class PermissionNotFoundException extends ResourceNotFoundException {
     public PermissionNotFoundException() {
-        super(MessageKey.PRIVILEGE_PERMISSION_NOT_FOUND);
+        super(MessageKey.Privilege.Error.PERMISSION_NOT_FOUND);
     }
 
     public PermissionNotFoundException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_PERMISSION_NOT_FOUND, context);
+        super(MessageKey.Privilege.Error.PERMISSION_NOT_FOUND, context);
     }
 
     public PermissionNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_PERMISSION_NOT_FOUND, context, cause);
+        super(MessageKey.Privilege.Error.PERMISSION_NOT_FOUND, context, cause);
     }
 }

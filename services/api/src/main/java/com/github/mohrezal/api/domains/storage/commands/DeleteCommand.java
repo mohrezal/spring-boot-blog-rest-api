@@ -39,7 +39,7 @@ public class DeleteCommand extends AuthenticatedCommand<DeleteCommandParams, Voi
                         .orElseThrow(
                                 () ->
                                         new ResourceNotFoundException(
-                                                MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
+                                                MessageKey.Shared.Error.RESOURCE_NOT_FOUND,
                                                 context));
 
         if (!storageUtilsService.isOwner(currentUser, storage)

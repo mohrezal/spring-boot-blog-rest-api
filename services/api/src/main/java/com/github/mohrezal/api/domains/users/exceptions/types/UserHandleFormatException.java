@@ -5,6 +5,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserHandleFormatException extends InvalidRequestException {
     public UserHandleFormatException() {
-        super(MessageKey.USER_VALIDATION_HANDLE_PATTERN);
+        super(MessageKey.User.Validation.HANDLE_PATTERN);
     }
 }

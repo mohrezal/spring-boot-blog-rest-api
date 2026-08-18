@@ -32,7 +32,7 @@ public class GetStorageByFilenameQuery
                         .orElseThrow(
                                 () ->
                                         new ResourceNotFoundException(
-                                                MessageKey.SHARED_ERROR_RESOURCE_NOT_FOUND,
+                                                MessageKey.Shared.Error.RESOURCE_NOT_FOUND,
                                                 context));
 
         var data = s3StorageService.download(storage.getFilename());

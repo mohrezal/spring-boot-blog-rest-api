@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserNotFollowingException extends InvalidRequestException {
     public UserNotFollowingException() {
-        super(MessageKey.USER_NOT_FOLLOWING);
+        super(MessageKey.User.Error.NOT_FOLLOWING);
     }
 
     public UserNotFollowingException(ExceptionContext context) {
-        super(MessageKey.USER_NOT_FOLLOWING, context);
+        super(MessageKey.User.Error.NOT_FOLLOWING, context);
     }
 
     public UserNotFollowingException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_NOT_FOLLOWING, context, cause);
+        super(MessageKey.User.Error.NOT_FOLLOWING, context, cause);
     }
 }

@@ -10,11 +10,11 @@ public class ForbiddenException extends BaseException {
     }
 
     public ForbiddenException() {
-        super(MessageKey.SHARED_ERROR_FORBIDDEN, HttpStatus.FORBIDDEN);
+        super(MessageKey.Shared.Error.FORBIDDEN, HttpStatus.FORBIDDEN);
     }
 
     public ForbiddenException(ExceptionContext context) {
-        super(MessageKey.SHARED_ERROR_FORBIDDEN, HttpStatus.FORBIDDEN, context);
+        super(MessageKey.Shared.Error.FORBIDDEN, HttpStatus.FORBIDDEN, context);
     }
 
     public ForbiddenException(String messageKey, ExceptionContext context) {

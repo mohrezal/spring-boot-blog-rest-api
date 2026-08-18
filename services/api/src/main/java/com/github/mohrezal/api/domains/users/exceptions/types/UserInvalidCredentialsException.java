@@ -6,7 +6,7 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserInvalidCredentialsException extends UnauthorizedException {
     public UserInvalidCredentialsException() {
-        super(MessageKey.USER_INVALID_CREDENTIALS);
+        super(MessageKey.User.Error.INVALID_CREDENTIALS);
     }
 
     public UserInvalidCredentialsException(String messageKey) {
@@ -14,6 +14,6 @@ public class UserInvalidCredentialsException extends UnauthorizedException {
     }
 
     public UserInvalidCredentialsException(UserLoginExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_INVALID_CREDENTIALS, context, cause);
+        super(MessageKey.User.Error.INVALID_CREDENTIALS, context, cause);
     }
 }

@@ -68,7 +68,7 @@ public class UpdatePostCommand extends AuthenticatedCommand<UpdatePostCommandPar
             return this.postMapper.toPostDetail(savedPost);
         } catch (DataIntegrityViolationException ex) {
             throw new ResourceConflictException(
-                    MessageKey.SHARED_ERROR_RESOURCE_CONFLICT, context, ex);
+                    MessageKey.Shared.Error.RESOURCE_CONFLICT, context, ex);
         }
     }
 }

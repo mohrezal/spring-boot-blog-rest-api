@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class StorageFileSizeExceededException extends InvalidRequestException {
     public StorageFileSizeExceededException() {
-        super(MessageKey.STORAGE_FILE_SIZE_EXCEEDED);
+        super(MessageKey.Storage.Error.FILE_SIZE_EXCEEDED);
     }
 
     public StorageFileSizeExceededException(ExceptionContext context) {
-        super(MessageKey.STORAGE_FILE_SIZE_EXCEEDED, context);
+        super(MessageKey.Storage.Error.FILE_SIZE_EXCEEDED, context);
     }
 
     public StorageFileSizeExceededException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.STORAGE_FILE_SIZE_EXCEEDED, context, cause);
+        super(MessageKey.Storage.Error.FILE_SIZE_EXCEEDED, context, cause);
     }
 }

@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class StorageInvalidMimeTypeException extends InvalidRequestException {
     public StorageInvalidMimeTypeException() {
-        super(MessageKey.STORAGE_FILE_MIME_TYPE_NOT_ALLOWED);
+        super(MessageKey.Storage.Error.FILE_MIME_TYPE_NOT_ALLOWED);
     }
 
     public StorageInvalidMimeTypeException(ExceptionContext context) {
-        super(MessageKey.STORAGE_FILE_MIME_TYPE_NOT_ALLOWED, context);
+        super(MessageKey.Storage.Error.FILE_MIME_TYPE_NOT_ALLOWED, context);
     }
 
     public StorageInvalidMimeTypeException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.STORAGE_FILE_MIME_TYPE_NOT_ALLOWED, context, cause);
+        super(MessageKey.Storage.Error.FILE_MIME_TYPE_NOT_ALLOWED, context, cause);
     }
 }

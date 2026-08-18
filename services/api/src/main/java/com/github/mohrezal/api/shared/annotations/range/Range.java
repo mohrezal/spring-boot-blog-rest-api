@@ -18,11 +18,11 @@ public @interface Range {
 
     int max() default Integer.MAX_VALUE;
 
-    String minMessage() default MessageKey.SHARED_VALIDATION_RANGE_MIN;
+    String minMessage() default MessageKey.Shared.Validation.RANGE_MIN;
 
-    String maxMessage() default MessageKey.SHARED_VALIDATION_RANGE_MAX;
+    String maxMessage() default MessageKey.Shared.Validation.RANGE_MAX;
 
-    String message() default MessageKey.SHARED_VALIDATION_RANGE;
+    String message() default MessageKey.Shared.Validation.RANGE;
 
     Class<?>[] groups() default {};
 

@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class ProtectedPermissionCannotBeDisabledException extends ResourceConflictException {
     public ProtectedPermissionCannotBeDisabledException() {
-        super(MessageKey.PRIVILEGE_PROTECTED_PERMISSION_CANNOT_BE_DISABLED);
+        super(MessageKey.Privilege.Error.PROTECTED_PERMISSION_CANNOT_BE_DISABLED);
     }
 
     public ProtectedPermissionCannotBeDisabledException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_PROTECTED_PERMISSION_CANNOT_BE_DISABLED, context);
+        super(MessageKey.Privilege.Error.PROTECTED_PERMISSION_CANNOT_BE_DISABLED, context);
     }
 
     public ProtectedPermissionCannotBeDisabledException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_PROTECTED_PERMISSION_CANNOT_BE_DISABLED, context, cause);
+        super(MessageKey.Privilege.Error.PROTECTED_PERMISSION_CANNOT_BE_DISABLED, context, cause);
     }
 }

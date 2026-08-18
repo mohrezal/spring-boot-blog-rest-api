@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class CategoryNotFoundException extends ResourceNotFoundException {
     public CategoryNotFoundException() {
-        super(MessageKey.CATEGORIES_NOT_FOUND);
+        super(MessageKey.Category.Error.NOT_FOUND);
     }
 
     public CategoryNotFoundException(ExceptionContext context) {
-        super(MessageKey.CATEGORIES_NOT_FOUND, context);
+        super(MessageKey.Category.Error.NOT_FOUND, context);
     }
 
     public CategoryNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.CATEGORIES_NOT_FOUND, context, cause);
+        super(MessageKey.Category.Error.NOT_FOUND, context, cause);
     }
 }

@@ -5,6 +5,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserEmailFormatException extends InvalidRequestException {
     public UserEmailFormatException() {
-        super(MessageKey.SHARED_VALIDATION_EMAIL);
+        super(MessageKey.Shared.Validation.EMAIL);
     }
 }

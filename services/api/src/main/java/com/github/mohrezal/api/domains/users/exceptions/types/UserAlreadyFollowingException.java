@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserAlreadyFollowingException extends InvalidRequestException {
     public UserAlreadyFollowingException() {
-        super(MessageKey.USER_ALREADY_FOLLOWING);
+        super(MessageKey.User.Error.ALREADY_FOLLOWING);
     }
 
     public UserAlreadyFollowingException(ExceptionContext context) {
-        super(MessageKey.USER_ALREADY_FOLLOWING, context);
+        super(MessageKey.User.Error.ALREADY_FOLLOWING, context);
     }
 
     public UserAlreadyFollowingException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_ALREADY_FOLLOWING, context, cause);
+        super(MessageKey.User.Error.ALREADY_FOLLOWING, context, cause);
     }
 }

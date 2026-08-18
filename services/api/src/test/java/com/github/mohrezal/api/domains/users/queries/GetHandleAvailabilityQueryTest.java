@@ -48,7 +48,7 @@ class GetHandleAvailabilityQueryTest {
                         UserHandleFormatException.class,
                         () -> query.execute(new HandleAvailabilityRequest("ab")));
 
-        assertEquals(MessageKey.USER_VALIDATION_HANDLE_PATTERN, exception.getMessageKey());
+        assertEquals(MessageKey.User.Validation.HANDLE_PATTERN, exception.getMessageKey());
         verifyNoInteractions(userRepository);
     }
 

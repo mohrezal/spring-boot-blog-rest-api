@@ -10,11 +10,11 @@ public class InternalException extends BaseException {
     }
 
     public InternalException() {
-        super(MessageKey.SHARED_ERROR_INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR);
+        super(MessageKey.Shared.Error.INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public InternalException(ExceptionContext context) {
-        super(MessageKey.SHARED_ERROR_INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR, context);
+        super(MessageKey.Shared.Error.INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR, context);
     }
 
     public InternalException(String messageKey, ExceptionContext context) {

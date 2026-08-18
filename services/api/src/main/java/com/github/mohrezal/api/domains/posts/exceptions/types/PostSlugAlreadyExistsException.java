@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class PostSlugAlreadyExistsException extends ResourceConflictException {
     public PostSlugAlreadyExistsException() {
-        super(MessageKey.POST_SLUG_ALREADY_EXISTS);
+        super(MessageKey.Post.Error.SLUG_ALREADY_EXISTS);
     }
 
     public PostSlugAlreadyExistsException(ExceptionContext context) {
-        super(MessageKey.POST_SLUG_ALREADY_EXISTS, context);
+        super(MessageKey.Post.Error.SLUG_ALREADY_EXISTS, context);
     }
 
     public PostSlugAlreadyExistsException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.POST_SLUG_ALREADY_EXISTS, context, cause);
+        super(MessageKey.Post.Error.SLUG_ALREADY_EXISTS, context, cause);
     }
 }

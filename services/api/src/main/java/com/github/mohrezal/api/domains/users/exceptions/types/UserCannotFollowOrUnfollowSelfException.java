@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserCannotFollowOrUnfollowSelfException extends InvalidRequestException {
     public UserCannotFollowOrUnfollowSelfException() {
-        super(MessageKey.USER_CANNOT_FOLLOW_OR_UNFOLLOW_SELF);
+        super(MessageKey.User.Error.CANNOT_FOLLOW_OR_UNFOLLOW_SELF);
     }
 
     public UserCannotFollowOrUnfollowSelfException(ExceptionContext context) {
-        super(MessageKey.USER_CANNOT_FOLLOW_OR_UNFOLLOW_SELF, context);
+        super(MessageKey.User.Error.CANNOT_FOLLOW_OR_UNFOLLOW_SELF, context);
     }
 
     public UserCannotFollowOrUnfollowSelfException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_CANNOT_FOLLOW_OR_UNFOLLOW_SELF, context, cause);
+        super(MessageKey.User.Error.CANNOT_FOLLOW_OR_UNFOLLOW_SELF, context, cause);
     }
 }

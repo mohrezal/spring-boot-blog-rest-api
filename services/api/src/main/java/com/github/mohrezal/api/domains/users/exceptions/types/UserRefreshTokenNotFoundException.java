@@ -6,7 +6,7 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserRefreshTokenNotFoundException extends ResourceNotFoundException {
     public UserRefreshTokenNotFoundException() {
-        super(MessageKey.USER_REFRESH_TOKEN_NOT_FOUND);
+        super(MessageKey.User.Error.REFRESH_TOKEN_NOT_FOUND);
     }
 
     public UserRefreshTokenNotFoundException(String messageKey) {
@@ -14,10 +14,10 @@ public class UserRefreshTokenNotFoundException extends ResourceNotFoundException
     }
 
     public UserRefreshTokenNotFoundException(ExceptionContext context) {
-        super(MessageKey.USER_REFRESH_TOKEN_NOT_FOUND, context);
+        super(MessageKey.User.Error.REFRESH_TOKEN_NOT_FOUND, context);
     }
 
     public UserRefreshTokenNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_REFRESH_TOKEN_NOT_FOUND, context, cause);
+        super(MessageKey.User.Error.REFRESH_TOKEN_NOT_FOUND, context, cause);
     }
 }

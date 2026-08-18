@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserEmailUnavailableException extends ResourceConflictException {
     public UserEmailUnavailableException() {
-        super(MessageKey.USER_EMAIL_UNAVAILABLE);
+        super(MessageKey.User.Error.EMAIL_UNAVAILABLE);
     }
 
     public UserEmailUnavailableException(ExceptionContext context) {
-        super(MessageKey.USER_EMAIL_UNAVAILABLE, context);
+        super(MessageKey.User.Error.EMAIL_UNAVAILABLE, context);
     }
 
     public UserEmailUnavailableException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.USER_EMAIL_UNAVAILABLE, context, cause);
+        super(MessageKey.User.Error.EMAIL_UNAVAILABLE, context, cause);
     }
 }

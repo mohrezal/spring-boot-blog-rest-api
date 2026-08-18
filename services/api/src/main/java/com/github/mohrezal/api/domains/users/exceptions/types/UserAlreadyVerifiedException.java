@@ -6,6 +6,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserAlreadyVerifiedException extends InvalidRequestException {
     public UserAlreadyVerifiedException(ExceptionContext context) {
-        super(MessageKey.USER_ALREADY_VERIFIED, context);
+        super(MessageKey.User.Error.ALREADY_VERIFIED, context);
     }
 }

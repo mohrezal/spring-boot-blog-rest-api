@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class ConfiguredRoleCannotBeDeletedException extends ResourceConflictException {
     public ConfiguredRoleCannotBeDeletedException() {
-        super(MessageKey.PRIVILEGE_CONFIGURED_ROLE_CANNOT_BE_DELETED);
+        super(MessageKey.Privilege.Error.CONFIGURED_ROLE_CANNOT_BE_DELETED);
     }
 
     public ConfiguredRoleCannotBeDeletedException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_CONFIGURED_ROLE_CANNOT_BE_DELETED, context);
+        super(MessageKey.Privilege.Error.CONFIGURED_ROLE_CANNOT_BE_DELETED, context);
     }
 
     public ConfiguredRoleCannotBeDeletedException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_CONFIGURED_ROLE_CANNOT_BE_DELETED, context, cause);
+        super(MessageKey.Privilege.Error.CONFIGURED_ROLE_CANNOT_BE_DELETED, context, cause);
     }
 }

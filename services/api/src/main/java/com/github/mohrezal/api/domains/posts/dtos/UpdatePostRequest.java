@@ -10,15 +10,15 @@ import java.util.Set;
 import java.util.UUID;
 
 public record UpdatePostRequest(
-        @NotBlank(message = MessageKey.SHARED_NOT_BLANK)
-                @Size(max = 255, message = MessageKey.SHARED_VALIDATION_SIZE_MAX)
+        @NotBlank(message = MessageKey.Shared.Validation.NOT_BLANK)
+                @Size(max = 255, message = MessageKey.Shared.Validation.SIZE_MAX)
                 String title,
-        @NotBlank(message = MessageKey.SHARED_NOT_BLANK) String content,
-        @NotBlank(message = MessageKey.SHARED_NOT_BLANK) String avatarUrl,
-        @NotEmpty(message = MessageKey.SHARED_NOT_EMPTY) Set<UUID> categoryIds,
-        @Size(max = 300, message = MessageKey.SHARED_VALIDATION_SIZE_MAX) String description,
-        @NotBlank(message = MessageKey.SHARED_NOT_BLANK)
+        @NotBlank(message = MessageKey.Shared.Validation.NOT_BLANK) String content,
+        @NotBlank(message = MessageKey.Shared.Validation.NOT_BLANK) String avatarUrl,
+        @NotEmpty(message = MessageKey.Shared.Validation.NOT_EMPTY) Set<UUID> categoryIds,
+        @Size(max = 300, message = MessageKey.Shared.Validation.SIZE_MAX) String description,
+        @NotBlank(message = MessageKey.Shared.Validation.NOT_BLANK)
                 @Pattern(
                         regexp = RegexUtils.SLUG_PATTERN,
-                        message = MessageKey.POST_SLUG_INVALID_FORMAT_KEY)
+                        message = MessageKey.Post.Error.SLUG_INVALID_FORMAT_KEY)
                 String slug) {}

@@ -5,6 +5,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserInvalidVerificationTokenException extends InvalidRequestException {
     public UserInvalidVerificationTokenException() {
-        super(MessageKey.USER_INVALID_VERIFICATION_TOKEN);
+        super(MessageKey.User.Error.INVALID_VERIFICATION_TOKEN);
     }
 }

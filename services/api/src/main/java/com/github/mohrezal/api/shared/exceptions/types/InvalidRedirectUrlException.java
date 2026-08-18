@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public class InvalidRedirectUrlException extends BaseException {
 
     public InvalidRedirectUrlException() {
-        super(MessageKey.SHARED_ERROR_INVALID_REDIRECT_URL, HttpStatus.BAD_REQUEST);
+        super(MessageKey.Shared.Error.INVALID_REDIRECT_URL, HttpStatus.BAD_REQUEST);
     }
 
     public InvalidRedirectUrlException(String messageKey) {
@@ -15,7 +15,7 @@ public class InvalidRedirectUrlException extends BaseException {
     }
 
     public InvalidRedirectUrlException(ExceptionContext context) {
-        super(MessageKey.SHARED_ERROR_INVALID_REDIRECT_URL, HttpStatus.BAD_REQUEST, context);
+        super(MessageKey.Shared.Error.INVALID_REDIRECT_URL, HttpStatus.BAD_REQUEST, context);
     }
 
     public InvalidRedirectUrlException(String messageKey, ExceptionContext context) {

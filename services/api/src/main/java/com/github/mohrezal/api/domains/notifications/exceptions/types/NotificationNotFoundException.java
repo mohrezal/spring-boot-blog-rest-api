@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class NotificationNotFoundException extends ResourceNotFoundException {
     public NotificationNotFoundException() {
-        super(MessageKey.NOTIFICATION_NOT_FOUND);
+        super(MessageKey.Notification.Error.NOT_FOUND);
     }
 
     public NotificationNotFoundException(ExceptionContext context) {
-        super(MessageKey.NOTIFICATION_NOT_FOUND, context);
+        super(MessageKey.Notification.Error.NOT_FOUND, context);
     }
 
     public NotificationNotFoundException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.NOTIFICATION_NOT_FOUND, context, cause);
+        super(MessageKey.Notification.Error.NOT_FOUND, context, cause);
     }
 }

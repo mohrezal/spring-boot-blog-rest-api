@@ -6,10 +6,10 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class UserEmailNotVerifiedException extends ForbiddenException {
     public UserEmailNotVerifiedException() {
-        super(MessageKey.USER_EMAIL_NOT_VERIFIED);
+        super(MessageKey.User.Error.EMAIL_NOT_VERIFIED);
     }
 
     public UserEmailNotVerifiedException(UserLoginExceptionContext context) {
-        super(MessageKey.USER_EMAIL_NOT_VERIFIED, context);
+        super(MessageKey.User.Error.EMAIL_NOT_VERIFIED, context);
     }
 }

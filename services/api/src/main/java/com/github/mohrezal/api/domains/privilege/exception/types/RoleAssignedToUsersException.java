@@ -6,14 +6,14 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class RoleAssignedToUsersException extends ResourceConflictException {
     public RoleAssignedToUsersException() {
-        super(MessageKey.PRIVILEGE_ROLE_ASSIGNED_TO_USERS);
+        super(MessageKey.Privilege.Error.ROLE_ASSIGNED_TO_USERS);
     }
 
     public RoleAssignedToUsersException(ExceptionContext context) {
-        super(MessageKey.PRIVILEGE_ROLE_ASSIGNED_TO_USERS, context);
+        super(MessageKey.Privilege.Error.ROLE_ASSIGNED_TO_USERS, context);
     }
 
     public RoleAssignedToUsersException(ExceptionContext context, Throwable cause) {
-        super(MessageKey.PRIVILEGE_ROLE_ASSIGNED_TO_USERS, context, cause);
+        super(MessageKey.Privilege.Error.ROLE_ASSIGNED_TO_USERS, context, cause);
     }
 }

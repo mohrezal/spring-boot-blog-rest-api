@@ -5,6 +5,6 @@ import com.github.mohrezal.common.constants.MessageKey;
 
 public class PostSlugFormatException extends InvalidRequestException {
     public PostSlugFormatException() {
-        super(MessageKey.POST_SLUG_INVALID_FORMAT);
+        super(MessageKey.Post.Error.SLUG_INVALID_FORMAT);
     }
 }
