@@ -2,7 +2,6 @@ package com.github.mohrezal.api.domains.users.commands;
 
 import com.github.mohrezal.api.domains.users.commands.params.VerifyEmailCommandParams;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserAlreadyVerifiedExceptionContext;
-import com.github.mohrezal.api.domains.users.exceptions.context.UserInvalidVerificationTokenExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserNotFoundExceptionContext;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserAlreadyVerifiedException;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserInvalidVerificationTokenException;
@@ -40,13 +39,7 @@ public class VerifyEmailCommand implements Command<VerifyEmailCommandParams, Voi
         var userId =
                 redisCacheService
                         .get(key, String.class)
-                        .orElseThrow(
-                                () -> {
-                                    var context =
-                                            new UserInvalidVerificationTokenExceptionContext(
-                                                    params.token());
-                                    return new UserInvalidVerificationTokenException(context);
-                                });
+                        .orElseThrow(UserInvalidVerificationTokenException::new);
         var uuid = UUID.fromString(userId);
         var user =
                 userRepository
