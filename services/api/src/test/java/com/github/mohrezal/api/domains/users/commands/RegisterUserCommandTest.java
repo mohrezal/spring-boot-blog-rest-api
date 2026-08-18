@@ -15,7 +15,8 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.RegisterUserRequest;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
-import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleReservedException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailUnavailableException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleUnavailableException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
@@ -115,6 +116,8 @@ class RegisterUserCommandTest {
 
         when(userRepository.existsByHandle(eq(params.registerUserRequest().handle())))
                 .thenReturn(false);
+        when(userRepository.existsByEmail(eq(params.registerUserRequest().email())))
+                .thenReturn(false);
         when(registrationService.register(eq(params.registerUserRequest()))).thenReturn(user);
         when(userMapper.toUserSummary(user)).thenReturn(userSummary);
 
@@ -129,10 +132,29 @@ class RegisterUserCommandTest {
     }
 
     @Test
-    void execute_whenHandleIsReserved_shouldThrowUserHandleReservedException() {
+    void execute_whenHandleIsReserved_shouldThrowHandleUnavailable() {
         command = createCommand(List.of("john_doe"));
 
-        assertThrows(UserHandleReservedException.class, () -> command.execute(params));
+        assertThrows(UserHandleUnavailableException.class, () -> command.execute(params));
+
+        verifyNoInteractions(registrationService, eventPublisher);
+    }
+
+    @Test
+    void execute_whenHandleAlreadyExists_shouldThrowHandleUnavailable() {
+        when(userRepository.existsByHandle("john_doe")).thenReturn(true);
+
+        assertThrows(UserHandleUnavailableException.class, () -> command.execute(params));
+
+        verifyNoInteractions(registrationService, eventPublisher);
+    }
+
+    @Test
+    void execute_whenEmailAlreadyExists_shouldThrowEmailUnavailable() {
+        when(userRepository.existsByHandle("john_doe")).thenReturn(false);
+        when(userRepository.existsByEmail(request.email())).thenReturn(true);
+
+        assertThrows(UserEmailUnavailableException.class, () -> command.execute(params));
 
         verifyNoInteractions(registrationService, eventPublisher);
     }
@@ -142,6 +164,7 @@ class RegisterUserCommandTest {
         command = createCommand(List.of());
 
         when(userRepository.existsByHandle("john_doe")).thenReturn(false);
+        when(userRepository.existsByEmail(request.email())).thenReturn(false);
 
         when(registrationService.register(any())).thenThrow(RuntimeException.class);
 

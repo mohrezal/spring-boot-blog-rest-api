@@ -5,9 +5,8 @@ import com.github.mohrezal.api.domains.notifications.repositories.NotificationPr
 import com.github.mohrezal.api.domains.users.commands.params.RegisterUserCommandParams;
 import com.github.mohrezal.api.domains.users.dtos.UserSummary;
 import com.github.mohrezal.api.domains.users.exceptions.context.UserRegisterExceptionContext;
-import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailAlreadyExistsException;
-import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleAlreadyExistsException;
-import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleReservedException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserEmailUnavailableException;
+import com.github.mohrezal.api.domains.users.exceptions.types.UserHandleUnavailableException;
 import com.github.mohrezal.api.domains.users.mappers.UserMapper;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.domains.users.services.registration.RegistrationService;
@@ -24,6 +23,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,12 +52,12 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, U
         var request = params.registerUserRequest();
         var context = new UserRegisterExceptionContext(request.email(), request.handle());
 
-        if (applicationProperties.handle().reservedHandles().contains(handle)) {
-            throw new UserHandleReservedException(context);
+        if (applicationProperties.handle().reservedHandles().contains(handle)
+                || userRepository.existsByHandle(handle)) {
+            throw new UserHandleUnavailableException(context);
         }
-
-        if (userRepository.existsByHandle(handle)) {
-            throw new UserHandleAlreadyExistsException(context);
+        if (userRepository.existsByEmail(request.email())) {
+            throw new UserEmailUnavailableException(context);
         }
     }
 
@@ -89,10 +89,14 @@ public class RegisterUserCommand implements Command<RegisterUserCommandParams, U
 
             log.info("User registration successful.");
             return userMapper.toUserSummary(user);
-        } catch (UserEmailAlreadyExistsException ex) {
+        } catch (DataIntegrityViolationException ex) {
             var request = params.registerUserRequest();
             var context = new UserRegisterExceptionContext(request.email(), request.handle());
-            throw new UserEmailAlreadyExistsException(context, ex);
+            var detail = String.valueOf(ex.getMostSpecificCause().getMessage()).toLowerCase();
+            if (detail.contains("handle")) {
+                throw new UserHandleUnavailableException(context, ex);
+            }
+            throw new UserEmailUnavailableException(context, ex);
         }
     }
 }

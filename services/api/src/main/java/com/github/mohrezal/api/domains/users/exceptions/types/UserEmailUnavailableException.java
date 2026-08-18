@@ -1,0 +1,19 @@
+package com.github.mohrezal.api.domains.users.exceptions.types;
+
+import com.github.mohrezal.api.shared.exceptions.context.ExceptionContext;
+import com.github.mohrezal.api.shared.exceptions.types.ResourceConflictException;
+import com.github.mohrezal.common.constants.MessageKey;
+
+public class UserEmailUnavailableException extends ResourceConflictException {
+    public UserEmailUnavailableException() {
+        super(MessageKey.USER_EMAIL_UNAVAILABLE);
+    }
+
+    public UserEmailUnavailableException(ExceptionContext context) {
+        super(MessageKey.USER_EMAIL_UNAVAILABLE, context);
+    }
+
+    public UserEmailUnavailableException(ExceptionContext context, Throwable cause) {
+        super(MessageKey.USER_EMAIL_UNAVAILABLE, context, cause);
+    }
+}
