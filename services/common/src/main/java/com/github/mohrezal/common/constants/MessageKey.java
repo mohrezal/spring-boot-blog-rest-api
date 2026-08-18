@@ -73,6 +73,8 @@ public final class MessageKey {
             "privilege.error.role-assigned-to-users";
 
     public static final String SHARED_VALIDATION_FAILED = "shared.validation.failed";
+    public static final String SHARED_VALIDATION_EMAIL = "shared.validation.email";
+    public static final String USER_VALIDATION_HANDLE_PATTERN = "user.validation.handle-pattern";
 
     public static final String SHARED_NOT_BLANK = "{shared.validation.not-blank}";
     public static final String SHARED_NOT_NULL = "{shared.validation.not-null}";

@@ -17,6 +17,8 @@ public final class Routes {
         public static final String REFRESH = "refresh";
         public static final String LOGOUT = "logout";
         public static final String VERIFY_EMAIL = "verify-email";
+        public static final String EMAIL_AVAILABILITY = "emails/availability";
+        public static final String HANDLE_AVAILABILITY = "handles/availability";
     }
 
     public static final class User {

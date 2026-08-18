@@ -120,6 +120,14 @@ app:
         method: POST
         path: /api/v1/auth/register
         ipLimit: 5
+      - key: auth-email-availability
+        method: GET
+        path: /api/v1/auth/emails/availability
+        ipLimit: 20
+      - key: auth-handle-availability
+        method: GET
+        path: /api/v1/auth/handles/availability
+        ipLimit: 20
       - key: auth-refresh
         method: POST
         path: /api/v1/auth/refresh

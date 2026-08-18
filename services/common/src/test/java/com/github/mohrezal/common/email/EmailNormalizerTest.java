@@ -1,7 +1,9 @@
 package com.github.mohrezal.common.email;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,5 +32,15 @@ class EmailNormalizerTest {
     })
     void normalize_shouldCanonicalizeAliases(String input, String expected) {
         assertEquals(expected, EmailNormalizer.normalize(input));
+    }
+
+    @Test
+    void isValid_whenEmailIsWellFormed_shouldReturnTrue() {
+        assertTrue(EmailNormalizer.isValid("User+news@Gmail.com"));
+    }
+
+    @Test
+    void isValid_whenEmailIsMalformed_shouldReturnFalse() {
+        assertFalse(EmailNormalizer.isValid("not-an-email"));
     }
 }
