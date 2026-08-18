@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.models;
 
 import com.github.mohrezal.api.domains.storage.models.Storage;
 import com.github.mohrezal.api.shared.models.BaseModel;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.List;
@@ -80,6 +83,12 @@ public class User extends BaseModel implements UserDetails {
 
     public boolean hasVerifiedEmail() {
         return Boolean.TRUE.equals(isVerified);
+    }
+
+    @PrePersist
+    @PreUpdate
+    void normalizeEmail() {
+        this.email = EmailNormalizer.normalize(this.email);
     }
 
     @Override

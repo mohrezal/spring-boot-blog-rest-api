@@ -5,6 +5,7 @@ import com.github.mohrezal.api.config.ratelimit.RateLimitFilter;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -147,7 +148,9 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username ->
-                userRepository.findByEmail(username).orElseThrow(UserNotFoundException::new);
+                userRepository
+                        .findByEmail(EmailNormalizer.normalize(username))
+                        .orElseThrow(UserNotFoundException::new);
     }
 
     @Bean

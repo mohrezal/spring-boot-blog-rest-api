@@ -4,6 +4,7 @@ import com.github.mohrezal.api.domains.users.dtos.LoginRequest;
 import com.github.mohrezal.api.domains.users.exceptions.types.UserNotFoundException;
 import com.github.mohrezal.api.domains.users.models.User;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,8 +19,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public User authenticate(LoginRequest body) {
+        var email = EmailNormalizer.normalize(body.email());
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(body.email(), body.password()));
-        return userRepository.findByEmail(body.email()).orElseThrow(UserNotFoundException::new);
+                new UsernamePasswordAuthenticationToken(email, body.password()));
+        return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 }

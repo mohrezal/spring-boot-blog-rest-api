@@ -5,6 +5,7 @@ import com.github.mohrezal.api.domains.privilege.repository.RoleRepository;
 import com.github.mohrezal.api.domains.privilege.repository.UserRoleRepository;
 import com.github.mohrezal.api.domains.users.repositories.UserRepository;
 import com.github.mohrezal.api.shared.config.ApplicationProperties;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -46,7 +47,7 @@ public class OwnerRoleSeeder implements CommandLineRunner {
                                         new IllegalStateException(
                                                 "Owner role not found: " + roleKey));
 
-        var ownerEmail = applicationProperties.owner().email();
+        var ownerEmail = EmailNormalizer.normalize(applicationProperties.owner().email());
         var owner =
                 userRepository
                         .findByEmail(ownerEmail)

@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.dtos;
 
 import com.github.mohrezal.common.constants.MessageKey;
 import com.github.mohrezal.common.constants.RegexUtils;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -32,4 +33,8 @@ public record RegisterUserRequest(
                         regexp = RegexUtils.PASSWORD_PATTERN,
                         message = MessageKey.USER_PASSWORD_PATTERN)
                 String password,
-        @Size(max = 500, message = MessageKey.SHARED_VALIDATION_SIZE_MAX) String bio) {}
+        @Size(max = 500, message = MessageKey.SHARED_VALIDATION_SIZE_MAX) String bio) {
+    public RegisterUserRequest {
+        email = EmailNormalizer.normalize(email);
+    }
+}

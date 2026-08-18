@@ -2,6 +2,7 @@ package com.github.mohrezal.api.domains.users.dtos;
 
 import com.github.mohrezal.common.constants.MessageKey;
 import com.github.mohrezal.common.constants.RegexUtils;
+import com.github.mohrezal.common.email.EmailNormalizer;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,4 +18,8 @@ public record LoginRequest(
                 @Pattern(
                         regexp = RegexUtils.PASSWORD_PATTERN,
                         message = MessageKey.USER_PASSWORD_PATTERN)
-                String password) {}
+                String password) {
+    public LoginRequest {
+        email = EmailNormalizer.normalize(email);
+    }
+}
