@@ -1,22 +1,18 @@
 package com.github.mohrezal.api.shared.services.deviceinfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 import com.github.mohrezal.api.support.constants.UserAgents;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 @ExtendWith(MockitoExtension.class)
 class RequestInfoServiceImplTest {
 
     private static final String IP = "10.0.0.1";
-
-    @Mock private HttpServletRequest request;
 
     @InjectMocks private RequestInfoServiceImpl requestInfoService;
 
@@ -62,45 +58,27 @@ class RequestInfoServiceImplTest {
 
     @Test
     void getClientIp_whenXForwardedForIsNull_shouldReturnRemoteAddr() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn(null);
-        when(request.getRemoteAddr()).thenReturn(IP);
+        var httpRequest = new MockHttpServletRequest();
+        httpRequest.setRemoteAddr(IP);
 
-        assertEquals(IP, requestInfoService.getClientIp(request));
+        assertEquals(IP, requestInfoService.getClientIp(httpRequest));
     }
 
     @Test
     void getClientIp_whenXForwardedForIsEmpty_shouldReturnRemoteAddr() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn("");
-        when(request.getRemoteAddr()).thenReturn(IP);
+        var httpRequest = new MockHttpServletRequest();
+        httpRequest.setRemoteAddr(IP);
+        httpRequest.addHeader("X-Forwarded-For", "");
 
-        assertEquals(IP, requestInfoService.getClientIp(request));
+        assertEquals(IP, requestInfoService.getClientIp(httpRequest));
     }
 
     @Test
-    void getClientIp_whenXForwardedForHasSingleIp_shouldReturnThatIp() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn(IP);
+    void getClientIp_whenXForwardedForIsSpoofed_shouldReturnRemoteAddr() {
+        var httpRequest = new MockHttpServletRequest();
+        httpRequest.setRemoteAddr(IP);
+        httpRequest.addHeader("X-Forwarded-For", "203.0.113.10, 198.51.100.1");
 
-        assertEquals(IP, requestInfoService.getClientIp(request));
-    }
-
-    @Test
-    void getClientIp_whenXForwardedForHasMultipleIps_shouldReturnFirstIp() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn(IP + ", 10.0.0.2, 10.0.0.3");
-
-        assertEquals(IP, requestInfoService.getClientIp(request));
-    }
-
-    @Test
-    void getClientIp_whenXForwardedForHasSpaces_shouldReturnTrimmedIp() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn("  " + IP + "  ");
-
-        assertEquals(IP, requestInfoService.getClientIp(request));
-    }
-
-    @Test
-    void getClientIp_whenXForwardedForHasMultipleIpsWithSpaces_shouldReturnFirstTrimmedIp() {
-        when(request.getHeader("X-Forwarded-For")).thenReturn(" " + IP + " , 10.0.0.2 ");
-
-        assertEquals(IP, requestInfoService.getClientIp(request));
+        assertEquals(IP, requestInfoService.getClientIp(httpRequest));
     }
 }

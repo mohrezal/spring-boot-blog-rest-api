@@ -45,10 +45,6 @@ public class RequestInfoServiceImpl implements RequestInfoService {
 
     @Override
     public String getClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isEmpty()) {
-            return forwarded.split(",")[0].trim();
-        }
         return request.getRemoteAddr();
     }
 }
