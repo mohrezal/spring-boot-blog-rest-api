@@ -1,206 +1,51 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Verify Your Email</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f9fafb;
-            color: #3f3f46;
-            line-height: 1.6;
-            padding: 20px 0;
-            margin: 0;
-        }
-
-        .email-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: transparent;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #18181b;
-            margin: 0;
-        }
-
-        .content-card {
-            background-color: #ffffff;
-            border: 1px solid #e4e4e7;
-            border-radius: 0.5rem;
-            padding: 40px;
-            margin-bottom: 32px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .greeting {
-            font-size: 18px;
-            font-weight: 500;
-            color: #18181b;
-            margin-bottom: 20px;
-            text-transform: capitalize;
-        }
-
-        .content-text {
-            font-size: 16px;
-            color: #3f3f46;
-            margin-bottom: 24px;
-            line-height: 1.7;
-        }
-
-        .verification-section {
-            margin-top: 32px;
-            padding: 24px;
-            background-color: #fafafa;
-            border: 1px solid #e4e4e7;
-            border-radius: 0.5rem;
-            text-align: center;
-        }
-
-        .verification-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #18181b;
-            margin-bottom: 12px;
-        }
-
-        .verification-text {
-            font-size: 14px;
-            color: #52525b;
-            margin-bottom: 24px;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: #27272a;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            padding: 12px 32px;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease;
-            margin-bottom: 16px;
-        }
-
-        .cta-button:hover {
-            background-color: #18181b;
-        }
-
-        .fallback-link {
-            font-size: 13px;
-            color: #71717a;
-            word-break: break-all;
-            margin-top: 12px;
-        }
-
-        .fallback-link a {
-            color: #52525b;
-            text-decoration: underline;
-        }
-
-        .secondary-text {
-            font-size: 14px;
-            color: #71717a;
-            margin-top: 24px;
-            line-height: 1.6;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: #a1a1aa;
-            margin-top: 32px;
-        }
-
-        @media only screen and (max-width: 600px) {
-            body {
-                padding: 10px 0;
-            }
-
-            .email-container {
-                margin: 0 16px;
-            }
-
-            .content-card {
-                padding: 24px;
-            }
-
-            .header h1 {
-                font-size: 20px;
-            }
-
-            .greeting {
-                font-size: 16px;
-            }
-
-            .content-text {
-                font-size: 15px;
-            }
-
-            .cta-button {
-                display: block;
-                width: 100%;
-                padding: 14px 24px;
-                font-size: 16px;
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="email-container">
-    <div class="header">
-        <h1>Verification Reminder</h1>
-    </div>
-
-    <div class="content-card">
-        <div class="greeting">
-            Hello <span th:text="${userName}">User</span>,
-        </div>
-
-        <div class="content-text">
-            You registered an account on our blog, but your email address hasn't been verified yet.
-            Please click the button below to verify your email and activate your account.
-        </div>
-
-        <div class="verification-section">
-            <div class="verification-title">Verify Your Email Address</div>
-            <div class="verification-text">
-                Click the button below to complete your registration. This link is valid for 24 hours.
-            </div>
-            <a th:href="${verificationUrl}" class="cta-button">Verify Email</a>
-            <div class="fallback-link">
-                If the button doesn't work, copy and paste this link into your browser:
-                <br>
-                <a th:href="${verificationUrl}" th:text="${verificationUrl}">verification link</a>
-            </div>
-        </div>
-
-        <div class="secondary-text">
-            If you didn't create an account, you can safely ignore this email.
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>You received this email because you registered on our blog.</p>
-    </div>
-</div>
+<head th:replace="~{email/layout :: head('Verify your email')}"></head>
+<body style="margin: 0; padding: 0; background-color: #f6f1e8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f1e8;">
+    <tr>
+        <td align="center" style="padding: 48px 16px;">
+            <table role="presentation" class="canvas" width="600" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="padding-bottom: 36px;">
+                        <th:block th:replace="~{email/layout :: header}"></th:block>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 20px; border-top: 1px solid #d6d3d1;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0 20px;">
+                        <h1 class="headline" style="margin: 0;">Still need to verify.</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="body-copy" style="padding-bottom: 28px;">
+                        Hello <span th:text="${userName}">Reader</span>,
+                        we saved you a seat. This link is good for 24 hours.
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 20px;">
+                        <th:block th:replace="~{email/layout :: button(${verificationUrl}, 'Verify email')}"></th:block>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="meta fallback" style="padding-bottom: 36px;">
+                        If the button does nothing, paste this into a browser:
+                        <br>
+                        <a th:href="${verificationUrl}" th:text="${verificationUrl}">verification link</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <th:block
+                                th:replace="~{email/layout :: footer('If you did not create an account, ignore this note.')}"></th:block>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>

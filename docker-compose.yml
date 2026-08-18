@@ -40,6 +40,8 @@ services:
       - POSTGRES_DB=${APPLICATION_DATABASE_NAME}
       - POSTGRES_USER=${APPLICATION_DATABASE_USERNAME}
       - POSTGRES_PASSWORD=${APPLICATION_DATABASE_PASSWORD}
+    ports:
+      - "127.0.0.1:${APPLICATION_DATABASE_PORT}:5432"
     volumes:
       - database:/var/lib/postgresql
     networks:
@@ -68,6 +70,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${APPLICATION_RABBIT_MQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${APPLICATION_RABBIT_MQ_PASSWORD}
+    ports:
+      - "127.0.0.1:${APPLICATION_RABBIT_MQ_PORT}:5672"
     volumes:
       - ./configs/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     networks:
@@ -77,6 +81,9 @@ services:
   mail:
     image: axllent/mailpit:v1.28
     container_name: mailpit
+    ports:
+      - "${APPLICATION_MAIL_CLIENT_PORT}:8025"
+      - "127.0.0.1:${APPLICATION_MAIL_PORT}:1025"
     networks:
       - blog-network
     restart: unless-stopped
@@ -119,9 +126,16 @@ services:
       - APPLICATION_RABBIT_MQ_PORT=5672
       - APPLICATION_RABBIT_MQ_USERNAME=${APPLICATION_RABBIT_MQ_USERNAME}
       - APPLICATION_RABBIT_MQ_PASSWORD=${APPLICATION_RABBIT_MQ_PASSWORD}
+      - APPLICATION_MAIL_HOST=mail
+      - APPLICATION_MAIL_PORT=1025
+      - APPLICATION_REDIS_HOST=redis
     depends_on:
       rabbitmq:
         condition: service_started
+      mail:
+        condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - blog-network
   prometheus:
